@@ -51,10 +51,19 @@ function countryPalette(country: (typeof COUNTRIES)[number]) {
   return country.theme_colors || country.flag_colors || ['#F8D36A', '#FFFFFF', '#EF4135']
 }
 
+function getDifficultyLabel(difficulty?: string) {
+  if (!difficulty) return 'unknown'
+  return difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
+}
+
 function getInitialCountry() {
   const saved = safeStorageGet(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(safeStorageGet).find(Boolean)
   if (saved && COUNTRY_BY_ISO2[saved]) return saved
   return 'FR'
+}
+
+function resolveCountry(code: string) {
+  return COUNTRY_BY_ISO2[code] || COUNTRY_BY_ISO2.FR
 }
 
 function maybeTitle(progress: { levelTitle?: string }) {
@@ -201,9 +210,11 @@ export default function FlagGamePage() {
   const [reward, setReward] = useState<RewardPayload | null>(null)
   const [rewardStage, setRewardStage] = useState<RewardStage>('stamp')
   const [clientReady, setClientReady] = useState(false)
+  const [explorerQuery, setExplorerQuery] = useState('')
+  const [explorerFilter, setExplorerFilter] = useState<'all' | 'completed' | 'active' | 'not_started'>('all')
   const timersRef = useRef<number[]>([])
 
-  const country = COUNTRY_BY_ISO2[activeCountryCode]
+  const country = resolveCountry(activeCountryCode)
   const countryProgress = getCountryProgress(progress, activeCountryCode)
   const completed = countryProgress.status === 'complete' || countryProgress.status === 'perfect'
   const palette = countryPalette(country)
@@ -218,7 +229,7 @@ export default function FlagGamePage() {
   const completionButtonLabel = completed ? 'Next Flag' : allRegionsFilled ? 'Almost there!' : 'Complete Flag'
   const displayProgress = clientReady ? progress : createDefaultFlagProgress()
   const displayActiveCountryCode = clientReady ? activeCountryCode : 'FR'
-  const displayCountry = COUNTRY_BY_ISO2[displayActiveCountryCode]
+  const displayCountry = resolveCountry(displayActiveCountryCode)
   const displayCountryProgress = getCountryProgress(displayProgress, displayActiveCountryCode)
   const displayCompleted = displayCountryProgress.status === 'complete' || displayCountryProgress.status === 'perfect'
   const displayPalette = countryPalette(displayCountry)
@@ -230,6 +241,24 @@ export default function FlagGamePage() {
   const displayIsPerfectFlag = displayAllRegionsFilled && displayCorrectRegionCount === displayTotalColorableRegions
   const displayCompletionMessage = displayIsPerfectFlag ? 'Perfect match.' : displayAllRegionsFilled ? 'Almost there!' : 'Finish every region to complete the flag.'
   const displayCompletionButtonLabel = displayCompleted ? 'Next Flag' : displayAllRegionsFilled ? 'Almost there!' : 'Complete Flag'
+  const totalCountries = COUNTRIES.length
+  const completedCountryCount = displayProgress.completedCountries
+  const completionRatio = `${completedCountryCount} / ${totalCountries}`
+  const normalizedQuery = explorerQuery.trim().toLowerCase()
+  const visibleCountries = COUNTRIES.filter((item) => {
+    const p = getCountryProgress(displayProgress, item.iso2)
+    const status = p.status === 'complete' || p.status === 'perfect' ? 'completed' : p.status === 'in_progress' ? 'active' : 'not_started'
+    const matchesQuery =
+      !normalizedQuery ||
+      item.name.toLowerCase().includes(normalizedQuery) ||
+      item.iso2.toLowerCase().includes(normalizedQuery) ||
+      item.continent.toLowerCase().includes(normalizedQuery) ||
+      getDifficultyLabel(item.difficulty).toLowerCase().includes(normalizedQuery)
+    const matchesFilter = explorerFilter === 'all' || status === explorerFilter
+    return matchesQuery && matchesFilter
+  })
+  const complexFlag = displayTotalColorableRegions > 6 || displayCountry.flag_regions.length > 6
+  const flagHeightClass = complexFlag ? 'min-h-[320px]' : 'min-h-[240px]'
 
   useEffect(() => {
     const storedProgress = loadFlagProgress()
@@ -338,13 +367,18 @@ export default function FlagGamePage() {
                 <div className="mt-1 text-3xl font-black text-[#7b3f09]">{displayCountry.name}</div>
                 <div className="text-sm font-semibold text-[#8d5a22]">{displayCountry.continent}</div>
               </div>
-              <div className={`rounded-full px-4 py-2 text-sm font-black uppercase tracking-[0.3em] ${displayCompleted ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900'}`}>
-                {displayCountryProgress.status}
+              <div className="flex flex-col items-end gap-2">
+                <div className={`rounded-full px-4 py-2 text-sm font-black uppercase tracking-[0.3em] ${displayCompleted ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900'}`}>
+                  {displayCountryProgress.status}
+                </div>
+                <div className="rounded-full bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] text-[#8d5a22]">
+                  {getDifficultyLabel(displayCountry.difficulty)}
+                </div>
               </div>
             </div>
 
-            <div className="mt-4 rounded-[30px] bg-[linear-gradient(180deg,#fffefa,#fff2c7)] p-4 shadow-inner">
-              <svg viewBox="0 0 300 200" className="mx-auto w-full max-w-2xl rounded-[22px] border-4 border-[#f3d68d] bg-white shadow-[0_16px_40px_rgba(133,79,18,0.14)]">
+            <div className={`mt-4 rounded-[30px] bg-[linear-gradient(180deg,#fffefa,#fff2c7)] p-4 shadow-inner ${flagHeightClass}`}>
+              <svg viewBox="0 0 300 200" className="mx-auto h-full w-full max-w-2xl rounded-[22px] border-4 border-[#f3d68d] bg-white shadow-[0_16px_40px_rgba(133,79,18,0.14)]">
                 {displayCountry.flag_regions.map((region: any) =>
                   region.shapes.map((shape: any, idx: number) => {
                     const fillColor = displayPalette[displayRegionFillState[region.id]?.selectedColorIndex ?? region.color] || '#eee'
@@ -383,9 +417,11 @@ export default function FlagGamePage() {
               <div className="rounded-[24px] bg-[#fff8e8] p-4">
                 <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b96a10]">Saved State</div>
                 <div className="mt-2 text-sm font-semibold text-[#7a4a17]">
-                  {displayProgress.completedCountries} countries completed.
+                  {completedCountryCount} countries completed.
                   <br />
-                  France stays complete after refresh.
+                  Campaign progress: {completionRatio}
+                  <br />
+                  {displayCountry.name} stays complete after refresh.
                   <br />
                   Colors filled: {displayColoredRegionCount} / {displayTotalColorableRegions}
                   <br />
@@ -427,13 +463,51 @@ export default function FlagGamePage() {
                   <div className="mt-1">{displayProgress.xp}</div>
                 </div>
               </div>
+              <div className="mt-4 rounded-[20px] border border-[#efd8a4] bg-white/70 p-3 text-xs font-bold uppercase tracking-[0.22em] text-[#8d5a22]">
+                Explorer log now covers all {totalCountries} countries.
+              </div>
             </div>
           </div>
 
           <aside className="rounded-[32px] border-4 border-[#fff2b9] bg-[rgba(255,250,235,0.82)] p-4 shadow-[0_24px_70px_rgba(94,53,17,0.18)] backdrop-blur-sm">
             <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#b96a10]">Explorer Log</div>
+            <div className="mt-2 rounded-[20px] border border-[#efd8a4] bg-white/70 px-3 py-2 text-[10px] font-black uppercase tracking-[0.28em] text-[#8d5a22]">
+              {completedCountryCount} of {totalCountries} completed
+            </div>
             <div className="mt-3 space-y-3">
-              {COUNTRIES.slice(0, 8).map((item) => {
+              <div className="grid gap-2">
+                <label className="rounded-[18px] border border-[#efd8a4] bg-white/70 px-3 py-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.28em] text-[#a15b10]">Search</span>
+                  <input
+                    value={explorerQuery}
+                    onChange={(event) => setExplorerQuery(event.target.value)}
+                    placeholder="Country, code, continent, difficulty"
+                    className="mt-1 w-full bg-transparent text-sm font-semibold text-[#7b3f09] outline-none placeholder:text-[#b48b4f]"
+                  />
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    ['all', 'All'],
+                    ['completed', 'Completed'],
+                    ['active', 'In Progress'],
+                    ['not_started', 'Not Started'],
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      onClick={() => setExplorerFilter(value as typeof explorerFilter)}
+                      className={`rounded-full px-3 py-2 text-[10px] font-black uppercase tracking-[0.25em] transition ${
+                        explorerFilter === value
+                          ? 'bg-[#7b3f09] text-white shadow-[0_8px_18px_rgba(123,63,9,0.2)]'
+                          : 'bg-white/70 text-[#8d5a22]'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="max-h-[72vh] space-y-3 overflow-y-auto pr-1">
+                {visibleCountries.map((item) => {
                 const p = getCountryProgress(displayProgress, item.iso2)
                 return (
                   <button
@@ -444,13 +518,21 @@ export default function FlagGamePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-black text-[#7b3f09]">{item.name}</div>
-                        <div className="text-xs font-semibold text-[#8d5a22]">{item.iso2}</div>
+                        <div className="text-xs font-semibold text-[#8d5a22]">
+                          {item.iso2} · {getDifficultyLabel(item.difficulty)}
+                        </div>
                       </div>
                       <div className="text-xl">{p.status === 'complete' || p.status === 'perfect' ? '✅' : '🟡'}</div>
                     </div>
                   </button>
                 )
-              })}
+                })}
+                {visibleCountries.length === 0 && (
+                  <div className="rounded-[22px] border border-dashed border-[#d8b46d] bg-white/60 px-4 py-6 text-center text-sm font-semibold text-[#8d5a22]">
+                    No countries match this search or filter.
+                  </div>
+                )}
+              </div>
             </div>
           </aside>
         </section>
