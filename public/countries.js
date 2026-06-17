@@ -4,7 +4,28 @@ const circle = (cx, cy, r) => ({ t: "circle", cx, cy, r });
 const country = (record) => ({
   ...record,
   flag_asset: `assets/flags/${record.id}.svg`,
+  ...(denseFlagMeta[record.id] || {}),
 });
+
+const denseFlagMeta = {
+  'united-states': { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  malaysia: { ui_complexity: 'very_high', tap_density: 'very_high', zoom_required: true, easy_hidden: true },
+  greece: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  jamaica: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  'south-korea': { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  china: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  'south-africa': { ui_complexity: 'very_high', tap_density: 'very_high', zoom_required: true, easy_hidden: true },
+  cuba: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  philippines: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  kenya: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  india: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  bhutan: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  nepal: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  morocco: { ui_complexity: 'medium', tap_density: 'medium', zoom_required: true, easy_hidden: true },
+  brazil: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  australia: { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+  'new-zealand': { ui_complexity: 'high', tap_density: 'high', zoom_required: true, easy_hidden: true },
+};
 
 export const COUNTRIES = [
   country({
