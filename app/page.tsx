@@ -56,14 +56,29 @@ function getDifficultyLabel(difficulty?: string) {
   return difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
 }
 
+function getCompletionStateLabel(status?: string) {
+  if (status === 'perfect') return 'Perfect'
+  if (status === 'complete') return 'Complete'
+  if (status === 'in_progress') return 'In Progress'
+  if (status === 'active') return 'In Progress'
+  return 'Not Started'
+}
+
+function isValidCountryCode(code?: string | null) {
+  return !!code && !!COUNTRY_BY_ISO2[code]
+}
+
 function getInitialCountry() {
   const saved = safeStorageGet(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(safeStorageGet).find(Boolean)
-  if (saved && COUNTRY_BY_ISO2[saved]) return saved
-  return 'FR'
+  if (isValidCountryCode(saved)) return saved
+  if (COUNTRY_BY_ISO2.FR) return 'FR'
+  return COUNTRIES[0]?.iso2 || 'FR'
 }
 
 function resolveCountry(code: string) {
-  return COUNTRY_BY_ISO2[code] || COUNTRY_BY_ISO2.FR
+  if (isValidCountryCode(code)) return COUNTRY_BY_ISO2[code]
+  if (COUNTRY_BY_ISO2.FR) return COUNTRY_BY_ISO2.FR
+  return COUNTRIES[0]
 }
 
 function maybeTitle(progress: { levelTitle?: string }) {
@@ -211,7 +226,8 @@ export default function FlagGamePage() {
   const [rewardStage, setRewardStage] = useState<RewardStage>('stamp')
   const [clientReady, setClientReady] = useState(false)
   const [explorerQuery, setExplorerQuery] = useState('')
-  const [explorerFilter, setExplorerFilter] = useState<'all' | 'completed' | 'active' | 'not_started'>('all')
+  const [explorerContinent, setExplorerContinent] = useState('all')
+  const [explorerFilter, setExplorerFilter] = useState<'all' | 'not_started' | 'complete' | 'perfect' | 'easy' | 'medium' | 'hard' | 'expert'>('all')
   const timersRef = useRef<number[]>([])
 
   const country = resolveCountry(activeCountryCode)
@@ -244,18 +260,26 @@ export default function FlagGamePage() {
   const totalCountries = COUNTRIES.length
   const completedCountryCount = displayProgress.completedCountries
   const completionRatio = `${completedCountryCount} / ${totalCountries}`
+  const perfectFlagsCount = displayProgress.perfectFlags
+  const countryContinentOptions = Array.from(new Set(COUNTRIES.map((item) => item.continent))).sort()
   const normalizedQuery = explorerQuery.trim().toLowerCase()
   const visibleCountries = COUNTRIES.filter((item) => {
     const p = getCountryProgress(displayProgress, item.iso2)
-    const status = p.status === 'complete' || p.status === 'perfect' ? 'completed' : p.status === 'in_progress' ? 'active' : 'not_started'
+    const difficulty = (item.difficulty || 'unknown').toLowerCase()
     const matchesQuery =
       !normalizedQuery ||
       item.name.toLowerCase().includes(normalizedQuery) ||
       item.iso2.toLowerCase().includes(normalizedQuery) ||
-      item.continent.toLowerCase().includes(normalizedQuery) ||
-      getDifficultyLabel(item.difficulty).toLowerCase().includes(normalizedQuery)
-    const matchesFilter = explorerFilter === 'all' || status === explorerFilter
-    return matchesQuery && matchesFilter
+      item.continent.toLowerCase().includes(normalizedQuery)
+    const matchesContinent = explorerContinent === 'all' || item.continent.toLowerCase() === explorerContinent.toLowerCase()
+    const matchesFilter = (() => {
+      if (explorerFilter === 'all') return true
+      if (explorerFilter === 'not_started') return p.status === 'not_started' || p.status === 'in_progress'
+      if (explorerFilter === 'complete') return p.status === 'complete'
+      if (explorerFilter === 'perfect') return p.status === 'perfect'
+      return difficulty === explorerFilter
+    })()
+    return matchesQuery && matchesContinent && matchesFilter
   })
   const complexFlag = displayTotalColorableRegions > 6 || displayCountry.flag_regions.length > 6
   const flagHeightClass = complexFlag ? 'min-h-[320px]' : 'min-h-[240px]'
@@ -367,13 +391,28 @@ export default function FlagGamePage() {
                 <div className="mt-1 text-3xl font-black text-[#7b3f09]">{displayCountry.name}</div>
                 <div className="text-sm font-semibold text-[#8d5a22]">{displayCountry.continent}</div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className={`rounded-full px-4 py-2 text-sm font-black uppercase tracking-[0.3em] ${displayCompleted ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900'}`}>
-                  {displayCountryProgress.status}
-                </div>
-                <div className="rounded-full bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] text-[#8d5a22]">
-                  {getDifficultyLabel(displayCountry.difficulty)}
-                </div>
+            <div className="flex flex-col items-end gap-2">
+              <div className={`rounded-full px-4 py-2 text-sm font-black uppercase tracking-[0.3em] ${displayCompleted ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900'}`}>
+                {displayCountryProgress.status}
+              </div>
+              <div className="rounded-full bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] text-[#8d5a22]">
+                {getDifficultyLabel(displayCountry.difficulty)}
+              </div>
+            </div>
+          </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[22px] bg-white/75 px-4 py-3 text-sm font-semibold text-[#7a4a17]">
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a15b10]">Global Progress</div>
+                <div className="mt-1 text-xl font-black text-[#7b3f09]">{completedCountryCount} / {totalCountries}</div>
+              </div>
+              <div className="rounded-[22px] bg-white/75 px-4 py-3 text-sm font-semibold text-[#7a4a17]">
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a15b10]">Perfect Flags</div>
+                <div className="mt-1 text-xl font-black text-[#7b3f09]">{perfectFlagsCount}</div>
+              </div>
+              <div className="rounded-[22px] bg-white/75 px-4 py-3 text-sm font-semibold text-[#7a4a17]">
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a15b10]">Explorer State</div>
+                <div className="mt-1 text-base font-black text-[#7b3f09]">{displayCountryProgress.status}</div>
               </div>
             </div>
 
@@ -474,6 +513,9 @@ export default function FlagGamePage() {
             <div className="mt-2 rounded-[20px] border border-[#efd8a4] bg-white/70 px-3 py-2 text-[10px] font-black uppercase tracking-[0.28em] text-[#8d5a22]">
               {completedCountryCount} of {totalCountries} completed
             </div>
+            <div className="mt-2 rounded-[20px] border border-[#efd8a4] bg-white/70 px-3 py-2 text-[10px] font-black uppercase tracking-[0.28em] text-[#8d5a22]">
+              {perfectFlagsCount} perfect flags tracked
+            </div>
             <div className="mt-3 space-y-3">
               <div className="grid gap-2">
                 <label className="rounded-[18px] border border-[#efd8a4] bg-white/70 px-3 py-2">
@@ -481,16 +523,35 @@ export default function FlagGamePage() {
                   <input
                     value={explorerQuery}
                     onChange={(event) => setExplorerQuery(event.target.value)}
-                    placeholder="Country, code, continent, difficulty"
+                    placeholder="Country name"
                     className="mt-1 w-full bg-transparent text-sm font-semibold text-[#7b3f09] outline-none placeholder:text-[#b48b4f]"
                   />
+                </label>
+                <label className="rounded-[18px] border border-[#efd8a4] bg-white/70 px-3 py-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.28em] text-[#a15b10]">Continent</span>
+                  <select
+                    value={explorerContinent}
+                    onChange={(event) => setExplorerContinent(event.target.value)}
+                    className="mt-1 w-full bg-transparent text-sm font-semibold text-[#7b3f09] outline-none"
+                  >
+                    <option value="all">All continents</option>
+                    {countryContinentOptions.map((continent) => (
+                      <option key={continent} value={continent}>
+                        {continent}
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     ['all', 'All'],
-                    ['completed', 'Completed'],
-                    ['active', 'In Progress'],
                     ['not_started', 'Not Started'],
+                    ['complete', 'Complete'],
+                    ['perfect', 'Perfect'],
+                    ['easy', 'Easy'],
+                    ['medium', 'Medium'],
+                    ['hard', 'Hard'],
+                    ['expert', 'Expert'],
                   ].map(([value, label]) => (
                     <button
                       key={value}
@@ -506,7 +567,7 @@ export default function FlagGamePage() {
                   ))}
                 </div>
               </div>
-              <div className="max-h-[72vh] space-y-3 overflow-y-auto pr-1">
+              <div className="max-h-[72vh] space-y-3 overflow-y-auto pr-1 pb-2 overscroll-contain touch-pan-y">
                 {visibleCountries.map((item) => {
                 const p = getCountryProgress(displayProgress, item.iso2)
                 return (
@@ -519,10 +580,10 @@ export default function FlagGamePage() {
                       <div>
                         <div className="font-black text-[#7b3f09]">{item.name}</div>
                         <div className="text-xs font-semibold text-[#8d5a22]">
-                          {item.iso2} · {getDifficultyLabel(item.difficulty)}
+                          {item.continent} · {getDifficultyLabel(item.difficulty)} · {getCompletionStateLabel(p.status)}
                         </div>
                       </div>
-                      <div className="text-xl">{p.status === 'complete' || p.status === 'perfect' ? '✅' : '🟡'}</div>
+                      <div className="text-xl">{p.status === 'complete' || p.status === 'perfect' ? '✅' : p.status === 'in_progress' ? '🟠' : '⚪'}</div>
                     </div>
                   </button>
                 )
