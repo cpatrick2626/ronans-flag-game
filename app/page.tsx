@@ -1,14 +1,16 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { COUNTRIES, COUNTRY_BY_ISO2 } from '../public/countries.js'
-import { createDefaultBananaProgress, loadBananaProgress, completeCountry, getCountryProgress } from '../public/banana-progression.js'
+import { createDefaultFlagProgress, loadFlagProgress, completeCountry, getCountryProgress } from '../public/flag-progress.js'
 
 type RewardPayload = ReturnType<typeof completeCountry>['reward']
 type RewardStage = 'stamp' | 'souvenir' | 'stars' | 'xp' | 'done'
 
-const STORAGE_KEY = 'banana_game_v1_active_country'
-const REGION_STORAGE_KEY = 'banana_game_v1_region_colors'
+const STORAGE_KEY = 'flag_game_v1_active_country'
+const LEGACY_STORAGE_KEYS = ['banana_game_v1_active_country']
+const REGION_STORAGE_KEY = 'flag_game_v1_region_colors'
+const LEGACY_REGION_STORAGE_KEYS = ['banana_game_v1_region_colors']
 
 function safeStorageGet(key: string) {
   if (typeof window === 'undefined') return null
@@ -21,11 +23,12 @@ function safeStorageSet(key: string, value: string) {
 }
 
 function loadRegionColorState() {
-  const saved = safeStorageGet(REGION_STORAGE_KEY)
+  const saved = safeStorageGet(REGION_STORAGE_KEY) || LEGACY_REGION_STORAGE_KEYS.map(safeStorageGet).find(Boolean)
   if (!saved) return {}
   try {
     const parsed = JSON.parse(saved)
     if (!parsed || typeof parsed !== 'object') return {}
+    safeStorageSet(REGION_STORAGE_KEY, JSON.stringify(parsed))
     return parsed
   } catch {
     return {}
@@ -49,7 +52,7 @@ function countryPalette(country: (typeof COUNTRIES)[number]) {
 }
 
 function getInitialCountry() {
-  const saved = safeStorageGet(STORAGE_KEY)
+  const saved = safeStorageGet(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(safeStorageGet).find(Boolean)
   if (saved && COUNTRY_BY_ISO2[saved]) return saved
   return 'FR'
 }
@@ -87,7 +90,7 @@ function CompletionOverlay({
 }: {
   reward: RewardPayload
   countryName: string
-  progress: ReturnType<typeof loadBananaProgress>
+  progress: ReturnType<typeof loadFlagProgress>
   stage: RewardStage
   onNext: () => void
   onViewPassport: () => void
@@ -190,8 +193,8 @@ function CompletionOverlay({
   )
 }
 
-export default function BananaGamePage() {
-  const [progress, setProgress] = useState<ReturnType<typeof loadBananaProgress>>(() => createDefaultBananaProgress() as ReturnType<typeof loadBananaProgress>)
+export default function FlagGamePage() {
+  const [progress, setProgress] = useState<ReturnType<typeof loadFlagProgress>>(() => createDefaultFlagProgress() as ReturnType<typeof loadFlagProgress>)
   const [activeCountryCode, setActiveCountryCode] = useState('FR')
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
   const [coloringState, setColoringState] = useState<Record<string, Record<string, { selectedColorIndex: number; isCorrect: boolean; updatedAt: string }>>>({})
@@ -213,7 +216,7 @@ export default function BananaGamePage() {
   const completionStars = isPerfectFlag ? 3 : allRegionsFilled ? 2 : 0
   const completionMessage = isPerfectFlag ? 'Perfect match.' : allRegionsFilled ? 'Almost there!' : 'Finish every region to complete the flag.'
   const completionButtonLabel = completed ? 'Next Flag' : allRegionsFilled ? 'Almost there!' : 'Complete Flag'
-  const displayProgress = clientReady ? progress : createDefaultBananaProgress()
+  const displayProgress = clientReady ? progress : createDefaultFlagProgress()
   const displayActiveCountryCode = clientReady ? activeCountryCode : 'FR'
   const displayCountry = COUNTRY_BY_ISO2[displayActiveCountryCode]
   const displayCountryProgress = getCountryProgress(displayProgress, displayActiveCountryCode)
@@ -229,7 +232,7 @@ export default function BananaGamePage() {
   const displayCompletionButtonLabel = displayCompleted ? 'Next Flag' : displayAllRegionsFilled ? 'Almost there!' : 'Complete Flag'
 
   useEffect(() => {
-    const storedProgress = loadBananaProgress()
+    const storedProgress = loadFlagProgress()
     const storedCountry = getInitialCountry()
     setProgress(storedProgress)
     setActiveCountryCode(storedCountry)
@@ -466,3 +469,4 @@ export default function BananaGamePage() {
     </main>
   )
 }
+

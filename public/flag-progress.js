@@ -1,7 +1,8 @@
 import { applyCountryCompletion, getPlayerProgressState, getCountryCompletionState, COUNTRY_PROGRESS_STATUS } from "./logic.js";
 import { COUNTRY_BY_ID, COUNTRY_BY_ISO2 } from "./countries.js";
 
-const STORAGE_KEY = "banana_progression_v1";
+const STORAGE_KEY = "flag_progression_v1";
+const LEGACY_STORAGE_KEYS = ["banana_progression_v1"];
 
 function safeParse(value, fallback) {
   try {
@@ -11,7 +12,20 @@ function safeParse(value, fallback) {
   }
 }
 
-export function createDefaultBananaProgress(playerName = "Ronan") {
+function readStoredProgress(storage) {
+  for (const key of [STORAGE_KEY, ...LEGACY_STORAGE_KEYS]) {
+    const parsed = safeParse(storage.getItem(key), null);
+    if (parsed) return { parsed, sourceKey: key };
+  }
+  return { parsed: null, sourceKey: null };
+}
+
+function migrateStoredProgress(storage, parsed, sourceKey) {
+  if (!storage || !parsed || sourceKey === STORAGE_KEY) return;
+  storage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+}
+
+export function createDefaultFlagProgress(playerName = "Ronan") {
   return {
     playerName,
     xp: 0,
@@ -25,18 +39,20 @@ export function createDefaultBananaProgress(playerName = "Ronan") {
   };
 }
 
-export function loadBananaProgress(storage = globalThis.localStorage) {
-  if (!storage) return createDefaultBananaProgress();
-  const parsed = safeParse(storage.getItem(STORAGE_KEY), null);
-  if (!parsed) return createDefaultBananaProgress();
-  return {
-    ...createDefaultBananaProgress(parsed.playerName || "Ronan"),
+export function loadFlagProgress(storage = globalThis.localStorage) {
+  if (!storage) return createDefaultFlagProgress();
+  const { parsed, sourceKey } = readStoredProgress(storage);
+  if (!parsed) return createDefaultFlagProgress();
+  const merged = {
+    ...createDefaultFlagProgress(parsed.playerName || "Ronan"),
     ...getPlayerProgressState(parsed),
     countries: parsed.countries || {},
   };
+  migrateStoredProgress(storage, merged, sourceKey);
+  return merged;
 }
 
-export function saveBananaProgress(progress, storage = globalThis.localStorage) {
+export function saveFlagProgress(progress, storage = globalThis.localStorage) {
   if (!storage) return progress;
   storage.setItem(STORAGE_KEY, JSON.stringify(progress));
   return progress;
@@ -62,7 +78,7 @@ export function completeCountry(countryCode, progress, opts = {}, storage = glob
     },
   };
   const finalState = { ...next.playerProgress, countries };
-  saveBananaProgress(finalState, storage);
+  saveFlagProgress(finalState, storage);
   return { ...next, progress: finalState };
 }
 
