@@ -4408,6 +4408,10652 @@ export const COUNTRIES = [
     "currency": "Dollar",
     "population": ""
   }),
+  country({
+    "id": "afghanistan",
+    "iso2": "AF",
+    "iso3": "AFG",
+    "name": "Afghanistan",
+    "capital": "Kabul",
+    "continent": "Asia",
+    "languages": [
+      "Dari",
+      "Pashto",
+      "Turkmen"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Afghan afghani",
+    "population": ""
+  }),
+  country({
+    "id": "albania",
+    "iso2": "AL",
+    "iso3": "ALB",
+    "name": "Albania",
+    "capital": "Tirana",
+    "continent": "Europe",
+    "languages": [
+      "Albanian"
+    ],
+    "theme_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Albanian lek",
+    "population": ""
+  }),
+  country({
+    "id": "algeria",
+    "iso2": "DZ",
+    "iso3": "DZA",
+    "name": "Algeria",
+    "capital": "Algiers",
+    "continent": "Africa",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Algerian dinar",
+    "population": ""
+  }),
+  country({
+    "id": "andorra",
+    "iso2": "AD",
+    "iso3": "AND",
+    "name": "Andorra",
+    "capital": "Andorra la Vella",
+    "continent": "Europe",
+    "languages": [
+      "Catalan"
+    ],
+    "theme_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "angola",
+    "iso2": "AO",
+    "iso3": "AGO",
+    "name": "Angola",
+    "capital": "Luanda",
+    "continent": "Africa",
+    "languages": [
+      "Portuguese"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Angolan kwanza",
+    "population": ""
+  }),
+  country({
+    "id": "antigua-and-barbuda",
+    "iso2": "AG",
+    "iso3": "ATG",
+    "name": "Antigua and Barbuda",
+    "capital": "Saint John's",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Eastern Caribbean dollar",
+    "population": ""
+  }),
+  country({
+    "id": "armenia",
+    "iso2": "AM",
+    "iso3": "ARM",
+    "name": "Armenia",
+    "capital": "Yerevan",
+    "continent": "Asia",
+    "languages": [
+      "Armenian"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Armenian dram",
+    "population": ""
+  }),
+  country({
+    "id": "azerbaijan",
+    "iso2": "AZ",
+    "iso3": "AZE",
+    "name": "Azerbaijan",
+    "capital": "Baku",
+    "continent": "Asia",
+    "languages": [
+      "Azerbaijani",
+      "Russian"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Azerbaijani manat",
+    "population": ""
+  }),
+  country({
+    "id": "bahamas",
+    "iso2": "BS",
+    "iso3": "BHS",
+    "name": "Bahamas",
+    "capital": "Nassau",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Bahamian dollar",
+    "population": ""
+  }),
+  country({
+    "id": "bahrain",
+    "iso2": "BH",
+    "iso3": "BHR",
+    "name": "Bahrain",
+    "capital": "Manama",
+    "continent": "Asia",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Bahraini dinar",
+    "population": ""
+  }),
+  country({
+    "id": "bangladesh",
+    "iso2": "BD",
+    "iso3": "BGD",
+    "name": "Bangladesh",
+    "capital": "Dhaka",
+    "continent": "Asia",
+    "languages": [
+      "Bengali"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Bangladeshi taka",
+    "population": ""
+  }),
+  country({
+    "id": "barbados",
+    "iso2": "BB",
+    "iso3": "BRB",
+    "name": "Barbados",
+    "capital": "Bridgetown",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Barbadian dollar",
+    "population": ""
+  }),
+  country({
+    "id": "belarus",
+    "iso2": "BY",
+    "iso3": "BLR",
+    "name": "Belarus",
+    "capital": "Minsk",
+    "continent": "Europe",
+    "languages": [
+      "Belarusian",
+      "Russian"
+    ],
+    "theme_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Belarusian ruble",
+    "population": ""
+  }),
+  country({
+    "id": "belize",
+    "iso2": "BZ",
+    "iso3": "BLZ",
+    "name": "Belize",
+    "capital": "Belmopan",
+    "continent": "Americas",
+    "languages": [
+      "Belizean Creole",
+      "English",
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Belize dollar",
+    "population": ""
+  }),
+  country({
+    "id": "benin",
+    "iso2": "BJ",
+    "iso3": "BEN",
+    "name": "Benin",
+    "capital": "Porto-Novo",
+    "continent": "Africa",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "West African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "bhutan",
+    "iso2": "BT",
+    "iso3": "BTN",
+    "name": "Bhutan",
+    "capital": "Thimphu",
+    "continent": "Asia",
+    "languages": [
+      "Dzongkha"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "band-top",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 55
+          }
+        ]
+      },
+      {
+        "id": "band-mid",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 55,
+            "w": 300,
+            "h": 90
+          }
+        ]
+      },
+      {
+        "id": "emblem",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 170,
+            "cy": 100,
+            "r": 28
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "expert",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Bhutanese ngultrum",
+    "population": ""
+  }),
+  country({
+    "id": "bolivia",
+    "iso2": "BO",
+    "iso3": "BOL",
+    "name": "Bolivia",
+    "capital": "Sucre",
+    "continent": "Americas",
+    "languages": [
+      "Aymara",
+      "Guaraní",
+      "Quechua",
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Bolivian boliviano",
+    "population": ""
+  }),
+  country({
+    "id": "bosnia-and-herzegovina",
+    "iso2": "BA",
+    "iso3": "BIH",
+    "name": "Bosnia and Herzegovina",
+    "capital": "Sarajevo",
+    "continent": "Europe",
+    "languages": [
+      "Bosnian",
+      "Croatian",
+      "Serbian"
+    ],
+    "theme_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Bosnia and Herzegovina convertible mark",
+    "population": ""
+  }),
+  country({
+    "id": "botswana",
+    "iso2": "BW",
+    "iso3": "BWA",
+    "name": "Botswana",
+    "capital": "Gaborone",
+    "continent": "Africa",
+    "languages": [
+      "English",
+      "Tswana"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Botswana pula",
+    "population": ""
+  }),
+  country({
+    "id": "brunei",
+    "iso2": "BN",
+    "iso3": "BRN",
+    "name": "Brunei",
+    "capital": "Bandar Seri Begawan",
+    "continent": "Asia",
+    "languages": [
+      "Malay"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Brunei dollar",
+    "population": ""
+  }),
+  country({
+    "id": "bulgaria",
+    "iso2": "BG",
+    "iso3": "BGR",
+    "name": "Bulgaria",
+    "capital": "Sofia",
+    "continent": "Europe",
+    "languages": [
+      "Bulgarian"
+    ],
+    "theme_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "burkina-faso",
+    "iso2": "BF",
+    "iso3": "BFA",
+    "name": "Burkina Faso",
+    "capital": "Ouagadougou",
+    "continent": "Africa",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "West African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "burundi",
+    "iso2": "BI",
+    "iso3": "BDI",
+    "name": "Burundi",
+    "capital": "Gitega",
+    "continent": "Africa",
+    "languages": [
+      "French",
+      "Kirundi"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Burundian franc",
+    "population": ""
+  }),
+  country({
+    "id": "cambodia",
+    "iso2": "KH",
+    "iso3": "KHM",
+    "name": "Cambodia",
+    "capital": "Phnom Penh",
+    "continent": "Asia",
+    "languages": [
+      "Khmer"
+    ],
+    "theme_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Cambodian riel",
+    "population": ""
+  }),
+  country({
+    "id": "cameroon",
+    "iso2": "CM",
+    "iso3": "CMR",
+    "name": "Cameroon",
+    "capital": "Yaoundé",
+    "continent": "Africa",
+    "languages": [
+      "English",
+      "French"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Central African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "cape-verde",
+    "iso2": "CV",
+    "iso3": "CPV",
+    "name": "Cape Verde",
+    "capital": "Praia",
+    "continent": "Africa",
+    "languages": [
+      "Portuguese"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Cape Verdean escudo",
+    "population": ""
+  }),
+  country({
+    "id": "central-african-republic",
+    "iso2": "CF",
+    "iso3": "CAF",
+    "name": "Central African Republic",
+    "capital": "Bangui",
+    "continent": "Africa",
+    "languages": [
+      "French",
+      "Sango"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Central African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "chad",
+    "iso2": "TD",
+    "iso3": "TCD",
+    "name": "Chad",
+    "capital": "N'Djamena",
+    "continent": "Africa",
+    "languages": [
+      "Arabic",
+      "French"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Central African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "comoros",
+    "iso2": "KM",
+    "iso3": "COM",
+    "name": "Comoros",
+    "capital": "Moroni",
+    "continent": "Africa",
+    "languages": [
+      "Arabic",
+      "French",
+      "Comorian"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Comorian franc",
+    "population": ""
+  }),
+  country({
+    "id": "congo",
+    "iso2": "CG",
+    "iso3": "COG",
+    "name": "Congo",
+    "capital": "Brazzaville",
+    "continent": "Africa",
+    "languages": [
+      "French",
+      "Kikongo",
+      "Lingala"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Central African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "costa-rica",
+    "iso2": "CR",
+    "iso3": "CRI",
+    "name": "Costa Rica",
+    "capital": "San José",
+    "continent": "Americas",
+    "languages": [
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Costa Rican colón",
+    "population": ""
+  }),
+  country({
+    "id": "cyprus",
+    "iso2": "CY",
+    "iso3": "CYP",
+    "name": "Cyprus",
+    "capital": "Nicosia",
+    "continent": "Europe",
+    "languages": [
+      "Greek",
+      "Turkish"
+    ],
+    "theme_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "djibouti",
+    "iso2": "DJ",
+    "iso3": "DJI",
+    "name": "Djibouti",
+    "capital": "Djibouti",
+    "continent": "Africa",
+    "languages": [
+      "Arabic",
+      "French"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Djiboutian franc",
+    "population": ""
+  }),
+  country({
+    "id": "dominica",
+    "iso2": "DM",
+    "iso3": "DMA",
+    "name": "Dominica",
+    "capital": "Roseau",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Eastern Caribbean dollar",
+    "population": ""
+  }),
+  country({
+    "id": "dominican-republic",
+    "iso2": "DO",
+    "iso3": "DOM",
+    "name": "Dominican Republic",
+    "capital": "Santo Domingo",
+    "continent": "Americas",
+    "languages": [
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Dominican peso",
+    "population": ""
+  }),
+  country({
+    "id": "dr-congo",
+    "iso2": "CD",
+    "iso3": "COD",
+    "name": "DR Congo",
+    "capital": "Kinshasa",
+    "continent": "Africa",
+    "languages": [
+      "French",
+      "Kikongo",
+      "Lingala",
+      "Tshiluba",
+      "Swahili"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Congolese franc",
+    "population": ""
+  }),
+  country({
+    "id": "ecuador",
+    "iso2": "EC",
+    "iso3": "ECU",
+    "name": "Ecuador",
+    "capital": "Quito",
+    "continent": "Americas",
+    "languages": [
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "United States dollar",
+    "population": ""
+  }),
+  country({
+    "id": "el-salvador",
+    "iso2": "SV",
+    "iso3": "SLV",
+    "name": "El Salvador",
+    "capital": "San Salvador",
+    "continent": "Americas",
+    "languages": [
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "United States dollar",
+    "population": ""
+  }),
+  country({
+    "id": "equatorial-guinea",
+    "iso2": "GQ",
+    "iso3": "GNQ",
+    "name": "Equatorial Guinea",
+    "capital": "Malabo",
+    "continent": "Africa",
+    "languages": [
+      "French",
+      "Portuguese",
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Central African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "eritrea",
+    "iso2": "ER",
+    "iso3": "ERI",
+    "name": "Eritrea",
+    "capital": "Asmara",
+    "continent": "Africa",
+    "languages": [
+      "Arabic",
+      "English",
+      "Tigrinya"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Eritrean nakfa",
+    "population": ""
+  }),
+  country({
+    "id": "estonia",
+    "iso2": "EE",
+    "iso3": "EST",
+    "name": "Estonia",
+    "capital": "Tallinn",
+    "continent": "Europe",
+    "languages": [
+      "Estonian"
+    ],
+    "theme_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "eswatini",
+    "iso2": "SZ",
+    "iso3": "SWZ",
+    "name": "Eswatini",
+    "capital": "Lobamba",
+    "continent": "Africa",
+    "languages": [
+      "English",
+      "Swazi"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Swazi lilangeni",
+    "population": ""
+  }),
+  country({
+    "id": "ethiopia",
+    "iso2": "ET",
+    "iso3": "ETH",
+    "name": "Ethiopia",
+    "capital": "Addis Ababa",
+    "continent": "Africa",
+    "languages": [
+      "Amharic"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Ethiopian birr",
+    "population": ""
+  }),
+  country({
+    "id": "fiji",
+    "iso2": "FJ",
+    "iso3": "FJI",
+    "name": "Fiji",
+    "capital": "Suva",
+    "continent": "Oceania",
+    "languages": [
+      "English",
+      "Fijian",
+      "Fiji Hindi"
+    ],
+    "theme_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Fijian dollar",
+    "population": ""
+  }),
+  country({
+    "id": "gabon",
+    "iso2": "GA",
+    "iso3": "GAB",
+    "name": "Gabon",
+    "capital": "Libreville",
+    "continent": "Africa",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Central African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "gambia",
+    "iso2": "GM",
+    "iso3": "GMB",
+    "name": "Gambia",
+    "capital": "Banjul",
+    "continent": "Africa",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "dalasi",
+    "population": ""
+  }),
+  country({
+    "id": "georgia",
+    "iso2": "GE",
+    "iso3": "GEO",
+    "name": "Georgia",
+    "capital": "Tbilisi",
+    "continent": "Asia",
+    "languages": [
+      "Georgian"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "lari",
+    "population": ""
+  }),
+  country({
+    "id": "ghana",
+    "iso2": "GH",
+    "iso3": "GHA",
+    "name": "Ghana",
+    "capital": "Accra",
+    "continent": "Africa",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Ghanaian cedi",
+    "population": ""
+  }),
+  country({
+    "id": "grenada",
+    "iso2": "GD",
+    "iso3": "GRD",
+    "name": "Grenada",
+    "capital": "St. George's",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Eastern Caribbean dollar",
+    "population": ""
+  }),
+  country({
+    "id": "guinea",
+    "iso2": "GN",
+    "iso3": "GIN",
+    "name": "Guinea",
+    "capital": "Conakry",
+    "continent": "Africa",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Guinean franc",
+    "population": ""
+  }),
+  country({
+    "id": "guinea-bissau",
+    "iso2": "GW",
+    "iso3": "GNB",
+    "name": "Guinea-Bissau",
+    "capital": "Bissau",
+    "continent": "Africa",
+    "languages": [
+      "Portuguese",
+      "Upper Guinea Creole"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "West African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "guyana",
+    "iso2": "GY",
+    "iso3": "GUY",
+    "name": "Guyana",
+    "capital": "Georgetown",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Guyanese dollar",
+    "population": ""
+  }),
+  country({
+    "id": "haiti",
+    "iso2": "HT",
+    "iso3": "HTI",
+    "name": "Haiti",
+    "capital": "Port-au-Prince",
+    "continent": "Americas",
+    "languages": [
+      "French",
+      "Haitian Creole"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Haitian gourde",
+    "population": ""
+  }),
+  country({
+    "id": "honduras",
+    "iso2": "HN",
+    "iso3": "HND",
+    "name": "Honduras",
+    "capital": "Tegucigalpa",
+    "continent": "Americas",
+    "languages": [
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Honduran lempira",
+    "population": ""
+  }),
+  country({
+    "id": "hungary",
+    "iso2": "HU",
+    "iso3": "HUN",
+    "name": "Hungary",
+    "capital": "Budapest",
+    "continent": "Europe",
+    "languages": [
+      "Hungarian"
+    ],
+    "theme_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Hungarian forint",
+    "population": ""
+  }),
+  country({
+    "id": "iran",
+    "iso2": "IR",
+    "iso3": "IRN",
+    "name": "Iran",
+    "capital": "Tehran",
+    "continent": "Asia",
+    "languages": [
+      "Persian (Farsi)"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Iranian rial",
+    "population": ""
+  }),
+  country({
+    "id": "iraq",
+    "iso2": "IQ",
+    "iso3": "IRQ",
+    "name": "Iraq",
+    "capital": "Baghdad",
+    "continent": "Asia",
+    "languages": [
+      "Arabic",
+      "Aramaic",
+      "Sorani"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Iraqi dinar",
+    "population": ""
+  }),
+  country({
+    "id": "israel",
+    "iso2": "IL",
+    "iso3": "ISR",
+    "name": "Israel",
+    "capital": "Jerusalem",
+    "continent": "Asia",
+    "languages": [
+      "Arabic",
+      "Hebrew"
+    ],
+    "theme_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Israeli new shekel",
+    "population": ""
+  }),
+  country({
+    "id": "ivory-coast",
+    "iso2": "CI",
+    "iso3": "CIV",
+    "name": "Ivory Coast",
+    "capital": "Yamoussoukro",
+    "continent": "Africa",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "West African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "jordan",
+    "iso2": "JO",
+    "iso3": "JOR",
+    "name": "Jordan",
+    "capital": "Amman",
+    "continent": "Asia",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Jordanian dinar",
+    "population": ""
+  }),
+  country({
+    "id": "kazakhstan",
+    "iso2": "KZ",
+    "iso3": "KAZ",
+    "name": "Kazakhstan",
+    "capital": "Astana",
+    "continent": "Asia",
+    "languages": [
+      "Kazakh",
+      "Russian"
+    ],
+    "theme_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Kazakhstani tenge",
+    "population": ""
+  }),
+  country({
+    "id": "kiribati",
+    "iso2": "KI",
+    "iso3": "KIR",
+    "name": "Kiribati",
+    "capital": "South Tarawa",
+    "continent": "Oceania",
+    "languages": [
+      "English",
+      "Gilbertese"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#60A5FA",
+      "#F43F5E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#60A5FA",
+      "#F43F5E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Australian dollar",
+    "population": ""
+  }),
+  country({
+    "id": "kuwait",
+    "iso2": "KW",
+    "iso3": "KWT",
+    "name": "Kuwait",
+    "capital": "Kuwait City",
+    "continent": "Asia",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Kuwaiti dinar",
+    "population": ""
+  }),
+  country({
+    "id": "kyrgyzstan",
+    "iso2": "KG",
+    "iso3": "KGZ",
+    "name": "Kyrgyzstan",
+    "capital": "Bishkek",
+    "continent": "Asia",
+    "languages": [
+      "Kyrgyz",
+      "Russian"
+    ],
+    "theme_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Kyrgyzstani som",
+    "population": ""
+  }),
+  country({
+    "id": "laos",
+    "iso2": "LA",
+    "iso3": "LAO",
+    "name": "Laos",
+    "capital": "Vientiane",
+    "continent": "Asia",
+    "languages": [
+      "Lao"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Lao kip",
+    "population": ""
+  }),
+  country({
+    "id": "latvia",
+    "iso2": "LV",
+    "iso3": "LVA",
+    "name": "Latvia",
+    "capital": "Riga",
+    "continent": "Europe",
+    "languages": [
+      "Latvian"
+    ],
+    "theme_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "lebanon",
+    "iso2": "LB",
+    "iso3": "LBN",
+    "name": "Lebanon",
+    "capital": "Beirut",
+    "continent": "Asia",
+    "languages": [
+      "Arabic",
+      "French"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Lebanese pound",
+    "population": ""
+  }),
+  country({
+    "id": "lesotho",
+    "iso2": "LS",
+    "iso3": "LSO",
+    "name": "Lesotho",
+    "capital": "Maseru",
+    "continent": "Africa",
+    "languages": [
+      "English",
+      "Sotho"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Lesotho loti",
+    "population": ""
+  }),
+  country({
+    "id": "liberia",
+    "iso2": "LR",
+    "iso3": "LBR",
+    "name": "Liberia",
+    "capital": "Monrovia",
+    "continent": "Africa",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Liberian dollar",
+    "population": ""
+  }),
+  country({
+    "id": "libya",
+    "iso2": "LY",
+    "iso3": "LBY",
+    "name": "Libya",
+    "capital": "Tripoli",
+    "continent": "Africa",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Libyan dinar",
+    "population": ""
+  }),
+  country({
+    "id": "liechtenstein",
+    "iso2": "LI",
+    "iso3": "LIE",
+    "name": "Liechtenstein",
+    "capital": "Vaduz",
+    "continent": "Europe",
+    "languages": [
+      "German"
+    ],
+    "theme_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Swiss franc",
+    "population": ""
+  }),
+  country({
+    "id": "lithuania",
+    "iso2": "LT",
+    "iso3": "LTU",
+    "name": "Lithuania",
+    "capital": "Vilnius",
+    "continent": "Europe",
+    "languages": [
+      "Lithuanian"
+    ],
+    "theme_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "luxembourg",
+    "iso2": "LU",
+    "iso3": "LUX",
+    "name": "Luxembourg",
+    "capital": "Luxembourg",
+    "continent": "Europe",
+    "languages": [
+      "German",
+      "French",
+      "Luxembourgish"
+    ],
+    "theme_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "madagascar",
+    "iso2": "MG",
+    "iso3": "MDG",
+    "name": "Madagascar",
+    "capital": "Antananarivo",
+    "continent": "Africa",
+    "languages": [
+      "French",
+      "Malagasy"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Malagasy ariary",
+    "population": ""
+  }),
+  country({
+    "id": "malawi",
+    "iso2": "MW",
+    "iso3": "MWI",
+    "name": "Malawi",
+    "capital": "Lilongwe",
+    "continent": "Africa",
+    "languages": [
+      "English",
+      "Chewa"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Malawian kwacha",
+    "population": ""
+  }),
+  country({
+    "id": "maldives",
+    "iso2": "MV",
+    "iso3": "MDV",
+    "name": "Maldives",
+    "capital": "Malé",
+    "continent": "Asia",
+    "languages": [
+      "Maldivian"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Maldivian rufiyaa",
+    "population": ""
+  }),
+  country({
+    "id": "mali",
+    "iso2": "ML",
+    "iso3": "MLI",
+    "name": "Mali",
+    "capital": "Bamako",
+    "continent": "Africa",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "West African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "malta",
+    "iso2": "MT",
+    "iso3": "MLT",
+    "name": "Malta",
+    "capital": "Valletta",
+    "continent": "Europe",
+    "languages": [
+      "English",
+      "Maltese"
+    ],
+    "theme_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "marshall-islands",
+    "iso2": "MH",
+    "iso3": "MHL",
+    "name": "Marshall Islands",
+    "capital": "Majuro",
+    "continent": "Oceania",
+    "languages": [
+      "English",
+      "Marshallese"
+    ],
+    "theme_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "United States dollar",
+    "population": ""
+  }),
+  country({
+    "id": "mauritania",
+    "iso2": "MR",
+    "iso3": "MRT",
+    "name": "Mauritania",
+    "capital": "Nouakchott",
+    "continent": "Africa",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Mauritanian ouguiya",
+    "population": ""
+  }),
+  country({
+    "id": "mauritius",
+    "iso2": "MU",
+    "iso3": "MUS",
+    "name": "Mauritius",
+    "capital": "Port Louis",
+    "continent": "Africa",
+    "languages": [
+      "English",
+      "French",
+      "Mauritian Creole"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Mauritian rupee",
+    "population": ""
+  }),
+  country({
+    "id": "micronesia",
+    "iso2": "FM",
+    "iso3": "FSM",
+    "name": "Micronesia",
+    "capital": "Palikir",
+    "continent": "Oceania",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#60A5FA",
+      "#F43F5E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#60A5FA",
+      "#F43F5E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "",
+    "population": ""
+  }),
+  country({
+    "id": "moldova",
+    "iso2": "MD",
+    "iso3": "MDA",
+    "name": "Moldova",
+    "capital": "Chișinău",
+    "continent": "Europe",
+    "languages": [
+      "Moldavian"
+    ],
+    "theme_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Moldovan leu",
+    "population": ""
+  }),
+  country({
+    "id": "monaco",
+    "iso2": "MC",
+    "iso3": "MCO",
+    "name": "Monaco",
+    "capital": "Monaco",
+    "continent": "Europe",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "mongolia",
+    "iso2": "MN",
+    "iso3": "MNG",
+    "name": "Mongolia",
+    "capital": "Ulan Bator",
+    "continent": "Asia",
+    "languages": [
+      "Mongolian"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Mongolian tögrög",
+    "population": ""
+  }),
+  country({
+    "id": "montenegro",
+    "iso2": "ME",
+    "iso3": "MNE",
+    "name": "Montenegro",
+    "capital": "Podgorica",
+    "continent": "Europe",
+    "languages": [
+      "Montenegrin"
+    ],
+    "theme_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "mozambique",
+    "iso2": "MZ",
+    "iso3": "MOZ",
+    "name": "Mozambique",
+    "capital": "Maputo",
+    "continent": "Africa",
+    "languages": [
+      "Portuguese"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Mozambican metical",
+    "population": ""
+  }),
+  country({
+    "id": "myanmar",
+    "iso2": "MM",
+    "iso3": "MMR",
+    "name": "Myanmar",
+    "capital": "Naypyidaw",
+    "continent": "Asia",
+    "languages": [
+      "Burmese"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Burmese kyat",
+    "population": ""
+  }),
+  country({
+    "id": "namibia",
+    "iso2": "NA",
+    "iso3": "NAM",
+    "name": "Namibia",
+    "capital": "Windhoek",
+    "continent": "Africa",
+    "languages": [
+      "Afrikaans",
+      "German",
+      "English",
+      "Herero",
+      "Khoekhoe",
+      "Kwangali",
+      "Lozi",
+      "Ndonga",
+      "Tswana"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Namibian dollar",
+    "population": ""
+  }),
+  country({
+    "id": "nauru",
+    "iso2": "NR",
+    "iso3": "NRU",
+    "name": "Nauru",
+    "capital": "Yaren",
+    "continent": "Oceania",
+    "languages": [
+      "English",
+      "Nauru"
+    ],
+    "theme_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Australian dollar",
+    "population": ""
+  }),
+  country({
+    "id": "nepal",
+    "iso2": "NP",
+    "iso3": "NPL",
+    "name": "Nepal",
+    "capital": "Kathmandu",
+    "continent": "Asia",
+    "languages": [
+      "Nepali"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "band-top",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 55
+          }
+        ]
+      },
+      {
+        "id": "band-mid",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 55,
+            "w": 300,
+            "h": 90
+          }
+        ]
+      },
+      {
+        "id": "emblem",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 170,
+            "cy": 100,
+            "r": 28
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "expert",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Nepalese rupee",
+    "population": ""
+  }),
+  country({
+    "id": "nicaragua",
+    "iso2": "NI",
+    "iso3": "NIC",
+    "name": "Nicaragua",
+    "capital": "Managua",
+    "continent": "Americas",
+    "languages": [
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Nicaraguan córdoba",
+    "population": ""
+  }),
+  country({
+    "id": "niger",
+    "iso2": "NE",
+    "iso3": "NER",
+    "name": "Niger",
+    "capital": "Niamey",
+    "continent": "Africa",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "West African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "north-korea",
+    "iso2": "KP",
+    "iso3": "PRK",
+    "name": "North Korea",
+    "capital": "Pyongyang",
+    "continent": "Asia",
+    "languages": [
+      "Korean"
+    ],
+    "theme_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "North Korean won",
+    "population": ""
+  }),
+  country({
+    "id": "north-macedonia",
+    "iso2": "MK",
+    "iso3": "MKD",
+    "name": "North Macedonia",
+    "capital": "Skopje",
+    "continent": "Europe",
+    "languages": [
+      "Macedonian"
+    ],
+    "theme_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "denar",
+    "population": ""
+  }),
+  country({
+    "id": "oman",
+    "iso2": "OM",
+    "iso3": "OMN",
+    "name": "Oman",
+    "capital": "Muscat",
+    "continent": "Asia",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#7C3AED",
+      "#0F766E",
+      "#F59E0B"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Omani rial",
+    "population": ""
+  }),
+  country({
+    "id": "pakistan",
+    "iso2": "PK",
+    "iso3": "PAK",
+    "name": "Pakistan",
+    "capital": "Islamabad",
+    "continent": "Asia",
+    "languages": [
+      "English",
+      "Urdu"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Pakistani rupee",
+    "population": ""
+  }),
+  country({
+    "id": "palau",
+    "iso2": "PW",
+    "iso3": "PLW",
+    "name": "Palau",
+    "capital": "Ngerulmud",
+    "continent": "Oceania",
+    "languages": [
+      "English",
+      "Palauan"
+    ],
+    "theme_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "United States dollar",
+    "population": ""
+  }),
+  country({
+    "id": "panama",
+    "iso2": "PA",
+    "iso3": "PAN",
+    "name": "Panama",
+    "capital": "Panama City",
+    "continent": "Americas",
+    "languages": [
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Panamanian balboa",
+    "population": ""
+  }),
+  country({
+    "id": "papua-new-guinea",
+    "iso2": "PG",
+    "iso3": "PNG",
+    "name": "Papua New Guinea",
+    "capital": "Port Moresby",
+    "continent": "Oceania",
+    "languages": [
+      "English",
+      "Hiri Motu",
+      "Tok Pisin"
+    ],
+    "theme_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Papua New Guinean kina",
+    "population": ""
+  }),
+  country({
+    "id": "paraguay",
+    "iso2": "PY",
+    "iso3": "PRY",
+    "name": "Paraguay",
+    "capital": "Asunción",
+    "continent": "Americas",
+    "languages": [
+      "Guaraní",
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Paraguayan guaraní",
+    "population": ""
+  }),
+  country({
+    "id": "qatar",
+    "iso2": "QA",
+    "iso3": "QAT",
+    "name": "Qatar",
+    "capital": "Doha",
+    "continent": "Asia",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Qatari riyal",
+    "population": ""
+  }),
+  country({
+    "id": "russia",
+    "iso2": "RU",
+    "iso3": "RUS",
+    "name": "Russia",
+    "capital": "Moscow",
+    "continent": "Europe",
+    "languages": [
+      "Russian"
+    ],
+    "theme_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Russian ruble",
+    "population": ""
+  }),
+  country({
+    "id": "rwanda",
+    "iso2": "RW",
+    "iso3": "RWA",
+    "name": "Rwanda",
+    "capital": "Kigali",
+    "continent": "Africa",
+    "languages": [
+      "English",
+      "French",
+      "Kinyarwanda"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Rwandan franc",
+    "population": ""
+  }),
+  country({
+    "id": "saint-kitts-and-nevis",
+    "iso2": "KN",
+    "iso3": "KNA",
+    "name": "Saint Kitts and Nevis",
+    "capital": "Basseterre",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#DC2626",
+      "#1D4ED8",
+      "#F97316"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Eastern Caribbean dollar",
+    "population": ""
+  }),
+  country({
+    "id": "saint-lucia",
+    "iso2": "LC",
+    "iso3": "LCA",
+    "name": "Saint Lucia",
+    "capital": "Castries",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Eastern Caribbean dollar",
+    "population": ""
+  }),
+  country({
+    "id": "saint-vincent-and-the-grenadines",
+    "iso2": "VC",
+    "iso3": "VCT",
+    "name": "Saint Vincent and the Grenadines",
+    "capital": "Kingstown",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Eastern Caribbean dollar",
+    "population": ""
+  }),
+  country({
+    "id": "samoa",
+    "iso2": "WS",
+    "iso3": "WSM",
+    "name": "Samoa",
+    "capital": "Apia",
+    "continent": "Oceania",
+    "languages": [
+      "English",
+      "Samoan"
+    ],
+    "theme_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Samoan tālā",
+    "population": ""
+  }),
+  country({
+    "id": "san-marino",
+    "iso2": "SM",
+    "iso3": "SMR",
+    "name": "San Marino",
+    "capital": "City of San Marino",
+    "continent": "Europe",
+    "languages": [
+      "Italian"
+    ],
+    "theme_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "s-o-tom-and-pr-ncipe",
+    "iso2": "ST",
+    "iso3": "STP",
+    "name": "São Tomé and Príncipe",
+    "capital": "São Tomé",
+    "continent": "Africa",
+    "languages": [
+      "Portuguese"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "São Tomé and Príncipe dobra",
+    "population": ""
+  }),
+  country({
+    "id": "saudi-arabia",
+    "iso2": "SA",
+    "iso3": "SAU",
+    "name": "Saudi Arabia",
+    "capital": "Riyadh",
+    "continent": "Asia",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Saudi riyal",
+    "population": ""
+  }),
+  country({
+    "id": "senegal",
+    "iso2": "SN",
+    "iso3": "SEN",
+    "name": "Senegal",
+    "capital": "Dakar",
+    "continent": "Africa",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "West African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "serbia",
+    "iso2": "RS",
+    "iso3": "SRB",
+    "name": "Serbia",
+    "capital": "Belgrade",
+    "continent": "Europe",
+    "languages": [
+      "Serbian"
+    ],
+    "theme_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0E3A8A",
+      "#F8FAFC",
+      "#C81E1E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Serbian dinar",
+    "population": ""
+  }),
+  country({
+    "id": "seychelles",
+    "iso2": "SC",
+    "iso3": "SYC",
+    "name": "Seychelles",
+    "capital": "Victoria",
+    "continent": "Africa",
+    "languages": [
+      "Seychellois Creole",
+      "English",
+      "French"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Seychellois rupee",
+    "population": ""
+  }),
+  country({
+    "id": "sierra-leone",
+    "iso2": "SL",
+    "iso3": "SLE",
+    "name": "Sierra Leone",
+    "capital": "Freetown",
+    "continent": "Africa",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Sierra Leonean leone",
+    "population": ""
+  }),
+  country({
+    "id": "slovakia",
+    "iso2": "SK",
+    "iso3": "SVK",
+    "name": "Slovakia",
+    "capital": "Bratislava",
+    "continent": "Europe",
+    "languages": [
+      "Slovak"
+    ],
+    "theme_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#C81E1E",
+      "#0E3A8A",
+      "#F8FAFC"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "slovenia",
+    "iso2": "SI",
+    "iso3": "SVN",
+    "name": "Slovenia",
+    "capital": "Ljubljana",
+    "continent": "Europe",
+    "languages": [
+      "Slovene"
+    ],
+    "theme_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "solomon-islands",
+    "iso2": "SB",
+    "iso3": "SLB",
+    "name": "Solomon Islands",
+    "capital": "Honiara",
+    "continent": "Oceania",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Solomon Islands dollar",
+    "population": ""
+  }),
+  country({
+    "id": "somalia",
+    "iso2": "SO",
+    "iso3": "SOM",
+    "name": "Somalia",
+    "capital": "Mogadishu",
+    "continent": "Africa",
+    "languages": [
+      "Arabic",
+      "Somali"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Somali shilling",
+    "population": ""
+  }),
+  country({
+    "id": "south-sudan",
+    "iso2": "SS",
+    "iso3": "SSD",
+    "name": "South Sudan",
+    "capital": "Juba",
+    "continent": "Africa",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "South Sudanese pound",
+    "population": ""
+  }),
+  country({
+    "id": "sri-lanka",
+    "iso2": "LK",
+    "iso3": "LKA",
+    "name": "Sri Lanka",
+    "capital": "Colombo",
+    "continent": "Asia",
+    "languages": [
+      "Sinhala",
+      "Tamil"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Sri Lankan rupee",
+    "population": ""
+  }),
+  country({
+    "id": "sudan",
+    "iso2": "SD",
+    "iso3": "SDN",
+    "name": "Sudan",
+    "capital": "Khartoum",
+    "continent": "Africa",
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Sudanese pound",
+    "population": ""
+  }),
+  country({
+    "id": "suriname",
+    "iso2": "SR",
+    "iso3": "SUR",
+    "name": "Suriname",
+    "capital": "Paramaribo",
+    "continent": "Americas",
+    "languages": [
+      "Dutch"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Surinamese dollar",
+    "population": ""
+  }),
+  country({
+    "id": "syria",
+    "iso2": "SY",
+    "iso3": "SYR",
+    "name": "Syria",
+    "capital": "Damascus",
+    "continent": "Asia",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Syrian pound",
+    "population": ""
+  }),
+  country({
+    "id": "tajikistan",
+    "iso2": "TJ",
+    "iso3": "TJK",
+    "name": "Tajikistan",
+    "capital": "Dushanbe",
+    "continent": "Asia",
+    "languages": [
+      "Russian",
+      "Tajik"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Tajikistani somoni",
+    "population": ""
+  }),
+  country({
+    "id": "tanzania",
+    "iso2": "TZ",
+    "iso3": "TZA",
+    "name": "Tanzania",
+    "capital": "Dodoma",
+    "continent": "Africa",
+    "languages": [
+      "English",
+      "Swahili"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Tanzanian shilling",
+    "population": ""
+  }),
+  country({
+    "id": "timor-leste",
+    "iso2": "TL",
+    "iso3": "TLS",
+    "name": "Timor-Leste",
+    "capital": "Dili",
+    "continent": "Asia",
+    "languages": [
+      "Portuguese",
+      "Tetum"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "United States dollar",
+    "population": ""
+  }),
+  country({
+    "id": "togo",
+    "iso2": "TG",
+    "iso3": "TGO",
+    "name": "Togo",
+    "capital": "Lomé",
+    "continent": "Africa",
+    "languages": [
+      "French"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "West African CFA franc",
+    "population": ""
+  }),
+  country({
+    "id": "tonga",
+    "iso2": "TO",
+    "iso3": "TON",
+    "name": "Tonga",
+    "capital": "Nuku'alofa",
+    "continent": "Oceania",
+    "languages": [
+      "English",
+      "Tongan"
+    ],
+    "theme_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#60A5FA",
+      "#F43F5E",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Tongan paʻanga",
+    "population": ""
+  }),
+  country({
+    "id": "trinidad-and-tobago",
+    "iso2": "TT",
+    "iso3": "TTO",
+    "name": "Trinidad and Tobago",
+    "capital": "Port of Spain",
+    "continent": "Americas",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#1D4ED8",
+      "#F97316",
+      "#DC2626"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Trinidad and Tobago dollar",
+    "population": ""
+  }),
+  country({
+    "id": "tunisia",
+    "iso2": "TN",
+    "iso3": "TUN",
+    "name": "Tunisia",
+    "capital": "Tunis",
+    "continent": "Africa",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Tunisian dinar",
+    "population": ""
+  }),
+  country({
+    "id": "t-rkiye",
+    "iso2": "TR",
+    "iso3": "TUR",
+    "name": "Türkiye",
+    "capital": "Ankara",
+    "continent": "Asia",
+    "languages": [
+      "Turkish"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Turkish lira",
+    "population": ""
+  }),
+  country({
+    "id": "turkmenistan",
+    "iso2": "TM",
+    "iso3": "TKM",
+    "name": "Turkmenistan",
+    "capital": "Ashgabat",
+    "continent": "Asia",
+    "languages": [
+      "Russian",
+      "Turkmen"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Turkmenistan manat",
+    "population": ""
+  }),
+  country({
+    "id": "tuvalu",
+    "iso2": "TV",
+    "iso3": "TUV",
+    "name": "Tuvalu",
+    "capital": "Funafuti",
+    "continent": "Oceania",
+    "languages": [
+      "English",
+      "Tuvaluan"
+    ],
+    "theme_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Australian dollar",
+    "population": ""
+  }),
+  country({
+    "id": "uganda",
+    "iso2": "UG",
+    "iso3": "UGA",
+    "name": "Uganda",
+    "capital": "Kampala",
+    "continent": "Africa",
+    "languages": [
+      "English",
+      "Swahili"
+    ],
+    "theme_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#14532D",
+      "#FACC15",
+      "#B45309"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Ugandan shilling",
+    "population": ""
+  }),
+  country({
+    "id": "united-arab-emirates",
+    "iso2": "AE",
+    "iso3": "ARE",
+    "name": "United Arab Emirates",
+    "capital": "Abu Dhabi",
+    "continent": "Asia",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "United Arab Emirates dirham",
+    "population": ""
+  }),
+  country({
+    "id": "united-kingdom",
+    "iso2": "GB",
+    "iso3": "GBR",
+    "name": "United Kingdom",
+    "capital": "London",
+    "continent": "Europe",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "British pound",
+    "population": ""
+  }),
+  country({
+    "id": "uruguay",
+    "iso2": "UY",
+    "iso3": "URY",
+    "name": "Uruguay",
+    "capital": "Montevideo",
+    "continent": "Americas",
+    "languages": [
+      "Spanish"
+    ],
+    "theme_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F97316",
+      "#DC2626",
+      "#1D4ED8"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Uruguayan peso",
+    "population": ""
+  }),
+  country({
+    "id": "uzbekistan",
+    "iso2": "UZ",
+    "iso3": "UZB",
+    "name": "Uzbekistan",
+    "capital": "Tashkent",
+    "continent": "Asia",
+    "languages": [
+      "Russian",
+      "Uzbek"
+    ],
+    "theme_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F59E0B",
+      "#7C3AED",
+      "#0F766E"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Uzbekistani soʻm",
+    "population": ""
+  }),
+  country({
+    "id": "vanuatu",
+    "iso2": "VU",
+    "iso3": "VUT",
+    "name": "Vanuatu",
+    "capital": "Port Vila",
+    "continent": "Oceania",
+    "languages": [
+      "Bislama",
+      "English",
+      "French"
+    ],
+    "theme_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F43F5E",
+      "#0F766E",
+      "#60A5FA"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Vanuatu vatu",
+    "population": ""
+  }),
+  country({
+    "id": "vatican-city",
+    "iso2": "VA",
+    "iso3": "VAT",
+    "name": "Vatican City",
+    "capital": "Vatican City",
+    "continent": "Europe",
+    "languages": [
+      "Italian",
+      "Latin"
+    ],
+    "theme_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#F8FAFC",
+      "#C81E1E",
+      "#0E3A8A"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Euro",
+    "population": ""
+  }),
+  country({
+    "id": "yemen",
+    "iso2": "YE",
+    "iso3": "YEM",
+    "name": "Yemen",
+    "capital": "Sana'a",
+    "continent": "Asia",
+    "languages": [
+      "Arabic"
+    ],
+    "theme_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#0F766E",
+      "#F59E0B",
+      "#7C3AED"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Yemeni rial",
+    "population": ""
+  }),
+  country({
+    "id": "zambia",
+    "iso2": "ZM",
+    "iso3": "ZMB",
+    "name": "Zambia",
+    "capital": "Lusaka",
+    "continent": "Africa",
+    "languages": [
+      "English"
+    ],
+    "theme_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "flag_regions": [
+      {
+        "id": "left",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "mid",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 100,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "right",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 200,
+            "y": 0,
+            "w": 100,
+            "h": 200
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#B45309",
+      "#14532D",
+      "#FACC15"
+    ],
+    "difficulty": "easy",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Zambian kwacha",
+    "population": ""
+  }),
+  country({
+    "id": "zimbabwe",
+    "iso2": "ZW",
+    "iso3": "ZWE",
+    "name": "Zimbabwe",
+    "capital": "Harare",
+    "continent": "Africa",
+    "languages": [
+      "Chibarwe",
+      "English",
+      "Kalanga",
+      "Khoisan",
+      "Ndau",
+      "Northern Ndebele",
+      "Chewa",
+      "Shona",
+      "Sotho",
+      "Tonga",
+      "Tswana",
+      "Tsonga",
+      "Venda",
+      "Xhosa",
+      "Zimbabwean Sign Language"
+    ],
+    "theme_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "flag_regions": [
+      {
+        "id": "field",
+        "color": 0,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 200
+          }
+        ]
+      },
+      {
+        "id": "stripe-a",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 0,
+            "w": 300,
+            "h": 67
+          }
+        ]
+      },
+      {
+        "id": "stripe-b",
+        "color": 2,
+        "shapes": [
+          {
+            "t": "rect",
+            "x": 0,
+            "y": 67,
+            "w": 300,
+            "h": 66
+          }
+        ]
+      },
+      {
+        "id": "mark",
+        "color": 1,
+        "shapes": [
+          {
+            "t": "circle",
+            "cx": 210,
+            "cy": 120,
+            "r": 22
+          }
+        ]
+      }
+    ],
+    "flag_colors": [
+      "#FACC15",
+      "#B45309",
+      "#14532D"
+    ],
+    "difficulty": "hard",
+    "landmark": "",
+    "foods": [],
+    "animals": [],
+    "fun_facts": [],
+    "currency": "Botswana pula",
+    "population": ""
+  }),
 ];
 
 export const COUNTRY_BY_ID = Object.fromEntries(COUNTRIES.map(country => [country.id, country]));
