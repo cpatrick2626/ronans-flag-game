@@ -3,20 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --bg-void: #030508;
-  --bg-panel: rgba(8, 12, 18, 0.84);
-  --border-panel: rgba(244, 231, 196, 0.12);
-  --text-primary: #f4ead9;
-  --text-secondary: #c6bda8;
-  --text-dim: #8b8172;
-  --accent-blue: #0055a4;
-  --accent-white: #f8f4ec;
-  --accent-red: #ef4135;
+  --bg-sky: #8fd8ff;
+  --bg-deep: #1c4574;
+  --bg-sand: #f6d58f;
+  --text-primary: #fff8ee;
+  --text-secondary: #f5ead8;
+  --text-dim: #d4e5f3;
+  --accent-blue: #2b72d6;
+  --accent-white: #fffaf1;
+  --accent-red: #ef5a45;
 }
 
 @layer base {
   html {
-    background: var(--bg-void);
+    background: var(--bg-sky);
   }
 
   body {
@@ -24,8 +24,10 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     background:
-      radial-gradient(circle at top, rgba(7, 27, 62, 0.8), transparent 42%),
-      linear-gradient(180deg, #07111f 0%, #030508 55%, #020305 100%);
+      radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.78), transparent 18%),
+      radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.56), transparent 14%),
+      radial-gradient(circle at 82% 15%, rgba(255, 255, 255, 0.48), transparent 12%),
+      linear-gradient(180deg, #8ed5ff 0%, #bfe8ff 30%, #fff4d3 72%, #f5d892 100%);
     color: var(--text-primary);
   }
 
@@ -170,3 +172,16 @@
 .xp-pulse { animation: xp-pulse 0.7s ease both; }
 .completion-title-rise { animation: correct-pulse-soft 0.45s ease both; }
 .completion-actions { animation: correct-pulse-soft 0.35s ease both; }
+
+@keyframes float-slow {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10px, 0); }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.float-slow { animation: float-slow 10s ease-in-out infinite; }
+.bob { animation: bob 6s ease-in-out infinite; }

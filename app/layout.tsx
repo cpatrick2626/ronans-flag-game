@@ -17,8 +17,8 @@ const cormorantGaramond = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: 'Magical Flag World',
-  description: 'A magical world exploration game built around flag discovery, progress, and multiplayer journeys.',
+  title: 'Ronan Flag Game',
+  description: 'A colorful flag coloring game with progress, multiplayer, and country discovery.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
