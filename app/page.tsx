@@ -339,9 +339,9 @@ function useRoomChannel(onSnapshot: (room: RoomState) => void) {
 
 function ScreenCard({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-[28px] border border-white/10 bg-[rgba(7,12,18,0.88)] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur">
-      <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#93a7bb]">{eyebrow}</div>
-      <h2 className="mt-2 font-display text-3xl font-black tracking-[0.06em] text-white">{title}</h2>
+    <section className="rounded-[28px] border border-[#f4e7c4]/10 bg-[rgba(8,12,18,0.76)] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur">
+      <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#b8a97b]">{eyebrow}</div>
+      <h2 className="mt-2 font-display text-3xl font-black tracking-[0.06em] text-[#fbf4e6]">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
   )
@@ -578,31 +578,35 @@ export default function FlagGamePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#10213c_0%,_#07111f_44%,_#03070d_100%)] text-[#d9e7f4]">
-      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:42px_42px]" />
+    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(7,27,62,0.95)_0%,_rgba(8,15,25,0.96)_42%,_#020406_100%)] text-[#f4ead9]">
+      <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px),radial-gradient(circle_at_20%_20%,rgba(255,215,128,0.10),transparent_28%),radial-gradient(circle_at_80%_15%,rgba(90,140,255,0.09),transparent_24%)] [background-size:42px_42px,42px_42px,100%_100%,100%_100%]" />
+      <div className="absolute inset-x-0 top-0 h-40 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent)] opacity-30" />
       <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 p-4 md:p-6">
-        <header className="rounded-[30px] border border-white/10 bg-[rgba(5,9,15,0.88)] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur">
+        <header className="overflow-hidden rounded-[30px] border border-[#f4e7c4]/12 bg-[rgba(7,10,16,0.88)] shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur">
+          <div className="h-1 bg-[linear-gradient(90deg,#0055A4_0%,#FFFFFF_52%,#EF4135_100%)]" />
+          <div className="p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <div className="text-[11px] font-black uppercase tracking-[0.5em] text-[#7f9eb9]">Ronan Flag Game</div>
-              <h1 className="mt-2 font-display text-4xl font-black tracking-[0.08em] text-white">Higgsfield Game Shell Recovery</h1>
+              <div className="text-[11px] font-black uppercase tracking-[0.5em] text-[#c7b27c]">France Expedition</div>
+              <h1 className="mt-2 font-display text-4xl font-black tracking-[0.08em] text-[#fff8ed]">Magical Flag World</h1>
               <p className="mt-2 max-w-3xl text-sm font-semibold text-[#9fb3c8]">
-                Player entry, home, play, room creation, join flow, waiting room, co-op, versus, and realtime sync wrapped around the existing flag challenge.
+                A game-first exploration journey where the flag is the hero, country atmosphere supports the scene, and multiplayer progression stays intact.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm font-bold">
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <div className="rounded-2xl border border-[#f4e7c4]/10 bg-white/5 px-4 py-3">
                 Player <span className="block text-lg font-black text-white">{playerName}</span>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <div className="rounded-2xl border border-[#f4e7c4]/10 bg-white/5 px-4 py-3">
                 Title <span className="block text-lg font-black text-white">{titleFor(visibleProgress)}</span>
               </div>
             </div>
           </div>
+          </div>
         </header>
 
         {screen === 'player-entry' && (
-          <ScreenCard title="Player Name Entry" eyebrow="01 / BOOT">
+          <ScreenCard title="Adventurer Name" eyebrow="01 / GATE">
             <div className="grid gap-3 md:grid-cols-[1fr_auto]">
               <input
                 value={playerName}
@@ -619,49 +623,49 @@ export default function FlagGamePage() {
 
         {screen === 'home' && (
           <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-            <ScreenCard title="Home Screen" eyebrow="02 / COMMAND">
+            <ScreenCard title="World Gate" eyebrow="02 / JOURNEY">
               <div className="grid gap-3 sm:grid-cols-2">
-                <button onClick={startSolo} className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-left">
-                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Solo Loop</div>
-                  <div className="mt-2 text-2xl font-black text-white">Resume Flag Color Challenge</div>
-                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Play Screen</div>
+                <button onClick={startSolo} className="rounded-[22px] border border-[#f4e7c4]/10 bg-white/5 p-4 text-left">
+                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b8a97b]">Solo Path</div>
+                  <div className="mt-2 text-2xl font-black text-white">Continue the Expedition</div>
+                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Enter the world map</div>
                   <div className="mt-3"><ModeBadge>Solo</ModeBadge></div>
                 </button>
-                <button onClick={() => { setPendingRoomMode('coop'); setScreen('create-room') }} className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-left">
-                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Co-op Mode</div>
-                  <div className="mt-2 text-2xl font-black text-white">Create Room</div>
-                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Shared room shell</div>
+                <button onClick={() => { setPendingRoomMode('coop'); setScreen('create-room') }} className="rounded-[22px] border border-[#f4e7c4]/10 bg-white/5 p-4 text-left">
+                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b8a97b]">Co-op Path</div>
+                  <div className="mt-2 text-2xl font-black text-white">Gather the Party</div>
+                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Shared exploration</div>
                   <div className="mt-3"><ModeBadge>Co-op</ModeBadge></div>
                 </button>
-                <button onClick={() => { setPendingRoomMode('versus'); setScreen('create-room') }} className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-left">
-                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Versus Mode</div>
-                  <div className="mt-2 text-2xl font-black text-white">Create Room</div>
-                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Head-to-head room shell</div>
+                <button onClick={() => { setPendingRoomMode('versus'); setScreen('create-room') }} className="rounded-[22px] border border-[#f4e7c4]/10 bg-white/5 p-4 text-left">
+                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b8a97b]">Challenge Path</div>
+                  <div className="mt-2 text-2xl font-black text-white">Set Rival Course</div>
+                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Head-to-head journey</div>
                   <div className="mt-3"><ModeBadge>Versus</ModeBadge></div>
                 </button>
-                <button onClick={() => setScreen('join-room')} className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-left">
-                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Join Room</div>
-                  <div className="mt-2 text-2xl font-black text-white">Enter Room Code</div>
-                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Realtime entry</div>
+                <button onClick={() => setScreen('join-room')} className="rounded-[22px] border border-[#f4e7c4]/10 bg-white/5 p-4 text-left">
+                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b8a97b]">Join Path</div>
+                  <div className="mt-2 text-2xl font-black text-white">Enter Another Expedition</div>
+                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Realtime co-op / versus</div>
                   <div className="mt-3"><ModeBadge>Sync</ModeBadge></div>
                 </button>
               </div>
             </ScreenCard>
-            <ScreenCard title="Operational Status" eyebrow="LIVE">
+            <ScreenCard title="World Status" eyebrow="LIVE">
               <div className="space-y-3 text-sm font-semibold text-[#b8c7d7]">
-                <div>194-country database: online</div>
-                <div>Explorer Log: preserved</div>
-                <div>Focus Mode: preserved</div>
-                <div>Progress, XP, Titles, Stamps: preserved</div>
-                <div>Passport, Collections, Settings: not built</div>
-                <div>Realtime Sync: {roomSyncLabel}</div>
+                <div>194-country atlas: online</div>
+                <div>Discovery log: preserved</div>
+                <div>Flag interaction: preserved</div>
+                <div>Progress, XP, titles, stamps: preserved</div>
+                <div>Multiplayer journeys: preserved</div>
+                <div>Realtime sync: {roomSyncLabel}</div>
               </div>
             </ScreenCard>
           </section>
         )}
 
         {screen === 'join-room' && (
-          <ScreenCard title="Join Room" eyebrow="05 / ACCESS">
+          <ScreenCard title="Join Expedition" eyebrow="05 / GATE">
             <div className="grid gap-3 md:grid-cols-[1fr_auto]">
               <input
                 value={roomCodeInput}
@@ -669,7 +673,7 @@ export default function FlagGamePage() {
                 placeholder="Room code"
                 className="h-14 rounded-2xl border border-white/10 bg-black/30 px-4 text-lg font-bold text-white outline-none placeholder:text-[#6f8599]"
               />
-              <button onClick={joinRoom} className="h-14 rounded-2xl bg-[#22c55e] px-5 text-lg font-black text-[#08111d]">
+              <button onClick={joinRoom} className="h-14 rounded-2xl bg-[#d4af37] px-5 text-lg font-black text-[#08111d]">
                 Join
               </button>
             </div>
@@ -680,10 +684,10 @@ export default function FlagGamePage() {
         )}
 
         {screen === 'country-arrival' && (
-          <ScreenCard title="Country Arrival" eyebrow="02B / BRIEFING">
+          <ScreenCard title="Country Arrival" eyebrow="02B / ARRIVAL">
             <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
               <div className="rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-4">
-                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#93a7bb]">Arrived In</div>
+                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#b8a97b]">Arrived In</div>
                 <div className="mt-2 text-4xl font-black text-white">{country.name}</div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <StatusChip>{country.continent}</StatusChip>
@@ -706,8 +710,8 @@ export default function FlagGamePage() {
                 </div>
               </div>
               <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4">
-                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#93a7bb]">Challenge Prep</div>
-                <div className="mt-2 text-2xl font-black text-white">Flag Color Challenge</div>
+                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#b8a97b]">Journey Prep</div>
+                <div className="mt-2 text-2xl font-black text-white">Flag as the Artifact</div>
                 <div className="mt-3 space-y-2 text-sm font-semibold text-[#b8c7d7]">
                   <div>Country: {country.name}</div>
                   <div>Continent: {country.continent}</div>
@@ -718,7 +722,7 @@ export default function FlagGamePage() {
                   onClick={() => { playSound('button_click'); setScreen('play') }}
                   className="mt-5 w-full rounded-2xl bg-[#f59e0b] px-5 py-3 text-lg font-black text-[#111827]"
                 >
-                  Begin Challenge
+                  Enter the Flag
                 </button>
               </div>
             </div>
@@ -726,7 +730,7 @@ export default function FlagGamePage() {
         )}
 
         {screen === 'create-room' && (
-          <ScreenCard title="Create Room" eyebrow="04 / ROOM">
+          <ScreenCard title="Create Expedition" eyebrow="04 / PARTY">
             <div className="grid gap-3 md:grid-cols-2">
               <button
                 onClick={() => {
@@ -736,39 +740,39 @@ export default function FlagGamePage() {
                 }}
                 className="rounded-[22px] border border-white/10 bg-[#f59e0b] px-4 py-4 text-left text-lg font-black text-[#111827]"
               >
-                Launch {pendingRoomMode === 'versus' ? 'Versus' : 'Co-op'} Room
+                Launch {pendingRoomMode === 'versus' ? 'Versus' : 'Co-op'} Journey
               </button>
               <button
                 onClick={() => setScreen('home')}
                 className="rounded-[22px] border border-white/10 bg-white/5 px-4 py-4 text-left text-lg font-black text-white"
               >
-                Back to Home
+                Back to World Gate
               </button>
             </div>
           </ScreenCard>
         )}
 
         {screen === 'waiting-room' && room && (
-          <ScreenCard title="Waiting Room" eyebrow="06 / SYNC">
+          <ScreenCard title="Campfire Wait" eyebrow="06 / SYNC">
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Room Code</div>
+                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b8a97b]">Expedition Code</div>
                 <div className="mt-2 text-3xl font-black text-white">{room.code}</div>
                 <div className="mt-2 text-sm text-[#9fb3c8]">Share this code to bring another player in.</div>
               </div>
               <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Players</div>
+                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b8a97b]">Travelers</div>
                 <div className="mt-2 font-bold text-white">{room.hostName}</div>
                 <div className="text-[#9fb3c8]">{room.guestName || 'Waiting for second player'}</div>
               </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <button onClick={() => promoteRoom('coop')} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-black text-white">Co-op Mode</button>
-              <button onClick={() => promoteRoom('versus')} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-black text-white">Versus Mode</button>
-              <button onClick={beginRoom} className="rounded-full bg-[#f59e0b] px-4 py-2 font-black text-[#111827]">Start Room</button>
+              <button onClick={() => promoteRoom('coop')} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-black text-white">Co-op</button>
+              <button onClick={() => promoteRoom('versus')} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-black text-white">Versus</button>
+              <button onClick={beginRoom} className="rounded-full bg-[#d4af37] px-4 py-2 font-black text-[#111827]">Begin Journey</button>
             </div>
             <div className="mt-3 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">
-              Sync status: {roomSyncLabel}
+              World sync: {roomSyncLabel}
             </div>
           </ScreenCard>
         )}
@@ -777,12 +781,12 @@ export default function FlagGamePage() {
           <section className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
             <div className="space-y-4">
               <ScreenCard
-                title={screen === 'play' ? 'Play Screen' : screen === 'coop' ? 'Co-op Mode' : 'Versus Mode'}
-                eyebrow="03 / LOOP"
+                title={screen === 'play' ? 'Flag Journey' : screen === 'coop' ? 'Co-op Journey' : 'Versus Journey'}
+                eyebrow="03 / ROUTE"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Current Country</div>
+                    <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b8a97b]">Current Country</div>
                     <div className="mt-1 text-3xl font-black text-white">{country.name}</div>
                     <div className="text-sm text-[#9fb3c8]">
                       {country.continent} | {getDifficultyLabel(country.difficulty)}
@@ -817,7 +821,7 @@ export default function FlagGamePage() {
               </ScreenCard>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <ScreenCard title="Progress System" eyebrow="XP / TITLES">
+                <ScreenCard title="Explorer Growth" eyebrow="XP / TITLES">
                   <div className="space-y-2 text-sm font-semibold text-[#b8c7d7]">
                     <div>XP: {visibleProgress.xp}</div>
                     <div>Title: {titleFor(visibleProgress)}</div>
@@ -826,7 +830,7 @@ export default function FlagGamePage() {
                     <div>Stamps: {visibleProgress.passportStamps.length}</div>
                   </div>
                 </ScreenCard>
-                <ScreenCard title="Global Completion" eyebrow="WORLD LOG">
+                <ScreenCard title="Global Discovery" eyebrow="WORLD MAP">
                   <div className="space-y-3">
                     <div>
                       <div className="flex items-center justify-between text-xs font-black uppercase tracking-[0.35em] text-[#93a7bb]">
@@ -844,7 +848,7 @@ export default function FlagGamePage() {
                       </div>
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Explorer Rank</div>
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#b8a97b]">Explorer Rank</div>
                       <div className="mt-1 text-2xl font-black text-white">{completionProgress.rank.name}</div>
                       <div className="mt-1 text-sm text-[#9fb3c8]">
                         Level {visibleProgress.explorerLevel} | {titleFor(visibleProgress)}
@@ -857,7 +861,7 @@ export default function FlagGamePage() {
                     </div>
                   </div>
                 </ScreenCard>
-                <ScreenCard title="Focus Mode" eyebrow="DENSE FLAGS">
+                <ScreenCard title="Flag Surface" eyebrow="DENSE FLAGS">
                   <div className="space-y-2 text-sm font-semibold text-[#b8c7d7]">
                     <div>Preserved for dense flag interaction.</div>
                     <div>Built into the play surface, not a separate mode.</div>
@@ -867,7 +871,7 @@ export default function FlagGamePage() {
             </div>
 
             <aside className="space-y-4">
-              <ScreenCard title="Explorer Log" eyebrow="DATABASE">
+              <ScreenCard title="Discovery Atlas" eyebrow="WORLD INDEX">
                 <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
                   {explorerCountries.map((item) => {
                     const p = getCountryProgress(visibleProgress, item.iso2)
@@ -897,7 +901,7 @@ export default function FlagGamePage() {
                 </div>
               </ScreenCard>
 
-              <ScreenCard title="Actions" eyebrow="RECOVERY">
+              <ScreenCard title="Flag Tools" eyebrow="TRAVEL KIT">
                 <div className="flex flex-wrap gap-2">
                   {palette.map((color, idx) => (
                     <button
@@ -913,11 +917,11 @@ export default function FlagGamePage() {
                   onClick={completeFlag}
                   className="mt-4 w-full rounded-2xl bg-[#f59e0b] px-4 py-3 text-lg font-black text-[#111827]"
                 >
-                  Complete Flag
+                  Seal the Flag
                 </button>
                 {room && (
                   <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-xs font-bold uppercase tracking-[0.2em] text-[#8ca2b6]">
-                    Room {room.code} | {room.mode} | {room.status}
+                    Camp {room.code} | {room.mode} | {room.status}
                   </div>
                 )}
                 {roomSnapshot && (
@@ -942,7 +946,7 @@ export default function FlagGamePage() {
             >
               <div className={`confetti-layer confetti-${celebrationProfile.particleShape}`} aria-hidden="true" />
               <div className="relative">
-                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#93a7bb]">COUNTRY DISCOVERED</div>
+                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#b8a97b]">COUNTRY DISCOVERED</div>
                 <h3 className={`mt-2 font-display text-4xl font-black text-white ${rewardStage !== 'stamp' ? 'completion-title-rise' : ''}`}>{reward.countryName}</h3>
                 <div className="mt-1 text-sm font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">
                   {reward.message}
@@ -956,12 +960,12 @@ export default function FlagGamePage() {
                 <div className="mt-5 grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
                   <div className="space-y-3">
                     <div className={`relative rounded-[24px] border border-white/10 bg-white/5 p-4 ${rewardStage === 'stamp' ? 'stamp-slam' : 'opacity-80'}`}>
-                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Passport Stamp</div>
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#b8a97b]">Passport Stamp</div>
                       <div className="mt-2 text-2xl font-black text-white">{reward.passportStamp.label}</div>
                       <div className="mt-1 text-sm text-[#9fb3c8]">{reward.passportStamp.completedAt}</div>
                     </div>
                     <div className={`rounded-[24px] border border-white/10 bg-white/5 p-4 ${rewardStage === 'souvenir' ? 'souvenir-pop' : 'opacity-80'}`}>
-                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Souvenir Reveal</div>
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#b8a97b]">Souvenir Reveal</div>
                       <div className="mt-2 text-2xl font-black text-white">{reward.souvenir.name}</div>
                       <div className="mt-1 text-sm text-[#9fb3c8]">Locked into explorer inventory.</div>
                       <div className="mt-3 text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">
@@ -971,14 +975,14 @@ export default function FlagGamePage() {
                   </div>
                   <div className="space-y-3">
                     <div className={`rounded-[24px] border border-white/10 bg-white/5 p-4 ${rewardStage === 'xp' ? 'star-pop' : 'opacity-80'}`}>
-                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">XP Reveal</div>
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#b8a97b]">XP Reveal</div>
                       <div className={`mt-2 text-5xl font-black text-[#22c55e] ${rewardStage === 'xp' ? 'xp-pulse' : ''}`}>+{rewardXpVisible}</div>
                       <div className="mt-2 text-sm text-[#9fb3c8]">
                         Base {reward.xp.flagComplete} | Bonus {reward.xp.perfectBonus + reward.xp.souvenirBonus}
                       </div>
                     </div>
                     <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
-                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Explorer Rank Progress</div>
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#b8a97b]">Explorer Rank Progress</div>
                       <div className="mt-2 text-2xl font-black text-white">{completionProgress.rank.name}</div>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/8">
                         <div
