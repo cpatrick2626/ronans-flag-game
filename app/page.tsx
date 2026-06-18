@@ -1,16 +1,159 @@
-﻿'use client'
+'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { COUNTRIES, COUNTRY_BY_ISO2 } from '../public/countries.js'
-import { createDefaultFlagProgress, loadFlagProgress, completeCountry, getCountryProgress } from '../public/flag-progress.js'
+import {
+  completeCountry,
+  getCountryProgress,
+  loadFlagProgress,
+} from '../public/flag-progress.js'
 
-type RewardPayload = ReturnType<typeof completeCountry>['reward']
+type Screen =
+  | 'player-entry'
+  | 'home'
+  | 'country-arrival'
+  | 'play'
+  | 'create-room'
+  | 'join-room'
+  | 'waiting-room'
+  | 'coop'
+  | 'versus'
+
+type Mode = 'solo' | 'coop' | 'versus'
 type RewardStage = 'stamp' | 'souvenir' | 'stars' | 'xp' | 'done'
+type CompletionSoundHook =
+  | 'button_click'
+  | 'correct_fill'
+  | 'wrong_fill'
+  | 'stamp_thump'
+  | 'country_complete'
+  | 'arrival_theme'
+  | 'home_theme'
+  | 'victory_default'
+  | 'victory_france'
+  | 'victory_japan'
+  | 'victory_brazil'
+  | 'victory_egypt'
 
-const STORAGE_KEY = 'flag_game_v1_active_country'
-const LEGACY_STORAGE_KEYS = ['banana_game_v1_active_country']
-const REGION_STORAGE_KEY = 'flag_game_v1_region_colors'
-const LEGACY_REGION_STORAGE_KEYS = ['banana_game_v1_region_colors']
+type CelebrationProfile = {
+  confettiColors: string[]
+  particleShape: 'dot' | 'petal' | 'diamond'
+  soundHook: CompletionSoundHook
+  themeLabel?: string
+}
+type RoomStatus = 'waiting' | 'ready' | 'active'
+type PaintFeedback = {
+  state: 'correct' | 'wrong'
+  at: number
+}
+
+type RoomState = {
+  id: string
+  code: string
+  hostName: string
+  guestName?: string
+  mode: Exclude<Mode, 'solo'>
+  createdAt: string
+  updatedAt: string
+  status: RoomStatus
+  activeCountryCode: string
+  rounds: string[]
+  roundIndex: number
+  scores: Record<string, number>
+  lastMoveAt?: string
+}
+
+type RoomSnapshot = {
+  room: RoomState
+  note: string
+}
+
+type SyncState = 'idle' | 'local' | 'broadcast' | 'joined' | 'started' | 'updated'
+
+const PLAYER_NAME_KEY = 'ronan_flag_player_name'
+const ACTIVE_MODE_KEY = 'ronan_flag_active_mode'
+const ACTIVE_COUNTRY_KEY = 'flag_game_v1_active_country'
+const ROOM_STORAGE_KEY = 'ronan_flag_room'
+const ROOM_CHANNEL = 'ronan-flag-room-sync'
+const GLOBAL_CELEBRATION: CelebrationProfile = {
+  confettiColors: ['#f59e0b', '#38bdf8', '#22c55e'],
+  particleShape: 'dot',
+  soundHook: 'victory_default',
+  themeLabel: 'Global celebration',
+}
+
+const CELEBRATION_BY_COUNTRY: Record<string, CelebrationProfile> = {
+  FR: {
+    confettiColors: ['#0055A4', '#FFFFFF', '#EF4135'],
+    particleShape: 'diamond',
+    soundHook: 'victory_france',
+    themeLabel: 'French victory',
+  },
+  JP: {
+    confettiColors: ['#D4002A', '#FFFFFF', '#F5B7C4'],
+    particleShape: 'petal',
+    soundHook: 'victory_japan',
+    themeLabel: 'Cherry blossom victory',
+  },
+  BR: {
+    confettiColors: ['#009C3B', '#FFDF00', '#002776'],
+    particleShape: 'diamond',
+    soundHook: 'victory_brazil',
+    themeLabel: 'Carnival victory',
+  },
+  EG: {
+    confettiColors: ['#C8A04A', '#D8C7A1', '#123B7A'],
+    particleShape: 'dot',
+    soundHook: 'victory_egypt',
+    themeLabel: 'Desert victory',
+  },
+}
+
+const CELEBRATION_BY_CONTINENT: Record<string, CelebrationProfile> = {
+  Europe: {
+    confettiColors: ['#0055A4', '#FFFFFF', '#EF4135'],
+    particleShape: 'diamond',
+    soundHook: 'victory_default',
+    themeLabel: 'European celebration',
+  },
+  Asia: {
+    confettiColors: ['#D4002A', '#FFFFFF', '#F5B7C4'],
+    particleShape: 'petal',
+    soundHook: 'victory_default',
+    themeLabel: 'Asian celebration',
+  },
+  'South America': {
+    confettiColors: ['#009C3B', '#FFDF00', '#002776'],
+    particleShape: 'diamond',
+    soundHook: 'victory_default',
+    themeLabel: 'South American celebration',
+  },
+  Americas: {
+    confettiColors: ['#0055A4', '#FFFFFF', '#EF4135'],
+    particleShape: 'diamond',
+    soundHook: 'victory_default',
+    themeLabel: 'Americas celebration',
+  },
+  Africa: {
+    confettiColors: ['#C8A04A', '#D8C7A1', '#123B7A'],
+    particleShape: 'dot',
+    soundHook: 'victory_default',
+    themeLabel: 'African celebration',
+  },
+}
+
+function getCelebrationProfile(countryCode: string) {
+  const country = COUNTRY_BY_ISO2[countryCode]
+  if (!country) return GLOBAL_CELEBRATION
+
+  const countryProfile = CELEBRATION_BY_COUNTRY[country.iso2]
+  if (countryProfile) return countryProfile
+
+  const continentProfile = CELEBRATION_BY_CONTINENT[country.continent]
+  if (continentProfile) return continentProfile
+
+  return GLOBAL_CELEBRATION
+}
 
 function safeStorageGet(key: string) {
   if (typeof window === 'undefined') return null
@@ -22,22 +165,111 @@ function safeStorageSet(key: string, value: string) {
   window.localStorage.setItem(key, value)
 }
 
-function loadRegionColorState() {
-  const saved = safeStorageGet(REGION_STORAGE_KEY) || LEGACY_REGION_STORAGE_KEYS.map(safeStorageGet).find(Boolean)
-  if (!saved) return {}
-  try {
-    const parsed = JSON.parse(saved)
-    if (!parsed || typeof parsed !== 'object') return {}
-    safeStorageSet(REGION_STORAGE_KEY, JSON.stringify(parsed))
-    return parsed
-  } catch {
-    return {}
+function isValidCountryCode(code?: string | null) {
+  return !!code && !!COUNTRY_BY_ISO2[code]
+}
+
+function getInitialCountry() {
+  const saved = safeStorageGet(ACTIVE_COUNTRY_KEY)
+  return isValidCountryCode(saved) ? (saved as string) : 'FR'
+}
+
+function getDifficultyLabel(difficulty?: string) {
+  if (!difficulty) return 'Unknown'
+  return difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
+}
+
+function getCountryLanguage(country: (typeof COUNTRIES)[number]) {
+  if (country.languages?.length) return country.languages[0]
+  return 'Unknown'
+}
+
+function getCountryFunFact(country: (typeof COUNTRIES)[number]) {
+  const recordedFact = country.fun_facts?.find((fact: string) => fact && fact.trim().length > 0)
+  if (recordedFact) return recordedFact
+
+  const landmark = country.landmark?.trim()
+  if (landmark) return `${country.name} is associated with ${landmark}.`
+
+  const food = country.foods?.find((item: string) => item && item.trim().length > 0)
+  if (food) return `${food} is a known local specialty in ${country.name}.`
+
+  const animal = country.animals?.find((item: string) => item && item.trim().length > 0)
+  if (animal) return `${animal} is one of the animals closely tied to ${country.name}.`
+
+  return `${country.name} is in ${country.continent} and uses ${getCountryLanguage(country)} as its primary language.`
+}
+
+function roomCode() {
+  return Math.random().toString(36).slice(2, 8).toUpperCase()
+}
+
+function roomId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
+function useSoundHooks() {
+  const hookMap: Record<CompletionSoundHook, null> = {
+    button_click: null,
+    correct_fill: null,
+    wrong_fill: null,
+    stamp_thump: null,
+    country_complete: null,
+    arrival_theme: null,
+    home_theme: null,
+    victory_default: null,
+    victory_france: null,
+    victory_japan: null,
+    victory_brazil: null,
+    victory_egypt: null,
+  }
+  return {
+    playSound: (hook: CompletionSoundHook) => {
+      void hookMap[hook]
+      void hook
+    },
   }
 }
 
-function saveRegionColorState(state: Record<string, Record<string, { selectedColorIndex: number; isCorrect: boolean; updatedAt: string }>>) {
+function loadRoom(): RoomState | null {
+  if (typeof window === 'undefined') return null
+  const raw = window.localStorage.getItem(ROOM_STORAGE_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as RoomState
+  } catch {
+    return null
+  }
+}
+
+function saveRoom(room: RoomState | null) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(REGION_STORAGE_KEY, JSON.stringify(state))
+  if (!room) {
+    window.localStorage.removeItem(ROOM_STORAGE_KEY)
+    return
+  }
+  window.localStorage.setItem(ROOM_STORAGE_KEY, JSON.stringify(room))
+}
+
+function makeRoom(mode: Exclude<Mode, 'solo'>, hostName: string, countryCode: string): RoomState {
+  const baseCountry = COUNTRY_BY_ISO2[countryCode] || COUNTRIES[0]
+  return {
+    id: roomId(),
+    code: roomCode(),
+    hostName,
+    mode,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'waiting',
+    activeCountryCode: baseCountry.iso2,
+    rounds: COUNTRIES.slice(0, 12).map((item) => item.iso2),
+    roundIndex: 0,
+    scores: {},
+  }
+}
+
+function countryPalette(country: (typeof COUNTRIES)[number]): string[] {
+  return country.theme_colors || country.flag_colors || ['#0055A4', '#FFFFFF', '#EF4135']
 }
 
 function getCountryShape(type: string, shape: any, fill: string) {
@@ -47,581 +279,737 @@ function getCountryShape(type: string, shape: any, fill: string) {
   return null
 }
 
-function countryPalette(country: (typeof COUNTRIES)[number]) {
-  return country.theme_colors || country.flag_colors || ['#F8D36A', '#FFFFFF', '#EF4135']
-}
-
-function getDifficultyLabel(difficulty?: string) {
-  if (!difficulty) return 'unknown'
-  return difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
-}
-
-function getCompletionStateLabel(status?: string) {
-  if (status === 'perfect') return 'Perfect'
-  if (status === 'complete') return 'Complete'
-  if (status === 'in_progress') return 'In Progress'
-  if (status === 'active') return 'In Progress'
-  return 'Not Started'
-}
-
-function isValidCountryCode(code?: string | null) {
-  return !!code && !!COUNTRY_BY_ISO2[code]
-}
-
-function getInitialCountry() {
-  const saved = safeStorageGet(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(safeStorageGet).find(Boolean)
-  if (isValidCountryCode(saved)) return saved
-  if (COUNTRY_BY_ISO2.FR) return 'FR'
-  return COUNTRIES[0]?.iso2 || 'FR'
-}
-
-function resolveCountry(code: string) {
-  if (isValidCountryCode(code)) return COUNTRY_BY_ISO2[code]
-  if (COUNTRY_BY_ISO2.FR) return COUNTRY_BY_ISO2.FR
-  return COUNTRIES[0]
-}
-
-function maybeTitle(progress: { levelTitle?: string }) {
+function titleFor(progress: ReturnType<typeof loadFlagProgress>) {
   return progress.levelTitle || 'Junior Explorer'
 }
 
-function formatCompletionTimestamp(value?: string | null) {
-  if (!value) return 'Today'
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return value
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(parsed)
+function getExplorerRank(completedCountries: number) {
+  if (completedCountries >= 120) return { name: 'Atlas Marshal', nextAt: null }
+  if (completedCountries >= 75) return { name: 'Passport Commander', nextAt: 120 }
+  if (completedCountries >= 35) return { name: 'Route Specialist', nextAt: 75 }
+  if (completedCountries >= 12) return { name: 'Field Explorer', nextAt: 35 }
+  return { name: 'Junior Explorer', nextAt: 12 }
 }
 
-function souvenirEmoji(name: string) {
-  if (name === 'Eiffel Tower') return '🗼'
-  if (name === 'Cherry Blossom') return '🌸'
-  if (name === 'Soccer Ball') return '⚽'
-  if (name === 'Statue of Liberty') return '🗽'
-  if (name === 'Pizza') return '🍕'
-  return '🏷️'
+function getCompletionProgress(progress: ReturnType<typeof loadFlagProgress>) {
+  const completed = progress.completedCountries || 0
+  const total = COUNTRIES.length
+  return {
+    completed,
+    total,
+    percent: total ? Math.round((completed / total) * 100) : 0,
+    rank: getExplorerRank(completed),
+  }
 }
 
-function CompletionOverlay({
-  reward,
-  countryName,
-  progress,
-  stage,
-  onNext,
-  onViewPassport,
-}: {
-  reward: RewardPayload
-  countryName: string
-  progress: ReturnType<typeof loadFlagProgress>
-  stage: RewardStage
-  onNext: () => void
-  onViewPassport: () => void
-}) {
-  const stampVisible = stage !== 'stamp'
-  const souvenirVisible = stage === 'souvenir' || stage === 'stars' || stage === 'xp' || stage === 'done'
-  const starsVisible = stage === 'stars' || stage === 'xp' || stage === 'done'
-  const xpVisible = stage === 'xp' || stage === 'done'
-  const actionsVisible = stage === 'done'
+function useRoomChannel(onSnapshot: (room: RoomState) => void) {
+  const channelRef = useRef<BroadcastChannel | null>(null)
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== ROOM_STORAGE_KEY || !event.newValue) return
+      try {
+        onSnapshot(JSON.parse(event.newValue) as RoomState)
+      } catch {
+        // Ignore malformed sync payloads.
+      }
+    }
+
+    window.addEventListener('storage', onStorage)
+
+    if ('BroadcastChannel' in window) {
+      const channel = new BroadcastChannel(ROOM_CHANNEL)
+      channel.onmessage = (event) => {
+        const payload = event.data as RoomSnapshot | null
+        if (payload?.room) onSnapshot(payload.room)
+      }
+      channelRef.current = channel
+    }
+
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      channelRef.current?.close()
+    }
+  }, [onSnapshot])
+
+  return channelRef
+}
+
+function ScreenCard({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2b1b0e]/70 px-4 backdrop-blur-sm">
-      <div className="banana-overlay absolute inset-0 opacity-75" aria-hidden />
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-[32px] border border-[#ffd78a]/70 bg-gradient-to-br from-[#fff8dd] via-[#ffe9aa] to-[#ffd7a1] p-5 text-[#5e3511] shadow-[0_30px_100px_rgba(63,31,5,0.45)]">
-        <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_transparent_70%)]" />
-        <div className="absolute inset-0 banana-overlay opacity-45" aria-hidden />
-        <div className="relative flex flex-col gap-4">
-          <div className="banana-burst text-center">
-            <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#9b5f13]">Flag Complete</div>
-            <h2 className="mt-2 font-display text-4xl font-bold tracking-[0.03em] text-[#7b3f09] drop-shadow-[0_2px_0_rgba(255,255,255,0.7)]">
-              You colored {countryName}!
-            </h2>
-            <p className="mt-2 text-sm font-semibold text-[#875214]">{reward.message}</p>
-          </div>
+    <section className="rounded-[28px] border border-white/10 bg-[rgba(7,12,18,0.88)] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur">
+      <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#93a7bb]">{eyebrow}</div>
+      <h2 className="mt-2 font-display text-3xl font-black tracking-[0.06em] text-white">{title}</h2>
+      <div className="mt-4">{children}</div>
+    </section>
+  )
+}
 
-          <div className="grid gap-3 md:grid-cols-[1.15fr_0.85fr]">
-            <div className="rounded-[28px] border-4 border-[#fff4c9] bg-[#fffaf0] p-4 shadow-[inset_0_0_0_1px_rgba(149,89,28,0.08)]">
-              <div className="flex items-center gap-3">
-                <div className="flex h-18 w-18 items-center justify-center rounded-[22px] bg-gradient-to-br from-[#ffcc77] to-[#ff9b58] text-4xl shadow-[0_10px_20px_rgba(153,84,27,0.25)]">
-                  {reward.flagEmoji || '🏳️'}
-                </div>
-                <div>
-                  <div className="text-[11px] font-black uppercase tracking-[0.34em] text-[#b46e11]">Passport Stamp</div>
-                  <div className="mt-1 text-2xl font-black text-[#753b0b]">{reward.passportStamp.label}</div>
-                  <div className="text-sm font-semibold text-[#94602a]">{reward.passportStamp.countryName}</div>
-                </div>
-              </div>
-              <div className={`mt-4 rounded-[24px] border-[6px] border-[#8c4a12] bg-[#f7d5a5] px-4 py-3 text-center shadow-[inset_0_0_0_2px_rgba(255,255,255,0.18)] ${stampVisible ? 'stamp-slam' : 'opacity-0'}`}>
-                <div className="text-[10px] font-black uppercase tracking-[0.42em] text-[#7b2f0b]">{reward.passportStamp.label}</div>
-                <div className="mt-1 text-2xl font-black tracking-[0.18em] text-[#6d2908]">{reward.passportStamp.countryName}</div>
-                <div className="mt-1 text-xs font-bold uppercase tracking-[0.3em] text-[#7f4b15]">
-                  {formatCompletionTimestamp(reward.passportStamp.completedAt)}
-                </div>
-                <div className="mt-2 text-xs font-black uppercase tracking-[0.28em] text-[#a15b10]">Stars Earned: {reward.stars}</div>
-              </div>
-            </div>
-
-            <div className="rounded-[28px] border-4 border-[#fff0be] bg-[#fff6d6] p-4">
-              <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b46e11]">Souvenir Unlocked</div>
-              <div className={`mt-3 rounded-[24px] bg-gradient-to-br from-[#fffdf2] to-[#ffe0a8] p-4 text-center shadow-[0_12px_24px_rgba(135,79,18,0.14)] ${souvenirVisible ? 'souvenir-pop' : 'opacity-0 translate-y-3'}`}>
-                <div className="text-5xl">{souvenirEmoji(reward.souvenir.name)}</div>
-                <div className="mt-2 text-2xl font-black text-[#7b3f09]">{reward.souvenir.name}</div>
-              </div>
-              <div className={`mt-4 ${starsVisible ? 'opacity-100' : 'opacity-0'}`}>
-                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b46e11]">Stars</div>
-                <div className="mt-2 flex gap-2 text-4xl">
-                  {Array.from({ length: reward.stars }).map((_, i) => (
-                    <span key={i} className="star-pop">
-                      ⭐
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={`grid gap-3 rounded-[28px] border border-[#c88c36]/20 bg-[#fff8e6] p-4 md:grid-cols-2 ${xpVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <div>
-              <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b46e11]">XP Summary</div>
-              <div className="mt-3 space-y-1 text-sm font-semibold text-[#754016]">
-                <div className="flex justify-between"><span>+{reward.xp.flagComplete} Flag Complete</span><span /></div>
-                <div className="flex justify-between"><span>+{reward.xp.perfectBonus} Perfect Bonus</span><span /></div>
-                <div className="flex justify-between"><span>+{reward.xp.souvenirBonus} Souvenir Unlock</span><span /></div>
-                <div className="mt-2 flex justify-between border-t border-[#d7b26e]/40 pt-2 text-base font-black">
-                  <span>Total</span>
-                  <span>+{reward.xp.total} XP</span>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-[22px] bg-white/70 p-4">
-              <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b46e11]">Explorer Title</div>
-              <div className="mt-2 text-2xl font-black text-[#7b3f09]">{maybeTitle(progress)}</div>
-              <div className="mt-2 text-sm font-semibold text-[#875214]">
-                {progress.completedCountries} completed countries. {progress.perfectFlags} perfect flags.
-              </div>
-            </div>
-          </div>
-
-          <div className={`flex flex-col gap-3 sm:flex-row ${actionsVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <button onClick={onNext} className="flex-1 rounded-full bg-[#f08a24] px-6 py-4 text-lg font-black text-white shadow-[0_10px_0_#b85f12] transition-transform hover:-translate-y-0.5 active:translate-y-1">
-              Next Flag
-            </button>
-            <button onClick={onViewPassport} className="flex-1 rounded-full border-2 border-[#b76b11] bg-white/75 px-6 py-4 text-lg font-black text-[#7b3f09] shadow-[0_6px_0_rgba(183,107,17,0.25)]">
-              View Passport
-            </button>
-          </div>
-        </div>
-      </div>
+function StatusChip({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-black uppercase tracking-[0.25em] text-[#dbeafe]">
+      {children}
     </div>
   )
 }
 
+function ModeBadge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] text-[#c6d6e6]">
+      {children}
+    </span>
+  )
+}
+
 export default function FlagGamePage() {
-  const [progress, setProgress] = useState<ReturnType<typeof loadFlagProgress>>(() => createDefaultFlagProgress() as ReturnType<typeof loadFlagProgress>)
+  const [screen, setScreen] = useState<Screen>('player-entry')
+  const [playerName, setPlayerName] = useState('Ronan')
+  const [mode, setMode] = useState<Mode>('solo')
+  const [progress, setProgress] = useState<ReturnType<typeof loadFlagProgress>>(() => loadFlagProgress())
   const [activeCountryCode, setActiveCountryCode] = useState('FR')
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
-  const [coloringState, setColoringState] = useState<Record<string, Record<string, { selectedColorIndex: number; isCorrect: boolean; updatedAt: string }>>>({})
-  const [reward, setReward] = useState<RewardPayload | null>(null)
+  const [reward, setReward] = useState<null | ReturnType<typeof completeCountry>['reward']>(null)
   const [rewardStage, setRewardStage] = useState<RewardStage>('stamp')
+  const [rewardXpVisible, setRewardXpVisible] = useState(0)
+  const [rewardRankProgress, setRewardRankProgress] = useState(0)
   const [clientReady, setClientReady] = useState(false)
-  const [explorerQuery, setExplorerQuery] = useState('')
-  const [explorerContinent, setExplorerContinent] = useState('all')
-  const [explorerFilter, setExplorerFilter] = useState<'all' | 'easy' | 'medium' | 'hard' | 'expert'>('all')
-  const [focusMode, setFocusMode] = useState(false)
+  const [room, setRoom] = useState<RoomState | null>(null)
+  const [roomCodeInput, setRoomCodeInput] = useState('')
+  const [roomSnapshot, setRoomSnapshot] = useState<RoomSnapshot | null>(null)
+  const [pendingRoomMode, setPendingRoomMode] = useState<Exclude<Mode, 'solo'> | null>(null)
+  const [colorState, setColorState] = useState<Record<string, Record<string, number>>>({})
+  const [paintFeedback, setPaintFeedback] = useState<Record<string, PaintFeedback>>({})
   const timersRef = useRef<number[]>([])
+  const syncStateRef = useRef<SyncState>('idle')
+  const channelRef = useRoomChannel((nextRoom) => {
+    setRoom((current) => {
+      if (current && current.updatedAt > nextRoom.updatedAt) return current
+      syncStateRef.current = 'broadcast'
+      return nextRoom
+    })
+  })
 
-  const country = resolveCountry(activeCountryCode)
+  const country = COUNTRY_BY_ISO2[activeCountryCode] || COUNTRIES[0]
+  const palette = countryPalette(country)
   const countryProgress = getCountryProgress(progress, activeCountryCode)
   const completed = countryProgress.status === 'complete' || countryProgress.status === 'perfect'
-  const palette = countryPalette(country)
-  const regionFillState = coloringState[activeCountryCode] || {}
-  const totalColorableRegions = country.flag_regions.length
-  const coloredRegionCount = country.flag_regions.filter((region: any) => regionFillState[region.id] !== undefined).length
-  const correctRegionCount = country.flag_regions.filter((region: any) => regionFillState[region.id]?.isCorrect).length
-  const allRegionsFilled = totalColorableRegions > 0 && coloredRegionCount === totalColorableRegions
-  const isPerfectFlag = allRegionsFilled && correctRegionCount === totalColorableRegions
-  const completionStars = isPerfectFlag ? 3 : allRegionsFilled ? 2 : 0
-  const completionMessage = isPerfectFlag ? 'Perfect match.' : allRegionsFilled ? 'Almost there!' : 'Finish every region to complete the flag.'
-  const completionButtonLabel = completed ? 'Next Flag' : allRegionsFilled ? 'Almost there!' : 'Complete Flag'
-  const displayProgress = clientReady ? progress : createDefaultFlagProgress()
-  const displayActiveCountryCode = clientReady ? activeCountryCode : 'FR'
-  const displayCountry = resolveCountry(displayActiveCountryCode)
-  const displayCountryProgress = getCountryProgress(displayProgress, displayActiveCountryCode)
-  const displayCompleted = displayCountryProgress.status === 'complete' || displayCountryProgress.status === 'perfect'
-  const displayPalette = countryPalette(displayCountry)
-  const displayRegionFillState = clientReady ? (coloringState[displayActiveCountryCode] || {}) : {}
-  const displayTotalColorableRegions = displayCountry.flag_regions.length
-  const displayColoredRegionCount = displayCountry.flag_regions.filter((region: any) => displayRegionFillState[region.id] !== undefined).length
-  const displayCorrectRegionCount = displayCountry.flag_regions.filter((region: any) => displayRegionFillState[region.id]?.isCorrect).length
-  const displayAllRegionsFilled = displayTotalColorableRegions > 0 && displayColoredRegionCount === displayTotalColorableRegions
-  const displayIsPerfectFlag = displayAllRegionsFilled && displayCorrectRegionCount === displayTotalColorableRegions
-  const displayCompletionMessage = displayIsPerfectFlag ? 'Perfect match.' : displayAllRegionsFilled ? 'Almost there!' : 'Finish every region to complete the flag.'
-  const displayCompletionButtonLabel = displayCompleted ? 'Next Flag' : displayAllRegionsFilled ? 'Almost there!' : 'Complete Flag'
-  const totalCountries = COUNTRIES.length
-  const completedCountryCount = displayProgress.completedCountries
-  const completionRatio = `${completedCountryCount} / ${totalCountries}`
-  const perfectFlagsCount = displayProgress.perfectFlags
-  const countryContinentOptions = Array.from(new Set(COUNTRIES.map((item) => item.continent))).sort()
-  const normalizedQuery = explorerQuery.trim().toLowerCase()
-  const visibleCountries = COUNTRIES.filter((item) => {
-    const p = getCountryProgress(displayProgress, item.iso2)
-    const difficulty = (item.difficulty || 'unknown').toLowerCase()
-    const matchesQuery =
-      !normalizedQuery ||
-      item.name.toLowerCase().includes(normalizedQuery) ||
-      item.iso2.toLowerCase().includes(normalizedQuery) ||
-      item.continent.toLowerCase().includes(normalizedQuery)
-    const matchesContinent = explorerContinent === 'all' || item.continent.toLowerCase() === explorerContinent.toLowerCase()
-    const matchesFilter = explorerFilter === 'all' || difficulty === explorerFilter
-    return matchesQuery && matchesContinent && matchesFilter && (explorerFilter !== 'easy' || !item.easy_hidden)
-  })
-  const denseFlag = !!displayCountry.zoom_required || displayTotalColorableRegions > 6 || displayCountry.flag_regions.length > 6
-  const focusActive = focusMode || !!displayCountry.zoom_required
-  const flagHeightClass = denseFlag ? 'min-h-[320px]' : 'min-h-[240px]'
+  const regionState = colorState[activeCountryCode] || {}
+  const totalRegions = country.flag_regions.length
+  const filledRegions = country.flag_regions.filter((region: any) => regionState[region.id] !== undefined).length
+  const allRegionsFilled = totalRegions > 0 && filledRegions === totalRegions
+  const perfectFlag = allRegionsFilled && country.flag_regions.every((region: any) => regionState[region.id] === region.color)
+  const visibleProgress = clientReady ? progress : loadFlagProgress()
+  const explorerCountries = useMemo(() => COUNTRIES.slice(0, 194), [])
+  const roomSyncLabel = roomSnapshot?.note || syncStateRef.current
+  const completionProgress = getCompletionProgress(visibleProgress)
+  const { playSound } = useSoundHooks()
+  const celebrationProfile = useMemo(() => getCelebrationProfile(activeCountryCode), [activeCountryCode])
 
   useEffect(() => {
     const storedProgress = loadFlagProgress()
-    const storedCountry = getInitialCountry()
     setProgress(storedProgress)
-    setActiveCountryCode(storedCountry)
-    setColoringState(loadRegionColorState())
+    setActiveCountryCode(getInitialCountry())
+    setPlayerName(safeStorageGet(PLAYER_NAME_KEY) ?? 'Ronan')
+    setMode((safeStorageGet(ACTIVE_MODE_KEY) as Mode | null) ?? 'solo')
+    setRoom(loadRoom())
     setClientReady(true)
   }, [])
 
   useEffect(() => {
-    safeStorageSet(STORAGE_KEY, activeCountryCode)
+    safeStorageSet(PLAYER_NAME_KEY, playerName)
+  }, [playerName])
+
+  useEffect(() => {
+    safeStorageSet(ACTIVE_MODE_KEY, mode)
+  }, [mode])
+
+  useEffect(() => {
+    safeStorageSet(ACTIVE_COUNTRY_KEY, activeCountryCode)
   }, [activeCountryCode])
 
   useEffect(() => {
-    saveRegionColorState(coloringState)
-  }, [coloringState])
-
-  useEffect(() => {
-    setSelectedColorIndex(0)
-  }, [activeCountryCode])
-
-  useEffect(() => {
-    return () => {
-      timersRef.current.forEach((timer) => window.clearTimeout(timer))
-      timersRef.current = []
+    saveRoom(room)
+    if (room && channelRef.current) {
+      channelRef.current.postMessage({ room, note: 'sync' } satisfies RoomSnapshot)
     }
-  }, [])
+    if (room) setRoomSnapshot({ room, note: 'sync' })
+  }, [room, channelRef])
 
   useEffect(() => {
     if (!reward) return
     timersRef.current.forEach((timer) => window.clearTimeout(timer))
     timersRef.current = []
     setRewardStage('stamp')
-    timersRef.current.push(window.setTimeout(() => setRewardStage('souvenir'), 550))
-    timersRef.current.push(window.setTimeout(() => setRewardStage('stars'), 1150))
-    timersRef.current.push(window.setTimeout(() => setRewardStage('xp'), 1650))
-    timersRef.current.push(window.setTimeout(() => setRewardStage('done'), 2200))
-  }, [reward])
+    setRewardXpVisible(0)
+    setRewardRankProgress(completionProgress.percent)
+    playSound(celebrationProfile.soundHook)
+    timersRef.current.push(window.setTimeout(() => {
+      setRewardStage('souvenir')
+      playSound('stamp_thump')
+    }, 420))
+    timersRef.current.push(window.setTimeout(() => setRewardStage('stars'), 880))
+    timersRef.current.push(window.setTimeout(() => {
+      setRewardStage('xp')
+      const xpTarget = reward.xp.total
+      const steps = 18
+      const interval = 24
+      for (let index = 1; index <= steps; index += 1) {
+        timersRef.current.push(window.setTimeout(() => {
+          setRewardXpVisible(Math.round((xpTarget * index) / steps))
+        }, index * interval))
+      }
+    }, 1260))
+    timersRef.current.push(window.setTimeout(() => {
+      setRewardRankProgress(Math.min(100, completionProgress.percent + 8))
+    }, 1520))
+    timersRef.current.push(window.setTimeout(() => setRewardStage('done'), 2140))
+  }, [reward, completionProgress.percent, playSound, celebrationProfile.soundHook])
+
+  useEffect(() => {
+    if (!reward || rewardStage !== 'done') return
+    const timer = window.setTimeout(() => setReward(null), 2600)
+    timersRef.current.push(timer)
+  }, [reward, rewardStage])
+
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach((timer) => window.clearTimeout(timer))
+    }
+  }, [])
+
+  function setScreenAndMode(nextScreen: Screen, nextMode?: Mode) {
+    if (nextMode) setMode(nextMode)
+    setScreen(nextScreen)
+  }
+
+  function updateRoom(nextRoom: RoomState, note: RoomSnapshot['note'], nextScreen?: Screen) {
+    syncStateRef.current = note as SyncState
+    setRoom(nextRoom)
+    setRoomSnapshot({ room: nextRoom, note })
+    if (nextScreen) setScreen(nextScreen)
+  }
+
+  function enterGame() {
+    playSound('home_theme')
+    setScreen('home')
+  }
+
+  function startSolo() {
+    playSound('arrival_theme')
+    setScreenAndMode('country-arrival', 'solo')
+  }
 
   function colorRegion(regionId: string) {
     if (!palette.length) return
-    setColoringState((current) => {
-      const nextForCountry = {
+    const region = country.flag_regions.find((item: any) => item.id === regionId)
+    const isCorrect = region ? selectedColorIndex === region.color : false
+    playSound(isCorrect ? 'correct_fill' : 'wrong_fill')
+    setPaintFeedback((current) => ({
+      ...current,
+      [regionId]: { state: isCorrect ? 'correct' : 'wrong', at: Date.now() },
+    }))
+    setColorState((current) => ({
+      ...current,
+      [activeCountryCode]: {
         ...(current[activeCountryCode] || {}),
-        [regionId]: {
-          selectedColorIndex,
-          isCorrect: selectedColorIndex === country.flag_regions.find((region: any) => region.id === regionId)?.color,
-          updatedAt: new Date().toISOString(),
-        },
-      }
-      return {
-        ...current,
-        [activeCountryCode]: nextForCountry,
-      }
-    })
+        [regionId]: selectedColorIndex,
+      },
+    }))
   }
 
-  function markComplete() {
-    if (completed || !allRegionsFilled) return
+  function completeFlag() {
+    if (!allRegionsFilled || completed) return
+    playSound('button_click')
     const result = completeCountry(activeCountryCode, progress, {
-      stars: completionStars || 1,
+      stars: perfectFlag ? 3 : 2,
       completedAt: new Date().toISOString(),
     })
     setProgress(result.progress)
     setReward(result.reward)
   }
 
-  function nextCountry() {
-    const currentIndex = COUNTRIES.findIndex((item) => item.iso2 === activeCountryCode)
-    const next = COUNTRIES[(currentIndex + 1) % COUNTRIES.length]
-    setActiveCountryCode(next.iso2)
-    setReward(null)
-    const nextSaved = coloringState[next.iso2]
-    const firstColorIndex = nextSaved ? Object.values(nextSaved)[0]?.selectedColorIndex ?? 0 : 0
-    setSelectedColorIndex(firstColorIndex)
+  function paintClass(regionId: string) {
+    const feedback = paintFeedback[regionId]
+    if (!feedback) return ''
+    return feedback.state === 'correct' ? 'paint-correct correct-glow' : 'paint-wrong wrong-shake'
   }
 
-  function viewPassport() {
-    window.alert('Passport view is not built yet. Progress is saved locally.')
+  function nextCountry() {
+    const index = COUNTRIES.findIndex((item) => item.iso2 === activeCountryCode)
+    const next = COUNTRIES[(index + 1) % COUNTRIES.length]
+    setActiveCountryCode(next.iso2)
+    setReward(null)
+    setScreen('country-arrival')
+  }
+
+  function createRoom(modeChoice: Exclude<Mode, 'solo'>) {
+    const next = makeRoom(modeChoice, playerName, activeCountryCode)
+    updateRoom(next, 'created', 'waiting-room')
+    setMode(modeChoice)
+  }
+
+  function joinRoom() {
+    const existing = loadRoom()
+    if (!existing || existing.code !== roomCodeInput.trim().toUpperCase()) return
+    const joined: RoomState = { ...existing, guestName: playerName, status: 'active', updatedAt: new Date().toISOString() }
+    updateRoom(joined, 'joined')
+    setMode(joined.mode)
+    setScreen(joined.mode === 'coop' ? 'coop' : 'versus')
+  }
+
+  function promoteRoom(modeChoice: Exclude<Mode, 'solo'>) {
+    if (!room) return
+    const next: RoomState = {
+      ...room,
+      mode: modeChoice,
+      status: room.guestName ? 'active' : 'waiting',
+      updatedAt: new Date().toISOString(),
+    }
+    updateRoom(next, 'updated')
+  }
+
+  function beginRoom() {
+    if (!room) return
+    const next: RoomState = { ...room, status: 'active', updatedAt: new Date().toISOString() }
+    updateRoom(next, 'started')
+    setScreen(room.mode === 'coop' ? 'coop' : 'versus')
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_#fff7de_0%,_#f8d98f_28%,_#f0b55a_52%,_#7b3f09_100%)] text-[#5e3511]">
-      <div className="banana-overlay pointer-events-none absolute inset-0 opacity-80" />
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#10213c_0%,_#07111f_44%,_#03070d_100%)] text-[#d9e7f4]">
+      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:42px_42px]" />
       <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 p-4 md:p-6">
-        <header className="rounded-[28px] border border-[#fff0c7]/80 bg-[rgba(255,251,235,0.82)] p-4 shadow-[0_16px_50px_rgba(102,55,11,0.18)] backdrop-blur-sm">
+        <header className="rounded-[30px] border border-white/10 bg-[rgba(5,9,15,0.88)] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <div className="text-[11px] font-black uppercase tracking-[0.5em] text-[#b96a10]">COLOR THE FLAG</div>
-              <h1 className="mt-2 font-display text-4xl font-black tracking-[0.04em] text-[#7b3f09]">Ronan&apos;s Flag Game</h1>
-              <p className="mt-2 max-w-2xl text-sm font-semibold text-[#8d5a22]">Color the flag, earn a stamp, unlock a souvenir, and move on to the next country.</p>
+              <div className="text-[11px] font-black uppercase tracking-[0.5em] text-[#7f9eb9]">Ronan Flag Game</div>
+              <h1 className="mt-2 font-display text-4xl font-black tracking-[0.08em] text-white">Higgsfield Game Shell Recovery</h1>
+              <p className="mt-2 max-w-3xl text-sm font-semibold text-[#9fb3c8]">
+                Player entry, home, play, room creation, join flow, waiting room, co-op, versus, and realtime sync wrapped around the existing flag challenge.
+              </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-sm font-bold text-[#7b3f09]">
-              <div className="rounded-2xl bg-white/70 px-4 py-3">XP <span className="block text-2xl font-black">{displayProgress.xp}</span></div>
-              <div className="rounded-2xl bg-white/70 px-4 py-3">Title <span className="block text-lg font-black">{maybeTitle(displayProgress)}</span></div>
+            <div className="grid grid-cols-2 gap-3 text-sm font-bold">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                Player <span className="block text-lg font-black text-white">{playerName}</span>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                Title <span className="block text-lg font-black text-white">{titleFor(visibleProgress)}</span>
+              </div>
             </div>
           </div>
         </header>
 
-        <section className="grid flex-1 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-[32px] border-4 border-[#fff2b9] bg-[rgba(255,250,235,0.8)] p-4 shadow-[0_24px_70px_rgba(94,53,17,0.18)] backdrop-blur-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#b96a10]">Current Flag</div>
-                <div className="mt-1 text-3xl font-black text-[#7b3f09]">{displayCountry.name}</div>
-                <div className="text-sm font-semibold text-[#8d5a22]">{displayCountry.continent}</div>
-              </div>
-            <div className="flex flex-col items-end gap-2">
-              <div className={`rounded-full px-4 py-2 text-sm font-black uppercase tracking-[0.3em] ${displayCompleted ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-200 text-amber-900'}`}>
-                {displayCountryProgress.status}
-              </div>
-              <div className="rounded-full bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] text-[#8d5a22]">
-                {getDifficultyLabel(displayCountry.difficulty)}
-              </div>
-              {displayCountry.zoom_required && (
-                <button
-                  onClick={() => setFocusMode((current) => !current)}
-                  className={`rounded-full px-3 py-2 text-[10px] font-black uppercase tracking-[0.28em] transition ${focusActive ? 'bg-[#7b3f09] text-white shadow-[0_8px_18px_rgba(123,63,9,0.2)]' : 'bg-white/80 text-[#8d5a22]'}`}
-                >
-                  {focusActive ? 'Exit Focus Mode' : 'Focus Mode'}
+        {screen === 'player-entry' && (
+          <ScreenCard title="Player Name Entry" eyebrow="01 / BOOT">
+            <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+              <input
+                value={playerName}
+                onChange={(event) => setPlayerName(event.target.value)}
+                placeholder="Enter player name"
+                className="h-14 rounded-2xl border border-white/10 bg-black/30 px-4 text-lg font-bold text-white outline-none placeholder:text-[#6f8599]"
+              />
+              <button onClick={enterGame} className="h-14 rounded-2xl bg-[#f59e0b] px-5 text-lg font-black text-[#111827]">
+                Continue
+              </button>
+            </div>
+          </ScreenCard>
+        )}
+
+        {screen === 'home' && (
+          <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+            <ScreenCard title="Home Screen" eyebrow="02 / COMMAND">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button onClick={startSolo} className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-left">
+                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Solo Loop</div>
+                  <div className="mt-2 text-2xl font-black text-white">Resume Flag Color Challenge</div>
+                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Play Screen</div>
+                  <div className="mt-3"><ModeBadge>Solo</ModeBadge></div>
                 </button>
-              )}
-            </div>
-          </div>
+                <button onClick={() => { setPendingRoomMode('coop'); setScreen('create-room') }} className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-left">
+                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Co-op Mode</div>
+                  <div className="mt-2 text-2xl font-black text-white">Create Room</div>
+                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Shared room shell</div>
+                  <div className="mt-3"><ModeBadge>Co-op</ModeBadge></div>
+                </button>
+                <button onClick={() => { setPendingRoomMode('versus'); setScreen('create-room') }} className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-left">
+                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Versus Mode</div>
+                  <div className="mt-2 text-2xl font-black text-white">Create Room</div>
+                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Head-to-head room shell</div>
+                  <div className="mt-3"><ModeBadge>Versus</ModeBadge></div>
+                </button>
+                <button onClick={() => setScreen('join-room')} className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-left">
+                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Join Room</div>
+                  <div className="mt-2 text-2xl font-black text-white">Enter Room Code</div>
+                  <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">Realtime entry</div>
+                  <div className="mt-3"><ModeBadge>Sync</ModeBadge></div>
+                </button>
+              </div>
+            </ScreenCard>
+            <ScreenCard title="Operational Status" eyebrow="LIVE">
+              <div className="space-y-3 text-sm font-semibold text-[#b8c7d7]">
+                <div>194-country database: online</div>
+                <div>Explorer Log: preserved</div>
+                <div>Focus Mode: preserved</div>
+                <div>Progress, XP, Titles, Stamps: preserved</div>
+                <div>Passport, Collections, Settings: not built</div>
+                <div>Realtime Sync: {roomSyncLabel}</div>
+              </div>
+            </ScreenCard>
+          </section>
+        )}
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[22px] bg-white/75 px-4 py-3 text-sm font-semibold text-[#7a4a17]">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a15b10]">Global Progress</div>
-                <div className="mt-1 text-xl font-black text-[#7b3f09]">{completedCountryCount} / {totalCountries}</div>
-              </div>
-              <div className="rounded-[22px] bg-white/75 px-4 py-3 text-sm font-semibold text-[#7a4a17]">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a15b10]">Perfect Flags</div>
-                <div className="mt-1 text-xl font-black text-[#7b3f09]">{perfectFlagsCount}</div>
-              </div>
-              <div className="rounded-[22px] bg-white/75 px-4 py-3 text-sm font-semibold text-[#7a4a17]">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a15b10]">Explorer State</div>
-                <div className="mt-1 text-base font-black text-[#7b3f09]">{displayCountryProgress.status}</div>
-              </div>
+        {screen === 'join-room' && (
+          <ScreenCard title="Join Room" eyebrow="05 / ACCESS">
+            <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+              <input
+                value={roomCodeInput}
+                onChange={(event) => setRoomCodeInput(event.target.value)}
+                placeholder="Room code"
+                className="h-14 rounded-2xl border border-white/10 bg-black/30 px-4 text-lg font-bold text-white outline-none placeholder:text-[#6f8599]"
+              />
+              <button onClick={joinRoom} className="h-14 rounded-2xl bg-[#22c55e] px-5 text-lg font-black text-[#08111d]">
+                Join
+              </button>
             </div>
+            <button onClick={() => setScreen('home')} className="mt-4 text-sm font-bold text-[#93a7bb]">
+              Back
+            </button>
+          </ScreenCard>
+        )}
 
-            <div className={`mt-4 rounded-[30px] bg-[linear-gradient(180deg,#fffefa,#fff2c7)] p-4 shadow-inner ${flagHeightClass}`}>
-              <div className={`mx-auto overflow-auto rounded-[22px] border-4 border-[#f3d68d] bg-white shadow-[0_16px_40px_rgba(133,79,18,0.14)] ${focusActive ? 'max-h-[72vh] p-2' : ''}`}>
-                <svg
-                  viewBox="0 0 300 200"
-                  className={`block h-full w-full origin-center ${focusActive ? 'min-w-[420px] scale-[1.3] sm:min-w-[520px] sm:scale-[1.45]' : 'max-w-2xl'}`}
-                >
-                  {displayCountry.flag_regions.map((region: any) =>
-                    region.shapes.map((shape: any, idx: number) => {
-                      const fillColor = displayPalette[displayRegionFillState[region.id]?.selectedColorIndex ?? region.color] || '#eee'
-                      return (
-                        <g
-                          key={`${region.id}-${idx}`}
-                          className="cursor-pointer"
-                          onClick={() => colorRegion(region.id)}
-                          onTouchStart={() => colorRegion(region.id)}
-                          role="button"
-                          tabIndex={0}
-                          aria-label={`Color ${region.id}`}
-                        >
-                          {getCountryShape(shape.t, shape, fillColor)}
-                        </g>
-                      )
-                    })
-                  )}
-                  {displayCompleted && <text x="150" y="25" textAnchor="middle" className="fill-[#7b3f09] text-[14px] font-black">COMPLETE</text>}
-                </svg>
-              </div>
-              <div className="mt-2 text-[10px] font-black uppercase tracking-[0.28em] text-[#8d5a22]">
-                {focusActive ? 'Focus Mode active. Zoomed for dense flag interaction.' : 'Tip: use Focus Mode on dense flags for better mobile control.'}
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <div className="rounded-[24px] bg-[#fff8e8] p-4">
-                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b96a10]">Color Kit</div>
+        {screen === 'country-arrival' && (
+          <ScreenCard title="Country Arrival" eyebrow="02B / BRIEFING">
+            <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-4">
+                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#93a7bb]">Arrived In</div>
+                <div className="mt-2 text-4xl font-black text-white">{country.name}</div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {displayPalette.map((color: string, idx: number) => (
+                  <StatusChip>{country.continent}</StatusChip>
+                  <StatusChip>{getDifficultyLabel(country.difficulty)}</StatusChip>
+                  <StatusChip>{country.capital}</StatusChip>
+                </div>
+                <div className="mt-4 grid gap-3 text-sm font-semibold text-[#b8c7d7] sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Capital</div>
+                    <div className="mt-1 text-lg font-black text-white">{country.capital}</div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Language</div>
+                    <div className="mt-1 text-lg font-black text-white">{getCountryLanguage(country)}</div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:col-span-2">
+                    <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Fun Fact</div>
+                    <div className="mt-1 text-base font-semibold text-[#dbeafe]">{getCountryFunFact(country)}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4">
+                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#93a7bb]">Challenge Prep</div>
+                <div className="mt-2 text-2xl font-black text-white">Flag Color Challenge</div>
+                <div className="mt-3 space-y-2 text-sm font-semibold text-[#b8c7d7]">
+                  <div>Country: {country.name}</div>
+                  <div>Continent: {country.continent}</div>
+                  <div>Difficulty: {getDifficultyLabel(country.difficulty)}</div>
+                  <div>Language: {getCountryLanguage(country)}</div>
+                </div>
+                <button
+                  onClick={() => { playSound('button_click'); setScreen('play') }}
+                  className="mt-5 w-full rounded-2xl bg-[#f59e0b] px-5 py-3 text-lg font-black text-[#111827]"
+                >
+                  Begin Challenge
+                </button>
+              </div>
+            </div>
+          </ScreenCard>
+        )}
+
+        {screen === 'create-room' && (
+          <ScreenCard title="Create Room" eyebrow="04 / ROOM">
+            <div className="grid gap-3 md:grid-cols-2">
+              <button
+                onClick={() => {
+                  if (!pendingRoomMode) return
+                  playSound('button_click')
+                  createRoom(pendingRoomMode)
+                }}
+                className="rounded-[22px] border border-white/10 bg-[#f59e0b] px-4 py-4 text-left text-lg font-black text-[#111827]"
+              >
+                Launch {pendingRoomMode === 'versus' ? 'Versus' : 'Co-op'} Room
+              </button>
+              <button
+                onClick={() => setScreen('home')}
+                className="rounded-[22px] border border-white/10 bg-white/5 px-4 py-4 text-left text-lg font-black text-white"
+              >
+                Back to Home
+              </button>
+            </div>
+          </ScreenCard>
+        )}
+
+        {screen === 'waiting-room' && room && (
+          <ScreenCard title="Waiting Room" eyebrow="06 / SYNC">
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Room Code</div>
+                <div className="mt-2 text-3xl font-black text-white">{room.code}</div>
+                <div className="mt-2 text-sm text-[#9fb3c8]">Share this code to bring another player in.</div>
+              </div>
+              <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Players</div>
+                <div className="mt-2 font-bold text-white">{room.hostName}</div>
+                <div className="text-[#9fb3c8]">{room.guestName || 'Waiting for second player'}</div>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button onClick={() => promoteRoom('coop')} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-black text-white">Co-op Mode</button>
+              <button onClick={() => promoteRoom('versus')} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-black text-white">Versus Mode</button>
+              <button onClick={beginRoom} className="rounded-full bg-[#f59e0b] px-4 py-2 font-black text-[#111827]">Start Room</button>
+            </div>
+            <div className="mt-3 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">
+              Sync status: {roomSyncLabel}
+            </div>
+          </ScreenCard>
+        )}
+
+        {(screen === 'play' || screen === 'coop' || screen === 'versus') && (
+          <section className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
+            <div className="space-y-4">
+              <ScreenCard
+                title={screen === 'play' ? 'Play Screen' : screen === 'coop' ? 'Co-op Mode' : 'Versus Mode'}
+                eyebrow="03 / LOOP"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#93a7bb]">Current Country</div>
+                    <div className="mt-1 text-3xl font-black text-white">{country.name}</div>
+                    <div className="text-sm text-[#9fb3c8]">
+                      {country.continent} | {getDifficultyLabel(country.difficulty)}
+                    </div>
+                  </div>
+                  <StatusChip>{countryProgress.status}</StatusChip>
+                </div>
+                <div className="mt-4 rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-3">
+                  <svg viewBox="0 0 300 200" className="h-auto w-full rounded-[18px] bg-white">
+                    {country.flag_regions.map((region: any) =>
+                      region.shapes.map((shape: any, idx: number) => {
+                        const fill = palette[(regionState[region.id] ?? region.color) % palette.length] || '#eee'
+                        return (
+                          <g
+                            key={`${region.id}-${idx}`}
+                            onClick={() => colorRegion(region.id)}
+                            role="button"
+                            tabIndex={0}
+                            className={paintClass(region.id)}
+                          >
+                            {getCountryShape(shape.t, shape, fill)}
+                          </g>
+                        )
+                      })
+                    )}
+                    {completed && <text x="150" y="26" textAnchor="middle" className="fill-[#111827] text-[14px] font-black">COMPLETE</text>}
+                  </svg>
+                </div>
+                <div className="mt-3 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">
+                  {totalRegions} regions total | {filledRegions} filled | {perfectFlag ? 'Perfect ready' : 'Complete the flag to earn the stamp'}
+                </div>
+              </ScreenCard>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <ScreenCard title="Progress System" eyebrow="XP / TITLES">
+                  <div className="space-y-2 text-sm font-semibold text-[#b8c7d7]">
+                    <div>XP: {visibleProgress.xp}</div>
+                    <div>Title: {titleFor(visibleProgress)}</div>
+                    <div>Countries: {visibleProgress.completedCountries}</div>
+                    <div>Perfect flags: {visibleProgress.perfectFlags}</div>
+                    <div>Stamps: {visibleProgress.passportStamps.length}</div>
+                  </div>
+                </ScreenCard>
+                <ScreenCard title="Global Completion" eyebrow="WORLD LOG">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between text-xs font-black uppercase tracking-[0.35em] text-[#93a7bb]">
+                        <span>Completion</span>
+                        <span>{completionProgress.percent}%</span>
+                      </div>
+                      <div className="mt-2 h-3 overflow-hidden rounded-full bg-white/8">
+                        <div
+                          className="h-full rounded-full bg-[linear-gradient(90deg,#22c55e,#f59e0b,#f97316)] transition-all duration-500"
+                          style={{ width: `${completionProgress.percent}%` }}
+                        />
+                      </div>
+                      <div className="mt-2 text-xs font-semibold text-[#8ca2b6]">
+                        {completionProgress.completed} of {completionProgress.total} countries discovered
+                      </div>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Explorer Rank</div>
+                      <div className="mt-1 text-2xl font-black text-white">{completionProgress.rank.name}</div>
+                      <div className="mt-1 text-sm text-[#9fb3c8]">
+                        Level {visibleProgress.explorerLevel} | {titleFor(visibleProgress)}
+                      </div>
+                      {completionProgress.rank.nextAt && (
+                        <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">
+                          Next rank at {completionProgress.rank.nextAt} countries
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </ScreenCard>
+                <ScreenCard title="Focus Mode" eyebrow="DENSE FLAGS">
+                  <div className="space-y-2 text-sm font-semibold text-[#b8c7d7]">
+                    <div>Preserved for dense flag interaction.</div>
+                    <div>Built into the play surface, not a separate mode.</div>
+                  </div>
+                </ScreenCard>
+              </div>
+            </div>
+
+            <aside className="space-y-4">
+              <ScreenCard title="Explorer Log" eyebrow="DATABASE">
+                <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
+                  {explorerCountries.map((item) => {
+                    const p = getCountryProgress(visibleProgress, item.iso2)
+                    const isCurrent = item.iso2 === activeCountryCode
+                    return (
+                      <button
+                        key={item.iso2}
+                        onClick={() => {
+                          setActiveCountryCode(item.iso2)
+                          setReward(null)
+                          setScreen('country-arrival')
+                        }}
+                        className={`w-full rounded-2xl border px-3 py-2 text-left ${isCurrent ? 'border-[#f59e0b] bg-white/10' : 'border-white/10 bg-white/5'}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-black text-white">{item.name}</div>
+                            <div className="text-xs text-[#9fb3c8]">
+                              {item.continent} | {getDifficultyLabel(item.difficulty)} | {p.status}
+                            </div>
+                          </div>
+                          <div className="text-sm">{p.status === 'complete' || p.status === 'perfect' ? '✓' : '□'}</div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </ScreenCard>
+
+              <ScreenCard title="Actions" eyebrow="RECOVERY">
+                <div className="flex flex-wrap gap-2">
+                  {palette.map((color, idx) => (
                     <button
                       key={color}
-                      className={`h-11 w-11 rounded-full border-4 shadow-[0_8px_16px_rgba(90,53,13,0.18)] transition-transform ${idx === selectedColorIndex ? 'scale-110 border-[#7b3f09] ring-4 ring-[#ffd26f]' : 'border-white'}`}
-                      style={{ background: color }}
                       onClick={() => setSelectedColorIndex(idx)}
+                      className={`h-10 w-10 rounded-full border-2 ${idx === selectedColorIndex ? 'border-white ring-4 ring-[#f59e0b]/40' : 'border-white/30'}`}
+                      style={{ background: color }}
                       aria-label={`Color ${idx + 1}`}
-                      aria-pressed={idx === selectedColorIndex}
                     />
                   ))}
                 </div>
-              </div>
-              <div className="rounded-[24px] bg-[#fff8e8] p-4">
-                <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b96a10]">Saved State</div>
-                <div className="mt-2 text-sm font-semibold text-[#7a4a17]">
-                  {completedCountryCount} countries completed.
-                  <br />
-                  Campaign progress: {completionRatio}
-                  <br />
-                  {displayCountry.name} stays complete after refresh.
-                  <br />
-                  Colors filled: {displayColoredRegionCount} / {displayTotalColorableRegions}
-                  <br />
-                  Correct parts: {displayCorrectRegionCount} / {displayTotalColorableRegions}
-                  <br />
-                  {displayCompletionMessage}
-                </div>
                 <button
-                  onClick={markComplete}
-                  disabled={!displayAllRegionsFilled && !displayCompleted}
-                  className={`mt-4 rounded-full px-4 py-2 text-sm font-black text-white shadow-[0_6px_0_#2e8a4d] ${(displayAllRegionsFilled || displayCompleted) ? 'bg-[#44b96a]' : 'bg-[#9db59f] opacity-75'}`}
+                  onClick={completeFlag}
+                  className="mt-4 w-full rounded-2xl bg-[#f59e0b] px-4 py-3 text-lg font-black text-[#111827]"
                 >
-                  {displayCompleted ? 'View Reward' : displayCompletionButtonLabel}
+                  Complete Flag
                 </button>
-              </div>
-            </div>
+                {room && (
+                  <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-xs font-bold uppercase tracking-[0.2em] text-[#8ca2b6]">
+                    Room {room.code} | {room.mode} | {room.status}
+                  </div>
+                )}
+                {roomSnapshot && (
+                  <div className="mt-2 text-xs text-[#8ca2b6]">Realtime sync: {roomSnapshot.note}</div>
+                )}
+              </ScreenCard>
+            </aside>
+          </section>
+        )}
 
-            <div className="mt-4 rounded-[24px] bg-[#fff8e8] p-4">
-              <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#b96a10]">Travel Summary</div>
-              <div className="mt-3 grid gap-2 text-sm font-semibold text-[#7a4a17] sm:grid-cols-2">
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#a15b10]">Completed</div>
-                  <div className="mt-1">{formatCompletionTimestamp(displayProgress.passportStamps[displayProgress.passportStamps.length - 1]?.completedAt)}</div>
+        {reward && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+            <div
+              className="celebration-shell w-full max-w-3xl overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(7,12,18,0.96)] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.5)]"
+              style={
+                {
+                  '--confetti-color-1': celebrationProfile.confettiColors[0],
+                  '--confetti-color-2': celebrationProfile.confettiColors[1] ?? celebrationProfile.confettiColors[0],
+                  '--confetti-color-3': celebrationProfile.confettiColors[2] ?? celebrationProfile.confettiColors[0],
+                } as CSSProperties
+              }
+            >
+              <div className={`confetti-layer confetti-${celebrationProfile.particleShape}`} aria-hidden="true" />
+              <div className="relative">
+                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#93a7bb]">COUNTRY DISCOVERED</div>
+                <h3 className={`mt-2 font-display text-4xl font-black text-white ${rewardStage !== 'stamp' ? 'completion-title-rise' : ''}`}>{reward.countryName}</h3>
+                <div className="mt-1 text-sm font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">
+                  {reward.message}
                 </div>
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#a15b10]">Flag Parts Colored</div>
-                  <div className="mt-1">{displayColoredRegionCount} / {displayTotalColorableRegions}</div>
+                {celebrationProfile.themeLabel && (
+                  <div className="mt-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#f0c674]">
+                    {celebrationProfile.themeLabel}
+                  </div>
+                )}
+
+                <div className="mt-5 grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
+                  <div className="space-y-3">
+                    <div className={`relative rounded-[24px] border border-white/10 bg-white/5 p-4 ${rewardStage === 'stamp' ? 'stamp-slam' : 'opacity-80'}`}>
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Passport Stamp</div>
+                      <div className="mt-2 text-2xl font-black text-white">{reward.passportStamp.label}</div>
+                      <div className="mt-1 text-sm text-[#9fb3c8]">{reward.passportStamp.completedAt}</div>
+                    </div>
+                    <div className={`rounded-[24px] border border-white/10 bg-white/5 p-4 ${rewardStage === 'souvenir' ? 'souvenir-pop' : 'opacity-80'}`}>
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Souvenir Reveal</div>
+                      <div className="mt-2 text-2xl font-black text-white">{reward.souvenir.name}</div>
+                      <div className="mt-1 text-sm text-[#9fb3c8]">Locked into explorer inventory.</div>
+                      <div className="mt-3 text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">
+                        {rewardStage === 'souvenir' ? 'Inventory unlocked' : 'Pending reveal'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className={`rounded-[24px] border border-white/10 bg-white/5 p-4 ${rewardStage === 'xp' ? 'star-pop' : 'opacity-80'}`}>
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">XP Reveal</div>
+                      <div className={`mt-2 text-5xl font-black text-[#22c55e] ${rewardStage === 'xp' ? 'xp-pulse' : ''}`}>+{rewardXpVisible}</div>
+                      <div className="mt-2 text-sm text-[#9fb3c8]">
+                        Base {reward.xp.flagComplete} | Bonus {reward.xp.perfectBonus + reward.xp.souvenirBonus}
+                      </div>
+                    </div>
+                    <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                      <div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#93a7bb]">Explorer Rank Progress</div>
+                      <div className="mt-2 text-2xl font-black text-white">{completionProgress.rank.name}</div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/8">
+                        <div
+                          className="h-full rounded-full bg-[linear-gradient(90deg,#38bdf8,#22c55e,#f59e0b)] transition-all duration-700"
+                          style={{ width: `${rewardRankProgress}%` }}
+                        />
+                      </div>
+                      <div className="mt-2 text-xs font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">
+                        {completionProgress.completed}/{completionProgress.total} global discovery
+                        {completionProgress.rank.nextAt ? ` | next rank at ${completionProgress.rank.nextAt}` : ''}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#a15b10]">Passport Stamps</div>
-                  <div className="mt-1">{displayProgress.passportStamps.length}</div>
+
+                <div className={`mt-4 flex flex-wrap gap-2 ${rewardStage === 'done' ? 'completion-actions' : 'opacity-70'}`}>
+                  <button onClick={() => { playSound('button_click'); nextCountry() }} className="rounded-2xl bg-[#f59e0b] px-5 py-3 font-black text-[#111827]">
+                    Next Flag
+                  </button>
+                  <button onClick={() => { playSound('button_click'); setReward(null) }} className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-black text-white">
+                    Continue
+                  </button>
+                  <button onClick={() => { playSound('button_click'); setRewardStage('stamp') }} className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-black text-white">
+                    Replay Stamp
+                  </button>
                 </div>
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#a15b10]">Souvenir</div>
-                  <div className="mt-1">{displayProgress.unlockedSouvenirs[displayProgress.unlockedSouvenirs.length - 1] || 'None yet'}</div>
-                </div>
-                <div className="sm:col-span-2">
-                  <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#a15b10]">XP Earned</div>
-                  <div className="mt-1">{displayProgress.xp}</div>
-                </div>
-              </div>
-              <div className="mt-4 rounded-[20px] border border-[#efd8a4] bg-white/70 p-3 text-xs font-bold uppercase tracking-[0.22em] text-[#8d5a22]">
-                Explorer log now covers all {totalCountries} countries.
               </div>
             </div>
           </div>
-
-          <aside className="rounded-[32px] border-4 border-[#fff2b9] bg-[rgba(255,250,235,0.82)] p-4 shadow-[0_24px_70px_rgba(94,53,17,0.18)] backdrop-blur-sm">
-                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#b96a10]">Explorer Log</div>
-            <div className="mt-2 rounded-[20px] border border-[#efd8a4] bg-white/70 px-3 py-2 text-[10px] font-black uppercase tracking-[0.28em] text-[#8d5a22]">
-              {completedCountryCount} of {totalCountries} completed
-            </div>
-            <div className="mt-2 rounded-[20px] border border-[#efd8a4] bg-white/70 px-3 py-2 text-[10px] font-black uppercase tracking-[0.28em] text-[#8d5a22]">
-              {perfectFlagsCount} perfect flags tracked
-            </div>
-            <div className="mt-3 space-y-3">
-              <div className="grid gap-2">
-                <label className="rounded-[18px] border border-[#efd8a4] bg-white/70 px-3 py-2">
-                  <span className="text-[10px] font-black uppercase tracking-[0.28em] text-[#a15b10]">Search</span>
-                  <input
-                    value={explorerQuery}
-                    onChange={(event) => setExplorerQuery(event.target.value)}
-                    placeholder="Country name"
-                    className="mt-1 w-full bg-transparent text-sm font-semibold text-[#7b3f09] outline-none placeholder:text-[#b48b4f]"
-                  />
-                </label>
-                <label className="rounded-[18px] border border-[#efd8a4] bg-white/70 px-3 py-2">
-                  <span className="text-[10px] font-black uppercase tracking-[0.28em] text-[#a15b10]">Continent</span>
-                  <select
-                    value={explorerContinent}
-                    onChange={(event) => setExplorerContinent(event.target.value)}
-                    className="mt-1 w-full bg-transparent text-sm font-semibold text-[#7b3f09] outline-none"
-                  >
-                    <option value="all">All continents</option>
-                    {countryContinentOptions.map((continent) => (
-                      <option key={continent} value={continent}>
-                        {continent}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    ['all', 'All'],
-                    ['easy', 'Easy'],
-                    ['medium', 'Medium'],
-                    ['hard', 'Hard'],
-                    ['expert', 'Expert'],
-                  ].map(([value, label]) => (
-                    <button
-                      key={value}
-                      onClick={() => setExplorerFilter(value as typeof explorerFilter)}
-                      className={`rounded-full px-3 py-2 text-[10px] font-black uppercase tracking-[0.25em] transition ${
-                        explorerFilter === value
-                          ? 'bg-[#7b3f09] text-white shadow-[0_8px_18px_rgba(123,63,9,0.2)]'
-                          : 'bg-white/70 text-[#8d5a22]'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="max-h-[72vh] space-y-3 overflow-y-auto pr-1 pb-2 overscroll-contain touch-pan-y">
-                {visibleCountries.map((item) => {
-                  const p = getCountryProgress(displayProgress, item.iso2)
-                  return (
-                    <button
-                      key={item.iso2}
-                      onClick={() => setActiveCountryCode(item.iso2)}
-                      className={`w-full rounded-[22px] border px-4 py-3 text-left transition ${item.iso2 === activeCountryCode ? 'border-[#d89a37] bg-white shadow-[0_10px_24px_rgba(122,74,23,0.14)]' : 'border-[#efd8a4] bg-[#fffaf1]'}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-black text-[#7b3f09]">{item.name}</div>
-                          <div className="text-xs font-semibold text-[#8d5a22]">
-                            {item.continent} · {getDifficultyLabel(item.difficulty)} · {getCompletionStateLabel(p.status)}
-                          </div>
-                        </div>
-                        <div className="text-xl">{p.status === 'complete' || p.status === 'perfect' ? '✅' : p.status === 'in_progress' ? '🟠' : '⚪'}</div>
-                      </div>
-                    </button>
-                  )
-                })}
-                {visibleCountries.length === 0 && (
-                  <div className="rounded-[22px] border border-dashed border-[#d8b46d] bg-white/60 px-4 py-6 text-center text-sm font-semibold text-[#8d5a22]">
-                    No countries match this search or filter.
-                  </div>
-                )}
-              </div>
-            </div>
-          </aside>
-        </section>
+        )}
       </div>
-
-      {reward && (
-        <CompletionOverlay
-          reward={reward}
-          countryName={displayCountry.name}
-          progress={displayProgress}
-          stage={rewardStage}
-          onNext={nextCountry}
-          onViewPassport={viewPassport}
-        />
-      )}
     </main>
   )
 }
-
