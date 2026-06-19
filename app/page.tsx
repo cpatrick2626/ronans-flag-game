@@ -6,6 +6,7 @@ import { completeCountry, getCountryProgress, loadFlagProgress } from '../public
 
 type Screen = 'loading' | 'home' | 'country-arrival' | 'play' | 'create-room' | 'join-room' | 'waiting-room' | 'coop' | 'versus'
 type Mode = 'solo' | 'coop' | 'versus'
+type ChallengeDifficulty = 'easy' | 'medium' | 'hard' | 'expert'
 type RewardStage = 'stamp' | 'souvenir' | 'stars' | 'xp' | 'done'
 type CompletionSoundHook = 'button_click' | 'correct_fill' | 'wrong_fill' | 'stamp_thump' | 'country_complete' | 'arrival_theme' | 'home_theme' | 'victory_default' | 'victory_france' | 'victory_japan' | 'victory_brazil' | 'victory_egypt'
 type CelebrationProfile = { confettiColors: string[]; particleShape: 'dot' | 'petal' | 'diamond'; soundHook: CompletionSoundHook; themeLabel?: string }
@@ -17,6 +18,7 @@ type RoomSnapshot = { room: RoomState; note: string }
 const PLAYER_NAME_KEY = 'ronan_flag_player_name'
 const PLAYER_NAME_CONFIRMED_KEY = 'ronan_flag_player_name_confirmed'
 const ACTIVE_MODE_KEY = 'ronan_flag_active_mode'
+const CHALLENGE_DIFFICULTY_KEY = 'ronan_flag_challenge_difficulty'
 const ACTIVE_COUNTRY_KEY = 'flag_game_v1_active_country'
 const ROOM_STORAGE_KEY = 'ronan_flag_room'
 const ROOM_CHANNEL = 'ronan-flag-room-sync'
@@ -95,7 +97,121 @@ function formatPercent(value: number) {
 function useRoomChannel(onSnapshot: (room: RoomState) => void) { const channelRef = useRef<BroadcastChannel | null>(null); useEffect(() => { if (typeof window === 'undefined') return; const onStorage = (event: StorageEvent) => { if (event.key !== ROOM_STORAGE_KEY || !event.newValue) return; try { onSnapshot(JSON.parse(event.newValue) as RoomState) } catch {} }; window.addEventListener('storage', onStorage); if ('BroadcastChannel' in window) { const channel = new BroadcastChannel(ROOM_CHANNEL); channel.onmessage = (event) => { const payload = event.data as RoomSnapshot | null; if (payload?.room) onSnapshot(payload.room) }; channelRef.current = channel } return () => { window.removeEventListener('storage', onStorage); channelRef.current?.close() } }, [onSnapshot]); return channelRef }
 function AtmosphereBackdrop() { return <div className="pointer-events-none absolute inset-0 overflow-hidden"><div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.62)_0%,_rgba(255,255,255,0.20)_26%,_rgba(142,213,255,0.00)_58%)]" /><div className="absolute inset-x-0 bottom-0 h-[42%] bg-[linear-gradient(180deg,rgba(255,240,204,0)_0%,rgba(246,213,143,0.50)_55%,rgba(231,183,105,0.96)_100%)]" /><div className="absolute left-1/2 top-[16%] h-40 w-40 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.94)_0%,_rgba(255,255,255,0.58)_42%,_rgba(255,255,255,0)_72%)] blur-[2px]" /></div> }
 
+function FlagColorSelectScreen({
+  selectedMode,
+  selectedDifficulty,
+  onSelectMode,
+  onSelectDifficulty,
+  onBack,
+  onPlaySolo,
+}: {
+  selectedMode: Mode
+  selectedDifficulty: ChallengeDifficulty
+  onSelectMode: (mode: Mode) => void
+  onSelectDifficulty: (difficulty: ChallengeDifficulty) => void
+  onBack: () => void
+  onPlaySolo: () => void
+}) {
+  const sparkleTimerRef = useRef<number | null>(null)
+  const [sparkle, setSparkle] = useState<{ key: string; x: number; y: number } | null>(null)
+
+  function triggerSparkle(key: string, x: number, y: number) {
+    if (sparkleTimerRef.current) window.clearTimeout(sparkleTimerRef.current)
+    setSparkle({ key, x, y })
+    sparkleTimerRef.current = window.setTimeout(() => setSparkle(null), 260)
+  }
+
+  useEffect(() => () => { if (sparkleTimerRef.current) window.clearTimeout(sparkleTimerRef.current) }, [])
+
+  const modeHitboxes = [
+    { label: 'PLAY SOLO', x: 50, y: 54, w: 66, h: 10, mode: 'solo' as const, action: onPlaySolo },
+    { label: 'TEAM UP CO-OP', x: 50, y: 66, w: 70, h: 10, mode: 'coop' as const, action: () => onSelectMode('coop') },
+    { label: 'HEAD TO HEAD BATTLE', x: 50, y: 78, w: 76, h: 10, mode: 'versus' as const, action: () => onSelectMode('versus') },
+  ]
+
+  const difficultyHitboxes = [
+    { label: 'Easy', x: 18, y: 84, w: 17, h: 9, difficulty: 'easy' as const },
+    { label: 'Medium', x: 39, y: 84, w: 19, h: 9, difficulty: 'medium' as const },
+    { label: 'Hard', x: 61, y: 84, w: 17, h: 9, difficulty: 'hard' as const },
+    { label: 'Expert', x: 82, y: 84, w: 17, h: 9, difficulty: 'expert' as const },
+  ]
+
+  return (
+    <section className="flag-select-screen" aria-label="Flag Color Challenge menu">
+      <div className="flag-select-shell">
+        <div className="flag-select-frame">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="flag-select-video"
+            src="/assets/flag-color/flag-color-select-screen.mp4"
+          />
+          <button
+            type="button"
+            className="flag-select-hitbox flag-select-back-hitbox"
+            aria-label="Back"
+            onClick={() => { triggerSparkle('back', 50, 12); onBack() }}
+          />
+          {modeHitboxes.map((hitbox) => {
+            const active = selectedMode === hitbox.mode
+            return (
+              <button
+                key={hitbox.label}
+                type="button"
+                aria-label={hitbox.label}
+                aria-pressed={active}
+                className={`flag-select-hitbox ${active ? 'is-active' : ''}`}
+                style={{ left: `${hitbox.x}%`, top: `${hitbox.y}%`, width: `${hitbox.w}%`, height: `${hitbox.h}%` } as React.CSSProperties}
+                onClick={() => {
+                  triggerSparkle(hitbox.label, hitbox.x, hitbox.y)
+                  hitbox.action()
+                }}
+              />
+            )
+          })}
+          {difficultyHitboxes.map((hitbox) => {
+            const active = selectedDifficulty === hitbox.difficulty
+            return (
+              <button
+                key={hitbox.label}
+                type="button"
+                aria-label={hitbox.label}
+                aria-pressed={active}
+                className={`flag-select-hitbox flag-select-difficulty-hitbox ${active ? 'is-active' : ''}`}
+                style={{ left: `${hitbox.x}%`, top: `${hitbox.y}%`, width: `${hitbox.w}%`, height: `${hitbox.h}%` } as React.CSSProperties}
+                onClick={() => {
+                  triggerSparkle(hitbox.label, hitbox.x, hitbox.y)
+                  onSelectDifficulty(hitbox.difficulty)
+                }}
+              />
+            )
+          })}
+          {sparkle && (
+            <span
+              className="flag-select-sparkle"
+              style={{ left: `${sparkle.x}%`, top: `${sparkle.y}%` } as React.CSSProperties}
+              aria-hidden="true"
+            />
+          )}
+        </div>
+      </div>
+      <div className="flag-select-side-gap" aria-hidden="true" />
+    </section>
+  )
+}
+
 function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean }) {
+  const playLockRef = useRef(false)
+
+  function handlePlayTrigger(event: React.SyntheticEvent) {
+    event.preventDefault()
+    if (playLockRef.current) return
+    playLockRef.current = true
+    onPlay()
+  }
+
   return (
     <div
       className={`intro-screen-container ${exiting ? 'intro-screen-exiting' : ''}`}
@@ -121,7 +237,11 @@ function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean
           />
           <button
             type="button"
-            onClick={onPlay}
+            onPointerDown={handlePlayTrigger}
+            onClick={handlePlayTrigger}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') handlePlayTrigger(event)
+            }}
             className="intro-play-hitbox"
             aria-label="Play Ronan's Flag Game"
           />
@@ -265,6 +385,7 @@ export default function FlagGamePage() {
   const [screen, setScreen] = useState<Screen>('loading')
   const [playerName, setPlayerName] = useState('Ronan')
   const [mode, setMode] = useState<Mode>('solo')
+  const [challengeDifficulty, setChallengeDifficulty] = useState<ChallengeDifficulty>('easy')
   const [progress, setProgress] = useState(() => loadFlagProgress())
   const [activeCountryCode, setActiveCountryCode] = useState('FR')
   const [playerNameConfirmed, setPlayerNameConfirmed] = useState(false)
@@ -319,7 +440,7 @@ export default function FlagGamePage() {
     { code: '??', label: 'Mystery', x: '86%', y: '27%', tone: 'pin-mystery' },
   ]
 
-  useEffect(() => { const storedProgress = loadFlagProgress(); setProgress(storedProgress); setActiveCountryCode(getInitialCountry()); setPlayerName(safeStorageGet(PLAYER_NAME_KEY) ?? 'Ronan'); setPlayerNameConfirmed(safeStorageGet(PLAYER_NAME_CONFIRMED_KEY) === 'true'); setMode((safeStorageGet(ACTIVE_MODE_KEY) as Mode | null) ?? 'solo'); setRoom(loadRoom()); setClientReady(true) }, [])
+  useEffect(() => { const storedProgress = loadFlagProgress(); setProgress(storedProgress); setActiveCountryCode(getInitialCountry()); setPlayerName(safeStorageGet(PLAYER_NAME_KEY) ?? 'Ronan'); setPlayerNameConfirmed(safeStorageGet(PLAYER_NAME_CONFIRMED_KEY) === 'true'); setMode((safeStorageGet(ACTIVE_MODE_KEY) as Mode | null) ?? 'solo'); setChallengeDifficulty((safeStorageGet(CHALLENGE_DIFFICULTY_KEY) as ChallengeDifficulty | null) ?? 'easy'); setRoom(loadRoom()); setClientReady(true) }, [])
   useEffect(() => { safeStorageSet(PLAYER_NAME_KEY, playerName) }, [playerName])
   useEffect(() => { safeStorageSet(PLAYER_NAME_CONFIRMED_KEY, String(playerNameConfirmed)) }, [playerNameConfirmed])
   useEffect(() => { safeStorageSet(ACTIVE_MODE_KEY, mode) }, [mode])
@@ -404,12 +525,35 @@ export default function FlagGamePage() {
                 <button aria-label="Passport nav" className="reference-hitbox" style={{ left: '50%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} onClick={() => setShowExplorerLog(true)} />
                 <button aria-label="Collections nav" className="reference-hitbox" style={{ left: '70%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} />
                 <button aria-label="Settings nav" className="reference-hitbox" style={{ left: '90%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} />
+                <button aria-label="Flag Color Challenge" className="reference-hitbox" style={{ left: '50%', top: '50%', width: '42%', height: '18%' } as React.CSSProperties} onClick={() => setScreen('play')} />
 
                 {/* Star / profile */}
                 <button aria-label="Star button" className="reference-hitbox" style={{ left: '88%', top: '10%', width: '8%', height: '8%' } as React.CSSProperties} />
               </div>
             </div>
           </section>
+        )}
+
+        {screen === 'play' && (
+          <FlagColorSelectScreen
+            selectedMode={mode}
+            selectedDifficulty={challengeDifficulty}
+            onSelectMode={(nextMode) => {
+              setMode(nextMode)
+              safeStorageSet(ACTIVE_MODE_KEY, nextMode)
+            }}
+            onSelectDifficulty={(nextDifficulty) => {
+              setChallengeDifficulty(nextDifficulty)
+              safeStorageSet(CHALLENGE_DIFFICULTY_KEY, nextDifficulty)
+            }}
+            onBack={() => setScreen('home')}
+            onPlaySolo={() => {
+              setMode('solo')
+              safeStorageSet(ACTIVE_MODE_KEY, 'solo')
+              safeStorageSet(CHALLENGE_DIFFICULTY_KEY, challengeDifficulty)
+              startSolo()
+            }}
+          />
         )}
 
         {(screen === 'country-arrival' || screen === 'play' || screen === 'coop' || screen === 'versus') && (
