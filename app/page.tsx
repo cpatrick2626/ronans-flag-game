@@ -94,20 +94,27 @@ function formatPercent(value: number) {
 function useRoomChannel(onSnapshot: (room: RoomState) => void) { const channelRef = useRef<BroadcastChannel | null>(null); useEffect(() => { if (typeof window === 'undefined') return; const onStorage = (event: StorageEvent) => { if (event.key !== ROOM_STORAGE_KEY || !event.newValue) return; try { onSnapshot(JSON.parse(event.newValue) as RoomState) } catch {} }; window.addEventListener('storage', onStorage); if ('BroadcastChannel' in window) { const channel = new BroadcastChannel(ROOM_CHANNEL); channel.onmessage = (event) => { const payload = event.data as RoomSnapshot | null; if (payload?.room) onSnapshot(payload.room) }; channelRef.current = channel } return () => { window.removeEventListener('storage', onStorage); channelRef.current?.close() } }, [onSnapshot]); return channelRef }
 function AtmosphereBackdrop() { return <div className="pointer-events-none absolute inset-0 overflow-hidden"><div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.62)_0%,_rgba(255,255,255,0.20)_26%,_rgba(142,213,255,0.00)_58%)]" /><div className="absolute inset-x-0 bottom-0 h-[42%] bg-[linear-gradient(180deg,rgba(255,240,204,0)_0%,rgba(246,213,143,0.50)_55%,rgba(231,183,105,0.96)_100%)]" /><div className="absolute left-1/2 top-[16%] h-40 w-40 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.94)_0%,_rgba(255,255,255,0.58)_42%,_rgba(255,255,255,0)_72%)] blur-[2px]" /></div> }
 
-function LoadingScreen() {
+function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean }) {
   return (
-    <div className="loading-screen-container">
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="loading-screen-video"
-        src="/assets/loading/ronans-loading-screen.mp4"
-      />
-      <div className="loading-screen-overlay">
-        <div className="loading-shimmer" />
-        <div className="loading-text">Preparing your adventure…</div>
+    <div className={`intro-screen-container ${exiting ? 'intro-screen-exiting' : ''}`}>
+      <div className="intro-screen-video-shell">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="intro-screen-video"
+          src="/assets/loading/ronans-loading-screen.mp4"
+        />
+      </div>
+      <div className="intro-screen-overlay">
+        <div className="intro-screen-vignette" />
+        <div className="intro-screen-cta">
+          <button onClick={onPlay} className="intro-play-button">
+            <span className="intro-play-label">PLAY</span>
+            <span className="intro-play-subtitle">Tap to Start</span>
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -214,6 +221,7 @@ export default function FlagGamePage() {
   const [colorState, setColorState] = useState<Record<string, Record<string, number>>>({})
   const [paintFeedback, setPaintFeedback] = useState<Record<string, PaintFeedback>>({})
   const [showExplorerLog, setShowExplorerLog] = useState(false)
+  const [introExiting, setIntroExiting] = useState(false)
   const timersRef = useRef<number[]>([])
   const channelRef = useRoomChannel((nextRoom) => setRoom((current) => (current && current.updatedAt > nextRoom.updatedAt ? current : nextRoom)))
   const { playSound } = useSoundHooks()
@@ -260,11 +268,11 @@ export default function FlagGamePage() {
     timersRef.current.push(window.setTimeout(() => setRewardStage('done'), 2140))
   }, [reward, completionProgress.percent])
 
-  useEffect(() => {
-    if (screen !== 'loading') return
-    const timer = window.setTimeout(() => setScreen('player-entry'), 3200)
-    return () => window.clearTimeout(timer)
-  }, [screen])
+  function beginIntroExit() {
+    if (screen !== 'loading' || introExiting) return
+    setIntroExiting(true)
+    window.setTimeout(() => setScreen('player-entry'), 420)
+  }
 
   function updateRoom(nextRoom: RoomState, note: RoomSnapshot['note'], nextScreen?: Screen) { setRoom(nextRoom); setRoomSnapshot({ room: nextRoom, note }); if (nextScreen) setScreen(nextScreen) }
   function enterGame() { playSound('home_theme'); setScreen('home') }
@@ -283,70 +291,83 @@ export default function FlagGamePage() {
       <AtmosphereBackdrop />
       <div className="absolute inset-x-0 bottom-0 h-[30vh] bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,rgba(94,144,82,0.18)_40%,rgba(53,100,55,0.82)_100%)]" />
       <div className="absolute inset-x-0 bottom-[10%] flex justify-center"><div className="h-40 w-[92vw] max-w-6xl rounded-full bg-[radial-gradient(circle,_rgba(92,59,27,0.26)_0%,_rgba(92,59,27,0.20)_42%,_rgba(92,59,27,0)_72%)] blur-3xl" /></div>
-      {screen === 'loading' && <LoadingScreen />}
+      {screen === 'loading' && <IntroScreen onPlay={beginIntroExit} exiting={introExiting} />}
       <div className="relative mx-auto flex min-h-screen w-full flex-col px-4 py-4 md:px-6 md:py-6">
         {screen === 'home' && (
           <section className="relative flex min-h-0 flex-1 flex-col">
-            <div className="home-world-shell relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[32px] border border-white/20 p-4 shadow-[0_30px_100px_rgba(33,47,71,0.18)] md:p-5">
+            <div className="home-world-shell relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[32px] border border-white/18 p-4 shadow-[0_34px_110px_rgba(18,27,44,0.26)] md:p-5">
               <div className="home-world-atmosphere pointer-events-none absolute inset-0" aria-hidden="true">
                 <div className="home-cloud home-cloud-a" />
                 <div className="home-cloud home-cloud-b" />
                 <div className="home-cloud home-cloud-c" />
+                <div className="home-orbit home-orbit-a" />
+                <div className="home-orbit home-orbit-b" />
+                <div className="home-stars" />
                 <div className="home-rays" />
                 <div className="home-vignette" />
               </div>
 
-              <header className="relative z-10 grid gap-3 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_auto]">
-                <div className="explorer-panel flex items-center gap-3 rounded-[24px] px-4 py-3">
-                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/40 bg-[radial-gradient(circle_at_30%_28%,#fffaf0_0%,#d7f0ff_30%,#7fc0ef_62%,#325f99_100%)] shadow-[0_18px_38px_rgba(31,54,78,0.18)]">
+              <header className="relative z-10 flex flex-wrap items-center justify-between gap-3">
+                <div className="explorer-panel flex items-center gap-3 rounded-[24px] px-4 py-3 text-[#5a3a18]">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/34 bg-[radial-gradient(circle_at_30%_28%,#fffaf0_0%,#d7f0ff_30%,#7fc0ef_62%,#325f99_100%)] shadow-[0_18px_38px_rgba(8,19,34,0.24)]">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_65%_35%,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.24)_22%,rgba(255,255,255,0)_58%)]" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#57708a]">Explorer</div>
-                    <div className="truncate font-display text-[clamp(1.5rem,3vw,2.35rem)] font-black text-[#1c3554]">{playerName}</div>
-                    <div className="mt-1 text-sm font-semibold text-[#5f758b]">Passport route commander</div>
+                    <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Explorer</div>
+                    <div className="truncate font-display text-[clamp(1.5rem,3vw,2.35rem)] font-black text-[#4e3015]">{playerName}</div>
+                    <div className="mt-1 text-sm font-semibold text-[#7a5a32]">Passport route commander</div>
                   </div>
                 </div>
 
-                <div className="explorer-panel grid gap-2 rounded-[24px] px-4 py-3 text-[#17324e]">
+                <div className="explorer-panel grid min-w-[min(100%,24rem)] gap-2 rounded-[24px] px-4 py-3 text-[#4e3015]">
                   <div className="flex items-end justify-between gap-3">
                     <div>
-                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#57708a]">Explorer Level</div>
-                      <div className="mt-1 font-display text-[clamp(1.25rem,2vw,1.75rem)] font-black">{explorerTitle}</div>
+                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Explorer Level</div>
+                      <div className="mt-1 font-display text-[clamp(1.25rem,2vw,1.75rem)] font-black text-[#4e3015]">{explorerTitle}</div>
                     </div>
-                    <div className="rounded-full bg-white/70 px-3 py-1 text-[11px] font-black uppercase tracking-[0.28em] text-[#17345a]">Lv {visibleProgress.explorerLevel}</div>
+                    <div className="rounded-full border border-[#c28d45]/30 bg-[#fff6df] px-3 py-1 text-[11px] font-black uppercase tracking-[0.28em] text-[#6a421c]">Lv {visibleProgress.explorerLevel}</div>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-white/60">
+                  <div className="h-2 overflow-hidden rounded-full bg-[#eed8aa]">
                     <div className="h-full rounded-full bg-[linear-gradient(90deg,#f5c84a,#7fdfb0,#7bc7ff)] transition-all duration-500" style={{ width: formatPercent(Math.max(12, Math.min(100, completionProgress.percent))) }} />
                   </div>
-                  <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.22em] text-[#5f7488]">
+                  <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.22em] text-[#7a5a32]">
                     <span>{visibleProgress.xp} XP</span>
                     <span>{completionProgress.percent}% route mastery</span>
                   </div>
                 </div>
 
-                <button onClick={() => setScreen('player-entry')} className="explorer-chip justify-self-start rounded-full px-4 py-3 text-[11px] font-black uppercase tracking-[0.36em] text-[#1f3550]">
+                <button onClick={() => setScreen('player-entry')} className="explorer-chip justify-self-start rounded-full px-4 py-3 text-[11px] font-black uppercase tracking-[0.36em] text-[#5a3a18]">
                   Settings
                 </button>
               </header>
 
-              <div className="relative z-10 mt-4 grid flex-1 gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.55fr)]">
-                <div className="relative overflow-hidden rounded-[30px] border border-white/18 bg-[linear-gradient(180deg,rgba(255,250,237,0.44)_0%,rgba(201,230,255,0.18)_20%,rgba(95,147,193,0.10)_50%,rgba(49,89,126,0.18)_100%)] shadow-[0_26px_70px_rgba(28,56,86,0.16)]">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(255,255,255,0.58)_0%,rgba(255,255,255,0.12)_26%,rgba(255,255,255,0)_48%)]" />
-                  <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(255,255,255,0)_100%)]" />
-                  <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,rgba(101,148,99,0.14)_45%,rgba(54,92,68,0.26)_100%)]" />
-
-                  <div className="absolute inset-x-0 top-6 flex justify-center">
-                    <div className="rounded-full border border-white/30 bg-white/20 px-4 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-white/90 backdrop-blur">
+              <div className="relative z-10 mt-4 grid flex-1 gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(270px,0.55fr)]">
+                <div className="globe-stage relative overflow-hidden rounded-[34px] border border-white/12 shadow-[0_30px_90px_rgba(4,11,23,0.38)]">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.08)_18%,rgba(255,255,255,0)_42%)]" />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,17,30,0.04)_0%,rgba(10,17,30,0.18)_52%,rgba(12,26,41,0.42)_100%)]" />
+                  <div className="absolute inset-x-0 top-5 flex justify-center">
+                    <div className="rounded-full border border-[#d8b56f]/32 bg-[#fff3d5]/72 px-4 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-[#6a4419] backdrop-blur">
                       World Explorer Map
                     </div>
                   </div>
 
-                  <div className="relative flex h-full min-h-[32rem] items-center justify-center p-4 sm:min-h-[38rem] md:p-6">
-                    <div className="relative h-[min(76vw,42rem)] w-[min(76vw,42rem)] max-w-full">
-                      <div className="absolute inset-[4%] rounded-full bg-[radial-gradient(circle_at_38%_32%,rgba(255,255,255,0.34)_0%,rgba(255,255,255,0.14)_22%,rgba(108,169,209,0.22)_48%,rgba(34,72,108,0.26)_74%,rgba(19,39,66,0.86)_100%)] blur-[1px]" />
-                      <div className="absolute inset-[8%] rounded-full border border-white/20 bg-[radial-gradient(circle_at_36%_30%,rgba(255,255,255,0.88)_0%,rgba(153,213,244,0.84)_16%,rgba(71,129,176,0.84)_46%,rgba(24,50,84,0.98)_100%)] shadow-[inset_0_0_50px_rgba(255,255,255,0.12),0_36px_70px_rgba(16,38,66,0.28)]" />
-                      <div className="absolute inset-[11%] rounded-full bg-[radial-gradient(circle_at_50%_46%,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0)_30%)]" />
+                  <div className="absolute inset-x-6 top-16 flex items-center justify-between">
+                    <div className="rounded-full border border-[#d8b56f]/28 bg-[#fff6df]/72 px-3 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-[#7a521d] backdrop-blur">
+                      Live Globe
+                    </div>
+                    <div className="rounded-full border border-[#d8b56f]/28 bg-[#fff6df]/72 px-3 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-[#7a521d] backdrop-blur">
+                      Tap a pin
+                    </div>
+                  </div>
+
+                  <div className="relative flex h-full min-h-[32rem] items-center justify-center p-4 sm:min-h-[39rem] md:p-6">
+                    <div className="globe-shell relative h-[min(78vw,44rem)] w-[min(78vw,44rem)] max-w-full">
+                      <div className="globe-halo absolute inset-[0%] rounded-full" />
+                      <div className="absolute inset-[4%] rounded-full bg-[radial-gradient(circle_at_38%_32%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.08)_22%,rgba(108,169,209,0.14)_48%,rgba(34,72,108,0.24)_74%,rgba(16,31,53,0.94)_100%)] blur-[1px]" />
+                      <div className="absolute inset-[7%] rounded-full border border-white/18 bg-[radial-gradient(circle_at_36%_30%,rgba(255,250,235,0.96)_0%,rgba(243,205,133,0.88)_18%,rgba(205,142,66,0.82)_48%,rgba(88,53,21,0.98)_100%)] shadow-[inset_0_0_60px_rgba(255,255,255,0.12),0_40px_90px_rgba(90,53,18,0.34)]" />
+                      <div className="absolute inset-[10%] rounded-full bg-[radial-gradient(circle_at_50%_42%,rgba(255,246,214,0.22)_0%,rgba(255,246,214,0)_30%)]" />
+                      <div className="absolute inset-[14%] rounded-full border border-white/10" />
+                      <div className="absolute inset-[18%] rounded-full border border-white/8" />
 
                       <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full overflow-visible">
                         <defs>
@@ -373,7 +394,7 @@ export default function FlagGamePage() {
                             <stop offset="100%" stopColor="#9eb5c8" />
                           </linearGradient>
                         </defs>
-                        <circle cx="50" cy="50" r="38" fill="rgba(18,44,79,0.3)" />
+                        <circle cx="50" cy="50" r="38" fill="rgba(91,55,22,0.18)" />
                         <circle cx="50" cy="50" r="38" fill="url(#world-glow)" />
                         <ellipse cx="50" cy="50" rx="35" ry="18" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="0.6" />
                         <ellipse cx="50" cy="50" rx="24" ry="38" fill="none" stroke="rgba(255,255,255,0.11)" strokeWidth="0.6" />
@@ -397,10 +418,10 @@ export default function FlagGamePage() {
                         })}
                       </svg>
 
-                      <div className="absolute left-[6%] top-[14%] h-14 w-28 rounded-full bg-white/28 blur-3xl" />
-                      <div className="absolute right-[10%] top-[18%] h-10 w-24 rounded-full bg-amber-100/25 blur-3xl" />
+                      <div className="absolute left-[7%] top-[16%] h-14 w-28 rounded-full bg-[#fff1cb]/34 blur-3xl" />
+                      <div className="absolute right-[11%] top-[20%] h-12 w-28 rounded-full bg-amber-100/24 blur-3xl" />
                       <div className="absolute inset-x-0 bottom-8 flex justify-center">
-                        <div className="rounded-full border border-white/22 bg-white/14 px-4 py-2 text-[10px] font-black uppercase tracking-[0.38em] text-white/92 backdrop-blur">
+                        <div className="rounded-full border border-[#d8b56f]/28 bg-[#fff6df]/76 px-4 py-2 text-[10px] font-black uppercase tracking-[0.38em] text-[#6a421c] backdrop-blur">
                           Tap any country pin to open arrival
                         </div>
                       </div>
@@ -409,43 +430,43 @@ export default function FlagGamePage() {
                 </div>
 
                 <aside className="grid gap-3 self-stretch">
-                  <div className="explorer-card rounded-[26px] p-4 text-[#18314b]">
-                    <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#5d7388]">Next Destination</div>
-                    <div className="mt-2 font-display text-[clamp(1.45rem,2.8vw,2.2rem)] font-black text-[#18314b]">{nextDestination.country.name}</div>
-                    <div className="mt-1 text-sm font-semibold text-[#5d7388]">{nextDestination.country.continent} | {nextDestination.status === 'complete' || nextDestination.status === 'perfect' ? 'Completed route target' : 'Current challenge route'}</div>
-                    <button onClick={() => { setActiveCountryCode(nextDestination.country.iso2); setScreen('country-arrival') }} className="mt-4 rounded-full bg-[#f5c84a] px-4 py-3 text-[11px] font-black uppercase tracking-[0.32em] text-[#17345a] shadow-[0_12px_24px_rgba(192,145,29,0.18)]">
+                  <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
+                    <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Next Destination</div>
+                    <div className="mt-2 font-display text-[clamp(1.45rem,2.8vw,2.2rem)] font-black text-[#4e3015]">{nextDestination.country.name}</div>
+                    <div className="mt-1 text-sm font-semibold text-[#7a5a32]">{nextDestination.country.continent} | {nextDestination.status === 'complete' || nextDestination.status === 'perfect' ? 'Completed route target' : 'Current challenge route'}</div>
+                    <button onClick={() => { setActiveCountryCode(nextDestination.country.iso2); setScreen('country-arrival') }} className="mt-4 rounded-full bg-[#f5c84a] px-4 py-3 text-[11px] font-black uppercase tracking-[0.32em] text-[#4e3015] shadow-[0_12px_24px_rgba(192,145,29,0.18)]">
                       Launch Challenge
                     </button>
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                    <div className="explorer-card rounded-[26px] p-4 text-[#18314b]">
-                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#5d7388]">Regional Completion %</div>
-                      <div className="mt-3 font-display text-[clamp(2.2rem,5vw,3.4rem)] font-black text-[#1a3550]">{completionProgress.percent}%</div>
-                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#dbe8ef]"><div className="h-full rounded-full bg-[linear-gradient(90deg,#79c7ff,#6ed28d,#ffd45f)]" style={{ width: formatPercent(completionProgress.percent) }} /></div>
+                    <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
+                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Regional Completion %</div>
+                      <div className="mt-3 font-display text-[clamp(2.2rem,5vw,3.4rem)] font-black text-[#4e3015]">{completionProgress.percent}%</div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#ebd6a5]"><div className="h-full rounded-full bg-[linear-gradient(90deg,#79c7ff,#6ed28d,#ffd45f)]" style={{ width: formatPercent(completionProgress.percent) }} /></div>
                     </div>
-                    <div className="explorer-card rounded-[26px] p-4 text-[#18314b]">
-                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#5d7388]">Flags Collected</div>
-                      <div className="mt-3 font-display text-[clamp(2.2rem,5vw,3.4rem)] font-black text-[#1a3550]">{completionProgress.completed}</div>
-                      <div className="mt-2 text-sm font-semibold text-[#5d7388]">of {completionProgress.total} nations discovered</div>
+                    <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
+                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Flags Collected</div>
+                      <div className="mt-3 font-display text-[clamp(2.2rem,5vw,3.4rem)] font-black text-[#4e3015]">{completionProgress.completed}</div>
+                      <div className="mt-2 text-sm font-semibold text-[#7a5a32]">of {completionProgress.total} nations discovered</div>
                     </div>
-                    <div className="explorer-card rounded-[26px] p-4 text-[#18314b]">
-                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#5d7388]">Landmark Unlocks</div>
-                      <div className="mt-3 font-display text-[clamp(2.2rem,5vw,3.4rem)] font-black text-[#1a3550]">{visibleProgress.unlockedSouvenirs?.length || 0}</div>
-                      <div className="mt-2 text-sm font-semibold text-[#5d7388]">passport discoveries secured</div>
+                    <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
+                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Landmark Unlocks</div>
+                      <div className="mt-3 font-display text-[clamp(2.2rem,5vw,3.4rem)] font-black text-[#4e3015]">{visibleProgress.unlockedSouvenirs?.length || 0}</div>
+                      <div className="mt-2 text-sm font-semibold text-[#7a5a32]">passport discoveries secured</div>
                     </div>
                   </div>
 
-                  <div className="explorer-card rounded-[26px] p-4 text-[#18314b]">
-                    <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#5d7388]">Route Status</div>
+                  <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
+                    <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Route Status</div>
                     <div className="mt-3 grid gap-2">
                       {mapNodes.slice(0, 5).map((node) => (
-                        <button key={node.country.iso2} onClick={() => { setActiveCountryCode(node.country.iso2); setScreen('country-arrival') }} className="flex items-center justify-between rounded-2xl border border-[#dce7ee] bg-white/82 px-3 py-3 text-left transition-transform hover:-translate-y-0.5">
+                        <button key={node.country.iso2} onClick={() => { setActiveCountryCode(node.country.iso2); setScreen('country-arrival') }} className="flex items-center justify-between rounded-2xl border border-[#d7b979] bg-[#fff8ea]/92 px-3 py-3 text-left transition-transform hover:-translate-y-0.5">
                           <div>
-                            <div className="font-black">{node.country.name}</div>
-                            <div className="text-xs font-semibold text-[#5d7388]">{node.country.continent}</div>
+                            <div className="font-black text-[#4e3015]">{node.country.name}</div>
+                            <div className="text-xs font-semibold text-[#7a5a32]">{node.country.continent}</div>
                           </div>
-                          <div className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] ${node.ring === 'completed' ? 'bg-emerald-100 text-emerald-800' : node.ring === 'current' ? 'bg-amber-100 text-amber-800' : node.ring === 'locked' ? 'bg-slate-200 text-slate-600' : 'bg-sky-100 text-sky-800'}`}>
+                          <div className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] ${node.ring === 'completed' ? 'bg-emerald-100 text-emerald-800' : node.ring === 'current' ? 'bg-amber-100 text-amber-800' : node.ring === 'locked' ? 'bg-stone-200 text-stone-700' : 'bg-yellow-100 text-yellow-800'}`}>
                             {node.ring}
                           </div>
                         </button>
@@ -457,7 +478,7 @@ export default function FlagGamePage() {
 
               <nav className="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-2">
                 {['Home', 'Map', 'Passport', 'Collections', 'Settings'].map((item) => (
-                  <button key={item} onClick={() => { if (item === 'Home' || item === 'Map') setScreen('home'); else if (item === 'Passport') setShowExplorerLog(true); else setScreen('player-entry') }} className={`nav-pill-explorer ${item === 'Home' ? 'is-active' : ''}`}>
+                  <button key={item} onClick={() => { if (item === 'Home' || item === 'Map') setScreen('home'); else if (item === 'Passport') setShowExplorerLog(true); else setScreen('player-entry') }} className={`nav-pill-explorer ${item === 'Map' ? 'is-active' : ''}`}>
                     {item}
                   </button>
                 ))}
