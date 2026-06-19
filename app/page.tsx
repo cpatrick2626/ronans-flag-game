@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { COUNTRIES, COUNTRY_BY_ISO2 } from '../public/countries.js'
 import { completeCountry, getCountryProgress, loadFlagProgress } from '../public/flag-progress.js'
 
-type Screen = 'loading' | 'player-entry' | 'home' | 'country-arrival' | 'play' | 'create-room' | 'join-room' | 'waiting-room' | 'coop' | 'versus'
+type Screen = 'loading' | 'home' | 'country-arrival' | 'play' | 'create-room' | 'join-room' | 'waiting-room' | 'coop' | 'versus'
 type Mode = 'solo' | 'coop' | 'versus'
 type RewardStage = 'stamp' | 'souvenir' | 'stars' | 'xp' | 'done'
 type CompletionSoundHook = 'button_click' | 'correct_fill' | 'wrong_fill' | 'stamp_thump' | 'country_complete' | 'arrival_theme' | 'home_theme' | 'victory_default' | 'victory_france' | 'victory_japan' | 'victory_brazil' | 'victory_egypt'
@@ -15,6 +15,7 @@ type RoomState = { id: string; code: string; hostName: string; guestName?: strin
 type RoomSnapshot = { room: RoomState; note: string }
 
 const PLAYER_NAME_KEY = 'ronan_flag_player_name'
+const PLAYER_NAME_CONFIRMED_KEY = 'ronan_flag_player_name_confirmed'
 const ACTIVE_MODE_KEY = 'ronan_flag_active_mode'
 const ACTIVE_COUNTRY_KEY = 'flag_game_v1_active_country'
 const ROOM_STORAGE_KEY = 'ronan_flag_room'
@@ -96,26 +97,84 @@ function AtmosphereBackdrop() { return <div className="pointer-events-none absol
 
 function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean }) {
   return (
-    <div className={`intro-screen-container ${exiting ? 'intro-screen-exiting' : ''}`}>
+    <div
+      className={`intro-screen-container ${exiting ? 'intro-screen-exiting' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-label="Play Ronan's Flag Game"
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onPlay()
+        }
+      }}
+    >
       <div className="intro-screen-video-shell">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="intro-screen-video"
-          src="/assets/loading/ronans-loading-screen.mp4"
-        />
-      </div>
-      <div className="intro-screen-overlay">
-        <div className="intro-screen-vignette" />
-        <div className="intro-screen-cta">
-          <button onClick={onPlay} className="intro-play-button">
-            <span className="intro-play-label">PLAY</span>
-            <span className="intro-play-subtitle">Tap to Start</span>
-          </button>
+        <div className="intro-screen-video-frame">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="intro-screen-video"
+            src="/assets/loading/ronans-loading-screen.mp4"
+          />
+          <button
+            type="button"
+            onClick={onPlay}
+            className="intro-play-hitbox"
+            aria-label="Play Ronan's Flag Game"
+          />
         </div>
       </div>
+      <div className="intro-screen-overlay" aria-hidden="true">
+        <div className="intro-screen-vignette" />
+      </div>
+    </div>
+  )
+}
+
+function PlayerNameModal({
+  playerName,
+  onPlayerNameChange,
+  onContinue,
+}: {
+  playerName: string
+  onPlayerNameChange: (value: string) => void
+  onContinue: () => void
+}) {
+  return (
+    <div className="player-name-modal-backdrop" role="presentation">
+      <section className="player-name-modal" role="dialog" aria-modal="true" aria-labelledby="player-name-title">
+        <div className="player-name-ribbon" aria-hidden="true">
+          <svg className="ribbon-flag" width="44" height="22" viewBox="0 0 44 22" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="44" height="22" rx="4" fill="#fff" /><rect x="2" y="2" width="14" height="18" rx="2" fill="#2b6cb0" /><rect x="18" y="2" width="24" height="18" rx="2" fill="#ef4444" opacity="0.95" /></svg>
+        </div>
+        <div className="player-name-toplabel">PLAYER NAME</div>
+        <div className="player-name-header">
+          <svg className="player-name-star" width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2l2.39 4.85L19 8.18l-3.2 3.12L16.3 16 12 13.77 7.7 16l.5-4.7L4.99 8.18l4.61-.33L12 2z" fill="#FFD54A"/></svg>
+          <h2 id="player-name-title" className="player-name-title">What should we call you?</h2>
+          <svg className="player-name-compass" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#2b6cb0" opacity="0.14"/><path d="M7 17l4.5-2.5L17 7l-4.5 2.5L7 17z" fill="#60a5fa"/></svg>
+        </div>
+        <input
+          id="player-name-input"
+          value={playerName}
+          onChange={(event) => onPlayerNameChange(event.target.value)}
+          placeholder="Ronan"
+          className="player-name-input"
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onContinue() } }}
+          autoFocus
+          aria-label="Player name"
+        />
+        <div className="player-name-helper">You can change this later.</div>
+        <button
+          type="button"
+          onClick={onContinue}
+          className="player-name-continue"
+          aria-label="Continue"
+        >
+          <span className="continue-label">Continue</span>
+        </button>
+      </section>
     </div>
   )
 }
@@ -208,6 +267,7 @@ export default function FlagGamePage() {
   const [mode, setMode] = useState<Mode>('solo')
   const [progress, setProgress] = useState(() => loadFlagProgress())
   const [activeCountryCode, setActiveCountryCode] = useState('FR')
+  const [playerNameConfirmed, setPlayerNameConfirmed] = useState(false)
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
   const [reward, setReward] = useState<null | ReturnType<typeof completeCountry>['reward']>(null)
   const [rewardStage, setRewardStage] = useState<RewardStage>('stamp')
@@ -222,7 +282,9 @@ export default function FlagGamePage() {
   const [paintFeedback, setPaintFeedback] = useState<Record<string, PaintFeedback>>({})
   const [showExplorerLog, setShowExplorerLog] = useState(false)
   const [introExiting, setIntroExiting] = useState(false)
+  const [activePin, setActivePin] = useState<string | null>(null)
   const timersRef = useRef<number[]>([])
+  const pinTimerRef = useRef<number | null>(null)
   const channelRef = useRoomChannel((nextRoom) => setRoom((current) => (current && current.updatedAt > nextRoom.updatedAt ? current : nextRoom)))
   const { playSound } = useSoundHooks()
 
@@ -248,13 +310,22 @@ export default function FlagGamePage() {
     return { country: next, status: nextProgress.status }
   }, [activeCountryCode, visibleProgress])
   const explorerTitle = getExplorerTier(completionProgress.percent)
+  const heroPins = [
+    { code: 'CA', label: 'Canada', x: '16%', y: '38%', tone: 'pin-red' },
+    { code: 'FR', label: 'France', x: '53%', y: '37%', tone: 'pin-blue' },
+    { code: 'BR', label: 'Brazil', x: '23%', y: '66%', tone: 'pin-green' },
+    { code: 'EG', label: 'Egypt', x: '56%', y: '62%', tone: 'pin-gold' },
+    { code: 'IN', label: 'India', x: '82%', y: '63%', tone: 'pin-purple' },
+    { code: '??', label: 'Mystery', x: '86%', y: '27%', tone: 'pin-mystery' },
+  ]
 
-  useEffect(() => { const storedProgress = loadFlagProgress(); setProgress(storedProgress); setActiveCountryCode(getInitialCountry()); setPlayerName(safeStorageGet(PLAYER_NAME_KEY) ?? 'Ronan'); setMode((safeStorageGet(ACTIVE_MODE_KEY) as Mode | null) ?? 'solo'); setRoom(loadRoom()); setClientReady(true) }, [])
+  useEffect(() => { const storedProgress = loadFlagProgress(); setProgress(storedProgress); setActiveCountryCode(getInitialCountry()); setPlayerName(safeStorageGet(PLAYER_NAME_KEY) ?? 'Ronan'); setPlayerNameConfirmed(safeStorageGet(PLAYER_NAME_CONFIRMED_KEY) === 'true'); setMode((safeStorageGet(ACTIVE_MODE_KEY) as Mode | null) ?? 'solo'); setRoom(loadRoom()); setClientReady(true) }, [])
   useEffect(() => { safeStorageSet(PLAYER_NAME_KEY, playerName) }, [playerName])
+  useEffect(() => { safeStorageSet(PLAYER_NAME_CONFIRMED_KEY, String(playerNameConfirmed)) }, [playerNameConfirmed])
   useEffect(() => { safeStorageSet(ACTIVE_MODE_KEY, mode) }, [mode])
   useEffect(() => { safeStorageSet(ACTIVE_COUNTRY_KEY, activeCountryCode) }, [activeCountryCode])
   useEffect(() => { saveRoom(room); if (room && channelRef.current) channelRef.current.postMessage({ room, note: 'sync' } satisfies RoomSnapshot); if (room) setRoomSnapshot({ room, note: 'sync' }) }, [room, channelRef])
-  useEffect(() => () => { timersRef.current.forEach((timer) => window.clearTimeout(timer)) }, [])
+  useEffect(() => () => { timersRef.current.forEach((timer) => window.clearTimeout(timer)); if (pinTimerRef.current) window.clearTimeout(pinTimerRef.current) }, [])
 
   useEffect(() => {
     if (!reward) return
@@ -268,14 +339,27 @@ export default function FlagGamePage() {
     timersRef.current.push(window.setTimeout(() => setRewardStage('done'), 2140))
   }, [reward, completionProgress.percent])
 
+  function handlePinEnter(isoCode: string) {
+    if (pinTimerRef.current) window.clearTimeout(pinTimerRef.current)
+    setActivePin(isoCode)
+  }
+  function handlePinLeave() {
+    pinTimerRef.current = window.setTimeout(() => setActivePin(null), 100)
+  }
+  function handlePinTap(isoCode: string) {
+    if (pinTimerRef.current) window.clearTimeout(pinTimerRef.current)
+    setActivePin(isoCode)
+    pinTimerRef.current = window.setTimeout(() => setActivePin(null), 700)
+  }
+
   function beginIntroExit() {
     if (screen !== 'loading' || introExiting) return
     setIntroExiting(true)
-    window.setTimeout(() => setScreen('player-entry'), 420)
+    window.setTimeout(() => setScreen('home'), 420)
   }
 
   function updateRoom(nextRoom: RoomState, note: RoomSnapshot['note'], nextScreen?: Screen) { setRoom(nextRoom); setRoomSnapshot({ room: nextRoom, note }); if (nextScreen) setScreen(nextScreen) }
-  function enterGame() { playSound('home_theme'); setScreen('home') }
+  function enterGame() { playSound('home_theme'); setPlayerNameConfirmed(true); setScreen('home') }
   function startSolo() { playSound('arrival_theme'); setScreen('country-arrival') }
   function colorRegion(regionId: string) { if (!palette.length) return; const region = country.flag_regions.find((item: any) => item.id === regionId); const isCorrect = region ? selectedColorIndex === region.color : false; setPaintFeedback((current) => ({ ...current, [regionId]: { state: isCorrect ? 'correct' : 'wrong', at: Date.now() } })); setColorState((current) => ({ ...current, [activeCountryCode]: { ...(current[activeCountryCode] || {}), [regionId]: selectedColorIndex } })) }
   function completeFlag() { if (!allRegionsFilled || completed) return; const result = completeCountry(activeCountryCode, progress, { stars: perfectFlag ? 3 : 2, completedAt: new Date().toISOString() }); setProgress(result.progress); setReward(result.reward) }
@@ -294,200 +378,39 @@ export default function FlagGamePage() {
       {screen === 'loading' && <IntroScreen onPlay={beginIntroExit} exiting={introExiting} />}
       <div className="relative mx-auto flex min-h-screen w-full flex-col px-4 py-4 md:px-6 md:py-6">
         {screen === 'home' && (
-          <section className="relative flex min-h-0 flex-1 flex-col">
-            <div className="home-world-shell relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[32px] border border-white/18 p-4 shadow-[0_34px_110px_rgba(18,27,44,0.26)] md:p-5">
-              <div className="home-world-atmosphere pointer-events-none absolute inset-0" aria-hidden="true">
-                <div className="home-cloud home-cloud-a" />
-                <div className="home-cloud home-cloud-b" />
-                <div className="home-cloud home-cloud-c" />
-                <div className="home-orbit home-orbit-a" />
-                <div className="home-orbit home-orbit-b" />
-                <div className="home-stars" />
-                <div className="home-rays" />
-                <div className="home-vignette" />
+          <section className="relative flex min-h-0 flex-1 items-center justify-center">
+            <div className="home-map-shell relative flex h-full min-h-0 w-full max-w-[420px] flex-1 flex-col overflow-hidden rounded-[34px] border border-[#f6e0b2]/12 shadow-[0_36px_120px_rgba(61,36,12,0.12)]">
+              {/* Use the provided full-screen reference image as the visual base */}
+              <div className="main-reference-container relative w-full h-full">
+                <img src="/assets/home/main-map-reference.png" alt="Main map reference" className="main-reference-image w-full h-full object-contain mx-auto" />
+
+                {/* Invisible / faint hitboxes over the image for interactivity */}
+                <button aria-label="France" className="reference-hitbox" style={{ left: '53%', top: '37%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('FR')} onPointerEnter={() => handlePinEnter('FR')} onPointerLeave={handlePinLeave} />
+                <button aria-label="Canada" className="reference-hitbox" style={{ left: '16%', top: '38%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('CA')} onPointerEnter={() => handlePinEnter('CA')} onPointerLeave={handlePinLeave} />
+                <button aria-label="Brazil" className="reference-hitbox" style={{ left: '23%', top: '66%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('BR')} onPointerEnter={() => handlePinEnter('BR')} onPointerLeave={handlePinLeave} />
+                <button aria-label="Egypt" className="reference-hitbox" style={{ left: '56%', top: '62%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('EG')} onPointerEnter={() => handlePinEnter('EG')} onPointerLeave={handlePinLeave} />
+                <button aria-label="India" className="reference-hitbox" style={{ left: '82%', top: '63%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('IN')} onPointerEnter={() => handlePinEnter('IN')} onPointerLeave={handlePinLeave} />
+                <button aria-label="Mystery" className="reference-hitbox" style={{ left: '86%', top: '27%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => { /* mystery */ }} />
+
+                {/* Card + nav hitboxes */}
+                <button aria-label="Next Destination (France)" className="reference-hitbox" style={{ left: '18%', top: '16%', width: '24%', height: '12%' } as React.CSSProperties} onClick={() => setActiveCountryCode('FR')} />
+                <button aria-label="Europe Progress" className="reference-hitbox" style={{ left: '78%', top: '16%', width: '14%', height: '12%' } as React.CSSProperties} />
+                <button aria-label="Flags Collected" className="reference-hitbox" style={{ left: '22%', top: '64%', width: '22%', height: '12%' } as React.CSSProperties} />
+                <button aria-label="Eiffel Tower" className="reference-hitbox" style={{ left: '78%', top: '64%', width: '20%', height: '12%' } as React.CSSProperties} />
+
+                {/* Bottom nav hitboxes */}
+                <button aria-label="Home nav" className="reference-hitbox" style={{ left: '10%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} onClick={() => setScreen('home')} />
+                <button aria-label="Map nav" className="reference-hitbox is-active" style={{ left: '30%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} />
+                <button aria-label="Passport nav" className="reference-hitbox" style={{ left: '50%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} onClick={() => setShowExplorerLog(true)} />
+                <button aria-label="Collections nav" className="reference-hitbox" style={{ left: '70%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} />
+                <button aria-label="Settings nav" className="reference-hitbox" style={{ left: '90%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} />
+
+                {/* Star / profile */}
+                <button aria-label="Star button" className="reference-hitbox" style={{ left: '88%', top: '10%', width: '8%', height: '8%' } as React.CSSProperties} />
               </div>
-
-              <header className="relative z-10 flex flex-wrap items-center justify-between gap-3">
-                <div className="explorer-panel flex items-center gap-3 rounded-[24px] px-4 py-3 text-[#5a3a18]">
-                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/34 bg-[radial-gradient(circle_at_30%_28%,#fffaf0_0%,#d7f0ff_30%,#7fc0ef_62%,#325f99_100%)] shadow-[0_18px_38px_rgba(8,19,34,0.24)]">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_65%_35%,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.24)_22%,rgba(255,255,255,0)_58%)]" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Explorer</div>
-                    <div className="truncate font-display text-[clamp(1.5rem,3vw,2.35rem)] font-black text-[#4e3015]">{playerName}</div>
-                    <div className="mt-1 text-sm font-semibold text-[#7a5a32]">Passport route commander</div>
-                  </div>
-                </div>
-
-                <div className="explorer-panel grid min-w-[min(100%,24rem)] gap-2 rounded-[24px] px-4 py-3 text-[#4e3015]">
-                  <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Explorer Level</div>
-                      <div className="mt-1 font-display text-[clamp(1.25rem,2vw,1.75rem)] font-black text-[#4e3015]">{explorerTitle}</div>
-                    </div>
-                    <div className="rounded-full border border-[#c28d45]/30 bg-[#fff6df] px-3 py-1 text-[11px] font-black uppercase tracking-[0.28em] text-[#6a421c]">Lv {visibleProgress.explorerLevel}</div>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-[#eed8aa]">
-                    <div className="h-full rounded-full bg-[linear-gradient(90deg,#f5c84a,#7fdfb0,#7bc7ff)] transition-all duration-500" style={{ width: formatPercent(Math.max(12, Math.min(100, completionProgress.percent))) }} />
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.22em] text-[#7a5a32]">
-                    <span>{visibleProgress.xp} XP</span>
-                    <span>{completionProgress.percent}% route mastery</span>
-                  </div>
-                </div>
-
-                <button onClick={() => setScreen('player-entry')} className="explorer-chip justify-self-start rounded-full px-4 py-3 text-[11px] font-black uppercase tracking-[0.36em] text-[#5a3a18]">
-                  Settings
-                </button>
-              </header>
-
-              <div className="relative z-10 mt-4 grid flex-1 gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(270px,0.55fr)]">
-                <div className="globe-stage relative overflow-hidden rounded-[34px] border border-white/12 shadow-[0_30px_90px_rgba(4,11,23,0.38)]">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.08)_18%,rgba(255,255,255,0)_42%)]" />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,17,30,0.04)_0%,rgba(10,17,30,0.18)_52%,rgba(12,26,41,0.42)_100%)]" />
-                  <div className="absolute inset-x-0 top-5 flex justify-center">
-                    <div className="rounded-full border border-[#d8b56f]/32 bg-[#fff3d5]/72 px-4 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-[#6a4419] backdrop-blur">
-                      World Explorer Map
-                    </div>
-                  </div>
-
-                  <div className="absolute inset-x-6 top-16 flex items-center justify-between">
-                    <div className="rounded-full border border-[#d8b56f]/28 bg-[#fff6df]/72 px-3 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-[#7a521d] backdrop-blur">
-                      Live Globe
-                    </div>
-                    <div className="rounded-full border border-[#d8b56f]/28 bg-[#fff6df]/72 px-3 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-[#7a521d] backdrop-blur">
-                      Tap a pin
-                    </div>
-                  </div>
-
-                  <div className="relative flex h-full min-h-[32rem] items-center justify-center p-4 sm:min-h-[39rem] md:p-6">
-                    <div className="globe-shell relative h-[min(78vw,44rem)] w-[min(78vw,44rem)] max-w-full">
-                      <div className="globe-halo absolute inset-[0%] rounded-full" />
-                      <div className="absolute inset-[4%] rounded-full bg-[radial-gradient(circle_at_38%_32%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.08)_22%,rgba(108,169,209,0.14)_48%,rgba(34,72,108,0.24)_74%,rgba(16,31,53,0.94)_100%)] blur-[1px]" />
-                      <div className="absolute inset-[7%] rounded-full border border-white/18 bg-[radial-gradient(circle_at_36%_30%,rgba(255,250,235,0.96)_0%,rgba(243,205,133,0.88)_18%,rgba(205,142,66,0.82)_48%,rgba(88,53,21,0.98)_100%)] shadow-[inset_0_0_60px_rgba(255,255,255,0.12),0_40px_90px_rgba(90,53,18,0.34)]" />
-                      <div className="absolute inset-[10%] rounded-full bg-[radial-gradient(circle_at_50%_42%,rgba(255,246,214,0.22)_0%,rgba(255,246,214,0)_30%)]" />
-                      <div className="absolute inset-[14%] rounded-full border border-white/10" />
-                      <div className="absolute inset-[18%] rounded-full border border-white/8" />
-
-                      <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full overflow-visible">
-                        <defs>
-                          <radialGradient id="world-glow" cx="35%" cy="28%" r="72%">
-                            <stop offset="0%" stopColor="rgba(255,255,255,0.5)" />
-                            <stop offset="40%" stopColor="rgba(255,255,255,0.12)" />
-                            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-                          </radialGradient>
-                          <linearGradient id="travel-route" x1="0%" x2="100%" y1="0%" y2="0%">
-                            <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
-                            <stop offset="50%" stopColor="rgba(255,234,176,0.95)" />
-                            <stop offset="100%" stopColor="rgba(255,255,255,0.12)" />
-                          </linearGradient>
-                          <linearGradient id="pin-complete" x1="0%" x2="0%" y1="0%" y2="100%">
-                            <stop offset="0%" stopColor="#fff6c9" />
-                            <stop offset="100%" stopColor="#f5c84a" />
-                          </linearGradient>
-                          <linearGradient id="pin-current" x1="0%" x2="0%" y1="0%" y2="100%">
-                            <stop offset="0%" stopColor="#fff0a0" />
-                            <stop offset="100%" stopColor="#ffcf4e" />
-                          </linearGradient>
-                          <linearGradient id="pin-locked" x1="0%" x2="0%" y1="0%" y2="100%">
-                            <stop offset="0%" stopColor="#dbe8f4" />
-                            <stop offset="100%" stopColor="#9eb5c8" />
-                          </linearGradient>
-                        </defs>
-                        <circle cx="50" cy="50" r="38" fill="rgba(91,55,22,0.18)" />
-                        <circle cx="50" cy="50" r="38" fill="url(#world-glow)" />
-                        <ellipse cx="50" cy="50" rx="35" ry="18" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="0.6" />
-                        <ellipse cx="50" cy="50" rx="24" ry="38" fill="none" stroke="rgba(255,255,255,0.11)" strokeWidth="0.6" />
-                        <path d="M15 50H85M50 12V88M26 28C36 37 64 37 74 28M26 72C36 63 64 63 74 72" stroke="rgba(255,255,255,0.08)" strokeWidth="0.45" fill="none" />
-                        <path d="M11 52c12-10 23-8 32-4s20 5 30 0 16-7 20-4" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" fill="none" strokeDasharray="1.3 2.1" />
-                        {travelRoutes.map((route, index) => <polyline key={route} points={route} fill="none" stroke="url(#travel-route)" strokeWidth="0.9" strokeDasharray="1.5 1.8" opacity={0.6 - index * 0.02} />)}
-                        {mapNodes.map((node) => {
-                          const isCurrent = node.ring === 'current'
-                          const isCompleted = node.ring === 'completed'
-                          const isLocked = node.ring === 'locked'
-                          const fill = isCurrent ? 'url(#pin-current)' : isCompleted ? 'url(#pin-complete)' : isLocked ? 'url(#pin-locked)' : '#fff0c7'
-                          const halo = isCurrent ? 'rgba(255,214,92,0.26)' : isCompleted ? 'rgba(125,240,194,0.18)' : 'rgba(255,255,255,0.10)'
-                          return (
-                            <g key={node.country.iso2} onClick={() => { setActiveCountryCode(node.country.iso2); setScreen('country-arrival') }} className="cursor-pointer">
-                              <circle cx={node.x} cy={node.y} r={isCurrent ? 2.95 : isCompleted ? 2.45 : 2.2} fill={halo} />
-                              <circle cx={node.x} cy={node.y} r={isCurrent ? 1.95 : 1.65} fill={fill} stroke="rgba(255,255,255,0.82)" strokeWidth="0.35" />
-                              <path d={`M ${node.x} ${node.y + 2.6} L ${node.x - 0.65} ${node.y + 4.45} L ${node.x + 0.65} ${node.y + 4.45} Z`} fill={fill} opacity={0.9} />
-                              <circle cx={node.x} cy={node.y} r={isCurrent ? 4.8 : 4.1} fill="none" stroke={isCurrent ? 'rgba(255,214,92,0.72)' : 'rgba(255,255,255,0.32)'} strokeWidth="0.45" strokeDasharray={isCurrent ? '0.8 1' : '0.6 1.2'} />
-                            </g>
-                          )
-                        })}
-                      </svg>
-
-                      <div className="absolute left-[7%] top-[16%] h-14 w-28 rounded-full bg-[#fff1cb]/34 blur-3xl" />
-                      <div className="absolute right-[11%] top-[20%] h-12 w-28 rounded-full bg-amber-100/24 blur-3xl" />
-                      <div className="absolute inset-x-0 bottom-8 flex justify-center">
-                        <div className="rounded-full border border-[#d8b56f]/28 bg-[#fff6df]/76 px-4 py-2 text-[10px] font-black uppercase tracking-[0.38em] text-[#6a421c] backdrop-blur">
-                          Tap any country pin to open arrival
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <aside className="grid gap-3 self-stretch">
-                  <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
-                    <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Next Destination</div>
-                    <div className="mt-2 font-display text-[clamp(1.45rem,2.8vw,2.2rem)] font-black text-[#4e3015]">{nextDestination.country.name}</div>
-                    <div className="mt-1 text-sm font-semibold text-[#7a5a32]">{nextDestination.country.continent} | {nextDestination.status === 'complete' || nextDestination.status === 'perfect' ? 'Completed route target' : 'Current challenge route'}</div>
-                    <button onClick={() => { setActiveCountryCode(nextDestination.country.iso2); setScreen('country-arrival') }} className="mt-4 rounded-full bg-[#f5c84a] px-4 py-3 text-[11px] font-black uppercase tracking-[0.32em] text-[#4e3015] shadow-[0_12px_24px_rgba(192,145,29,0.18)]">
-                      Launch Challenge
-                    </button>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                    <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
-                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Regional Completion %</div>
-                      <div className="mt-3 font-display text-[clamp(2.2rem,5vw,3.4rem)] font-black text-[#4e3015]">{completionProgress.percent}%</div>
-                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#ebd6a5]"><div className="h-full rounded-full bg-[linear-gradient(90deg,#79c7ff,#6ed28d,#ffd45f)]" style={{ width: formatPercent(completionProgress.percent) }} /></div>
-                    </div>
-                    <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
-                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Flags Collected</div>
-                      <div className="mt-3 font-display text-[clamp(2.2rem,5vw,3.4rem)] font-black text-[#4e3015]">{completionProgress.completed}</div>
-                      <div className="mt-2 text-sm font-semibold text-[#7a5a32]">of {completionProgress.total} nations discovered</div>
-                    </div>
-                    <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
-                      <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Landmark Unlocks</div>
-                      <div className="mt-3 font-display text-[clamp(2.2rem,5vw,3.4rem)] font-black text-[#4e3015]">{visibleProgress.unlockedSouvenirs?.length || 0}</div>
-                      <div className="mt-2 text-sm font-semibold text-[#7a5a32]">passport discoveries secured</div>
-                    </div>
-                  </div>
-
-                  <div className="explorer-card globe-info-card rounded-[26px] p-4 text-[#5a3a18]">
-                    <div className="text-[10px] font-black uppercase tracking-[0.48em] text-[#8f6230]">Route Status</div>
-                    <div className="mt-3 grid gap-2">
-                      {mapNodes.slice(0, 5).map((node) => (
-                        <button key={node.country.iso2} onClick={() => { setActiveCountryCode(node.country.iso2); setScreen('country-arrival') }} className="flex items-center justify-between rounded-2xl border border-[#d7b979] bg-[#fff8ea]/92 px-3 py-3 text-left transition-transform hover:-translate-y-0.5">
-                          <div>
-                            <div className="font-black text-[#4e3015]">{node.country.name}</div>
-                            <div className="text-xs font-semibold text-[#7a5a32]">{node.country.continent}</div>
-                          </div>
-                          <div className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] ${node.ring === 'completed' ? 'bg-emerald-100 text-emerald-800' : node.ring === 'current' ? 'bg-amber-100 text-amber-800' : node.ring === 'locked' ? 'bg-stone-200 text-stone-700' : 'bg-yellow-100 text-yellow-800'}`}>
-                            {node.ring}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </aside>
-              </div>
-
-              <nav className="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-2">
-                {['Home', 'Map', 'Passport', 'Collections', 'Settings'].map((item) => (
-                  <button key={item} onClick={() => { if (item === 'Home' || item === 'Map') setScreen('home'); else if (item === 'Passport') setShowExplorerLog(true); else setScreen('player-entry') }} className={`nav-pill-explorer ${item === 'Map' ? 'is-active' : ''}`}>
-                    {item}
-                  </button>
-                ))}
-              </nav>
             </div>
           </section>
         )}
-
-        {screen === 'player-entry' && <section className="mx-auto flex w-full max-w-xl flex-1 items-center justify-center"><div className="w-full rounded-[28px] border border-white/20 bg-white/20 p-5 text-[#17345a] backdrop-blur"><div className="text-[11px] font-black uppercase tracking-[0.45em]">WELCOME</div><div className="mt-2 text-3xl font-black">Player Name</div><div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]"><input value={playerName} onChange={(event) => setPlayerName(event.target.value)} placeholder="Enter player name" className="h-14 rounded-2xl border border-white/10 bg-white/90 px-4 text-lg font-bold outline-none placeholder:text-[#5d7590]" /><button onClick={enterGame} className="h-14 rounded-2xl bg-[#ffcf54] px-5 text-lg font-black text-[#17345a]">Continue</button></div></div></section>}
 
         {(screen === 'country-arrival' || screen === 'play' || screen === 'coop' || screen === 'versus') && (
           <section className="relative flex min-h-0 flex-1 flex-col">
@@ -515,8 +438,8 @@ export default function FlagGamePage() {
             <nav className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 pb-3 md:gap-3 md:pb-4">
               <button onClick={() => { playSound('button_click'); setScreen('home') }} className="nav-pill">Home</button>
               <button onClick={() => setShowExplorerLog((value) => !value)} className="nav-pill">Passport</button>
-              <button onClick={() => setScreen('player-entry')} className="nav-pill">Collections</button>
-              <button onClick={() => setScreen('player-entry')} className="nav-pill">Settings</button>
+              <button onClick={() => setPlayerNameConfirmed(false)} className="nav-pill">Collections</button>
+              <button onClick={() => setPlayerNameConfirmed(false)} className="nav-pill">Settings</button>
             </nav>
           </section>
         )}
@@ -538,6 +461,14 @@ export default function FlagGamePage() {
               </div>
             </aside>
           </div>
+        )}
+
+        {screen === 'home' && !playerNameConfirmed && (
+          <PlayerNameModal
+            playerName={playerName}
+            onPlayerNameChange={setPlayerName}
+            onContinue={enterGame}
+          />
         )}
 
         {reward && (
