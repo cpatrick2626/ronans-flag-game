@@ -364,6 +364,8 @@ function FlagColorSelectScreen({
 }) {
   const sparkleTimerRef = useRef<number | null>(null)
   const [sparkle, setSparkle] = useState<{ key: string; x: number; y: number } | null>(null)
+  const [lockedNotice, setLockedNotice] = useState<{ title: string; detail: string } | null>(null)
+  const lockedNoticeTimerRef = useRef<number | null>(null)
 
   function triggerSparkle(key: string, x: number, y: number) {
     if (sparkleTimerRef.current) window.clearTimeout(sparkleTimerRef.current)
@@ -371,12 +373,43 @@ function FlagColorSelectScreen({
     sparkleTimerRef.current = window.setTimeout(() => setSparkle(null), 260)
   }
 
-  useEffect(() => () => { if (sparkleTimerRef.current) window.clearTimeout(sparkleTimerRef.current) }, [])
+  function showLockedNotice(title: string, detail: string) {
+    if (lockedNoticeTimerRef.current) window.clearTimeout(lockedNoticeTimerRef.current)
+    setLockedNotice({ title, detail })
+    lockedNoticeTimerRef.current = window.setTimeout(() => setLockedNotice(null), 2200)
+  }
+
+  useEffect(() => () => {
+    if (sparkleTimerRef.current) window.clearTimeout(sparkleTimerRef.current)
+    if (lockedNoticeTimerRef.current) window.clearTimeout(lockedNoticeTimerRef.current)
+  }, [])
 
   const modeHitboxes = [
     { label: 'PLAY SOLO', x: 50, y: 54, w: 66, h: 10, mode: 'solo' as const, action: onPlaySolo },
-    { label: 'TEAM UP CO-OP', x: 50, y: 66, w: 70, h: 10, mode: 'coop' as const, action: () => onSelectMode('coop') },
-    { label: 'HEAD TO HEAD BATTLE', x: 50, y: 78, w: 76, h: 10, mode: 'versus' as const, action: () => onSelectMode('versus') },
+    {
+      label: 'TEAM UP CO-OP',
+      x: 50,
+      y: 66,
+      w: 70,
+      h: 10,
+      mode: 'coop' as const,
+      action: () => {
+        onSelectMode('coop')
+        showLockedNotice('Team Up Co-op is coming soon!', 'Play Solo is ready now.')
+      },
+    },
+    {
+      label: 'HEAD TO HEAD BATTLE',
+      x: 50,
+      y: 78,
+      w: 76,
+      h: 10,
+      mode: 'versus' as const,
+      action: () => {
+        onSelectMode('versus')
+        showLockedNotice('Head to Head Battle is coming soon!', 'Play Solo is ready now.')
+      },
+    },
   ]
 
   const difficultyHitboxes = [
@@ -452,6 +485,14 @@ function FlagColorSelectScreen({
               style={{ left: `${sparkle.x}%`, top: `${sparkle.y}%` } as React.CSSProperties}
               aria-hidden="true"
             />
+          )}
+          {lockedNotice && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center px-4">
+              <div className="max-w-[min(92vw,320px)] rounded-[22px] border border-[#9b6a2b]/40 bg-[linear-gradient(180deg,rgba(255,247,216,0.98),rgba(241,218,170,0.95))] px-4 py-3 text-center text-[#6d4416] shadow-[0_16px_34px_rgba(94,58,18,0.22)]">
+                <div className="text-[11px] font-black uppercase tracking-[0.32em]">{lockedNotice.title}</div>
+                <div className="mt-1 text-[12px] font-bold tracking-[0.08em]">{lockedNotice.detail}</div>
+              </div>
+            </div>
           )}
         </div>
       </div>
