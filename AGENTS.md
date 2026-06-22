@@ -23,3 +23,14 @@
 - Do not refactor unrelated code.
 - Do not commit, push, or deploy unless explicitly instructed.
 - Always report files changed, validation run, and final git status.
+
+## Skill Routing
+
+- Use `read-only-audit` for inspection-only tasks.
+- Use `ronan-design-authority` for UI, gameplay, art direction, naming, or design-system decisions.
+- Use `ui-reference-parity` when matching screenshots or reference images.
+- Use `frontend-visual-parity` when preserving the existing visual system during UI edits.
+- Use `build-validation` after code changes that could affect build or runtime.
+- Use `runtime-validation` when browser or manual behavior must be checked.
+- Use `git-hygiene` before and after changes to prevent accidental churn.
+- Use `single-patch-execution` for tightly scoped implementation tasks.
