@@ -239,3 +239,49 @@ When implementing UI/gameplay changes, the result should be:
 - reusable where reasonable, but not abstracted too early
 
 Reusable architecture is important, but visual/gameplay correctness comes first.
+
+## Ronan Project Command List
+
+These commands are for Ronan’s Flag Game only. They are lightweight routing shortcuts for future planning, design, audit, validation, and execution packets.
+
+### `!mp` — Project Routing
+Identify the correct Ronan’s Flag Game project context, repo path, current priority, and protected surfaces before giving next steps.
+
+### `!rp` — Room Routing
+Decide which Ronan room/context should receive the update, prompt, handoff, or final report.
+
+### `!q` — Question Only
+Answer the user’s question only. Do not create an action packet, Codex prompt, Claude prompt, or task plan unless asked.
+
+### `!x` — Execution Packet
+Create one bounded Codex/Claude Code execution packet for a small implementation task.
+
+### `!xa` — Read-Only Audit Packet
+Create one read-only audit packet. No file edits, no gameplay changes, no commits, no pushes.
+
+### `!design` — Design Direction
+Give visual direction, reference alignment, screenshot parity notes, or a Claude Design prompt.
+
+### `!play` — Gameplay Loop Review
+Review the current gameplay flow for clarity, child-friendliness, trigger timing, and completion logic.
+
+### `!mobile` — Mobile Layout Check
+Create or review a mobile/tablet layout validation task focused on tap targets, readability, spacing, and screen fit.
+
+### `!kid` — Child-Friendly Clarity Check
+Review whether the screen is easy for a child to understand without extra explanation.
+
+### `!test` — Validation Packet
+Create a build/runtime/browser validation packet. This should check the actual game behavior, not just static code.
+
+### `!handoff` — Full Room Handoff
+Create a concise handoff for a fresh Ronan’s Flag Game session, including current priority, repo path, protected surfaces, and next action.
+
+### `!nr` — New Room Setup
+Create setup instructions for starting a new Ronan room with the correct project identity, repo path, priorities, and boundaries.
+
+### `!list` — Tracked Tasks
+List current Ronan’s Flag Game tracked tasks in priority order.
+
+### `!add` — Add Tracked Task
+Add a new tracked Ronan task only if it supports the current gameplay loop and does not distract from the active priority.
