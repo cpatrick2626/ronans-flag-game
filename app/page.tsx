@@ -826,13 +826,13 @@ export default function FlagGamePage() {
                 <button
                   type="button"
                   aria-label="Flag Color Challenge"
-                  className="launch-challenge-btn absolute left-1/2 bottom-[15%] z-10 flex -translate-x-1/2 items-center gap-3 rounded-[24px] border border-[#fff0bf]/28 bg-[linear-gradient(180deg,rgba(255,239,180,0.96),rgba(214,167,70,0.92))] px-4 py-3 text-left shadow-[0_14px_34px_rgba(112,76,18,0.22)]"
+                  className="launch-challenge-btn launch-challenge-pin absolute left-[58%] top-[52%] z-10 flex -translate-x-1/2 -translate-y-full items-center gap-2 rounded-full border border-[#fff0bf]/28 bg-[linear-gradient(180deg,rgba(255,239,180,0.96),rgba(214,167,70,0.92))] px-3 py-2 text-left shadow-[0_12px_28px_rgba(112,76,18,0.2)]"
                   onClick={() => setScreen('play')}
                 >
-                  <span className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/28 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,247,214,0.58))] text-[1.1rem] shadow-inner">🏳️</span>
-                  <span className="min-w-0">
-                    <span className="block text-[10px] font-black uppercase tracking-[0.42em] text-[#7b4f12]/80">Adventure Mode</span>
-                    <span className="block text-[16px] font-black uppercase tracking-[0.22em] text-[#5f3a0c]">Flag Color Challenge</span>
+                  <span className="launch-challenge-pin-icon flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,247,214,0.68))] text-[1rem] shadow-inner">🏳️</span>
+                  <span className="pointer-events-none hidden min-w-0 sm:block">
+                    <span className="block text-[9px] font-black uppercase tracking-[0.36em] text-[#7b4f12]/78">Adventure Mode</span>
+                    <span className="block text-[13px] font-black uppercase tracking-[0.14em] text-[#5f3a0c]">Flag Color Challenge</span>
                   </span>
                 </button>
 
