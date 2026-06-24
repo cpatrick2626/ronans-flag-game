@@ -143,205 +143,120 @@ function renderFlagShape(shape: FlagRegionConfig['shapes'][number], fill: string
 }
 
 function FlagColorChallengeGame({
-  round,
+  round: _round,
   onBack,
 }: {
   round: FlagRoundConfig
   onBack: () => void
 }) {
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0)
-  const [completedRegions, setCompletedRegions] = useState<Record<string, number>>({})
-  const [feedback, setFeedback] = useState<{ state: 'correct' | 'wrong'; at: number; regionId?: string } | null>(null)
-  const [celebrate, setCelebrate] = useState(false)
-  const [pointer, setPointer] = useState({ x: 50, y: 50, active: false })
-  const [hoverRegion, setHoverRegion] = useState<string | null>(null)
-  const rootRef = useRef<HTMLDivElement | null>(null)
-  const pointerTimerRef = useRef<number | null>(null)
+  const [selectedOrb, setSelectedOrb] = useState<'blue' | 'white' | 'red' | 'yellow' | 'green'>('blue')
+  const [activeNav, setActiveNav] = useState<'home' | 'passport' | 'collections' | 'settings'>('home')
+  const [spark, setSpark] = useState<{ key: number; x: number; y: number; hue: string } | null>(null)
+  const sparkTimerRef = useRef<number | null>(null)
 
-  const allComplete = round.regions.every((region) => completedRegions[region.id] === region.correctColorIndex)
-  const selectedPalette = [...round.palette, ...round.distractors]
+  const navItems = [
+    { id: 'home' as const, label: 'Home', left: '24.8%' },
+    { id: 'passport' as const, label: 'Passport', left: '37.7%' },
+    { id: 'collections' as const, label: 'Collections', left: '49.3%' },
+    { id: 'settings' as const, label: 'Settings', left: '59.7%' },
+  ]
 
-  useEffect(() => {
-    if (!allComplete) return
-    setCelebrate(true)
-    const timer = window.setTimeout(() => setCelebrate(false), 2200)
-    return () => window.clearTimeout(timer)
-  }, [allComplete])
+  const orbItems = [
+    { id: 'blue' as const, label: 'Blue', left: '27.6%', hue: '#4aa6ff' },
+    { id: 'white' as const, label: 'White', left: '38.6%', hue: '#ffffff' },
+    { id: 'red' as const, label: 'Red', left: '49.4%', hue: '#ff5d63' },
+    { id: 'yellow' as const, label: 'Yellow', left: '60.3%', hue: '#ffd44a' },
+    { id: 'green' as const, label: 'Green', left: '71.1%', hue: '#4ddb7d' },
+  ]
 
-  useEffect(() => () => { if (pointerTimerRef.current) window.clearTimeout(pointerTimerRef.current) }, [])
+  useEffect(() => () => {
+    if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
+  }, [])
 
-  function updatePointer(event: React.PointerEvent) {
-    if (!rootRef.current) return
-    const rect = rootRef.current.getBoundingClientRect()
-    setPointer({
-      x: ((event.clientX - rect.left) / rect.width) * 100,
-      y: ((event.clientY - rect.top) / rect.height) * 100,
-      active: true,
-    })
-    if (pointerTimerRef.current) window.clearTimeout(pointerTimerRef.current)
-    pointerTimerRef.current = window.setTimeout(() => setPointer((current) => ({ ...current, active: false })), 800)
+  function triggerSpark(x: number, y: number, hue: string) {
+    if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
+    setSpark({ key: Date.now(), x, y, hue })
+    sparkTimerRef.current = window.setTimeout(() => setSpark(null), 700)
   }
 
-  function handleRegionClick(region: FlagRegionConfig) {
-    const selected = round.palette[selectedColorIndex]
-    const isCorrect = selected?.color === round.palette[region.correctColorIndex]?.color
-    setFeedback({ state: isCorrect ? 'correct' : 'wrong', at: Date.now(), regionId: region.id })
-    if (!isCorrect) return
-    setCompletedRegions((current) => (current[region.id] === region.correctColorIndex ? current : { ...current, [region.id]: region.correctColorIndex }))
+  function handleOrbSelect(orbId: typeof selectedOrb, x: number, y: number, hue: string) {
+    setSelectedOrb(orbId)
+    triggerSpark(x, y, hue)
+  }
+
+  function handleStripeTap(x: number, y: number) {
+    triggerSpark(x, y, '#ffe08a')
   }
 
   return (
-    <section ref={rootRef} className="flag-challenge-stage relative flex min-h-screen flex-col overflow-hidden text-[#fff7ea]" onPointerMove={updatePointer} onPointerDown={updatePointer}>
-      <div className="flag-challenge-bg" aria-hidden="true">
-        <span className="flag-challenge-cloud flag-challenge-cloud-a" />
-        <span className="flag-challenge-cloud flag-challenge-cloud-b" />
-        <span className="flag-challenge-cloud flag-challenge-cloud-c" />
-        <span className="flag-challenge-spark flag-challenge-spark-a" />
-        <span className="flag-challenge-spark flag-challenge-spark-b" />
-        <span className="flag-challenge-spark flag-challenge-spark-c" />
-      </div>
-      <div className="relative z-10 flex min-h-screen flex-col px-4 pb-4 pt-4 md:px-6 md:pb-5 md:pt-5">
-        <header className="pointer-events-none text-center">
-          <div className="flag-title-ribbon text-[10px] font-black uppercase tracking-[0.7em] text-white/76">FLAG COLOR CHALLENGE</div>
-          <h1 className="mt-2 font-display text-[clamp(3.1rem,8.8vw,7.6rem)] font-black tracking-[0.18em] text-[#fff4d8] drop-shadow-[0_14px_0_rgba(82,51,16,0.16)]">{round.countryName.toUpperCase()}</h1>
-          <p className="mt-2 text-[11px] font-black uppercase tracking-[0.42em] text-white/72">{round.backgroundTagline}</p>
-        </header>
-
-        <div className="relative mt-4 flex flex-1 flex-col items-center justify-center">
-          <div className="flag-stage-backdrop" aria-hidden="true">
-            <div className="flag-stage-sun" />
-            <div className="flag-stage-haze" />
-            <div className="flag-stage-eiffel flag-stage-eiffel-left" />
-            <div className="flag-stage-eiffel flag-stage-eiffel-right" />
-            <div className="flag-stage-dome flag-stage-dome-left" />
-            <div className="flag-stage-dome flag-stage-dome-right" />
-            <div className="flag-stage-cloud flag-stage-cloud-a" />
-            <div className="flag-stage-cloud flag-stage-cloud-b" />
-            <div className="flag-stage-sparkle flag-stage-sparkle-a" />
-            <div className="flag-stage-sparkle flag-stage-sparkle-b" />
-            <div className="flag-stage-sparkle flag-stage-sparkle-c" />
+    <section className="france-play-stage">
+      <div className="france-play-shell">
+        <div className="france-play-stage-frame">
+          <div className="france-play-title-ribbon" aria-hidden="true">
+            FLAG COLOR CHALLENGE
           </div>
-          <div className="flag-stage-panel">
-            <div className="flag-stage-topline">
-              <span>{round.backgroundAccent}</span>
-              <span>{allComplete ? 'COMPLETE' : `${Object.keys(completedRegions).length} / ${round.regions.length} colored`}</span>
+          <div className="france-play-image-shell">
+            <img
+              src="/assets/france-scene.png"
+              alt="France Flag Color Challenge"
+              className="france-play-image"
+              draggable={false}
+            />
+            <div className="france-play-hotspots">
+              <button type="button" aria-label="France blue stripe" className="france-hotspot stripe invisible-hotspot" style={{ left: '29%', top: '17.5%', width: '14.6%', height: '41%' }} onClick={() => handleStripeTap(36.3, 38)} />
+              <button type="button" aria-label="France white stripe" className="france-hotspot stripe invisible-hotspot" style={{ left: '43.6%', top: '17.5%', width: '14.6%', height: '41%' }} onClick={() => handleStripeTap(50.9, 38)} />
+              <button type="button" aria-label="France red stripe" className="france-hotspot stripe invisible-hotspot" style={{ left: '58.2%', top: '17.5%', width: '14.8%', height: '41%' }} onClick={() => handleStripeTap(65.6, 38)} />
+              {orbItems.map((orb) => (
+                <button
+                  key={orb.id}
+                  type="button"
+                  aria-label={`${orb.label} orb`}
+                  aria-pressed={selectedOrb === orb.id}
+                  className={`france-hotspot orb invisible-hotspot ${selectedOrb === orb.id ? 'is-selected' : ''}`}
+                  style={{ left: orb.left, top: '69.5%', width: '13cqh', height: '13cqh' }}
+                  onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), 69.5, orb.hue)}
+                />
+              ))}
+              {navItems.map((nav) => (
+                <button
+                  key={nav.id}
+                  type="button"
+                  aria-label={nav.label}
+                  aria-pressed={activeNav === nav.id}
+                  className={`france-hotspot nav invisible-hotspot ${activeNav === nav.id ? 'is-active' : ''}`}
+                  style={{ left: nav.left, top: '89%', width: '13%', height: '11%' }}
+                  onClick={() => setActiveNav(nav.id)}
+                />
+              ))}
             </div>
-            <div className="relative">
-              <div className="flag-wind-shadow" aria-hidden="true" />
-              <div className="flag-pole" aria-hidden="true" />
-              <svg viewBox="0 0 300 200" className="interactive-flag" aria-label={`${round.countryName} flag`}>
-                <defs>
-                  <linearGradient id="parchment-frame" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#f9d99b" />
-                    <stop offset="50%" stopColor="#b97e35" />
-                    <stop offset="100%" stopColor="#7d4d17" />
-                  </linearGradient>
-                  <linearGradient id="flag-sheen-soft" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(255,255,255,0.38)" />
-                    <stop offset="45%" stopColor="rgba(255,255,255,0.04)" />
-                    <stop offset="100%" stopColor="rgba(255,255,255,0.22)" />
-                  </linearGradient>
-                  <clipPath id="flag-clip">
-                    <rect x="2" y="2" width="296" height="196" rx="18" />
-                  </clipPath>
-                </defs>
-                <rect x="0" y="0" width="300" height="200" rx="20" fill="rgba(55, 30, 10, 0.36)" />
-                <rect x="6" y="6" width="288" height="188" rx="18" fill="#f1e0b4" stroke="url(#parchment-frame)" strokeWidth="4" />
-                <g clipPath="url(#flag-clip)">
-                  <rect x="0" y="0" width="300" height="200" fill="#efe4c0" />
-                  {round.regions.map((region) => {
-                    const isFilled = completedRegions[region.id] === region.correctColorIndex
-                    const fill = isFilled ? round.palette[region.correctColorIndex].color : 'rgba(255, 250, 240, 0.78)'
-                    return (
-                      <g
-                        key={region.id}
-                        className={`interactive-region ${isFilled ? 'is-filled' : ''} ${hoverRegion === region.id ? 'is-hovered' : ''} ${feedback?.regionId === region.id ? feedback.state : ''}`}
-                        onPointerEnter={() => setHoverRegion(region.id)}
-                        onPointerLeave={() => setHoverRegion(null)}
-                        onClick={() => handleRegionClick(region)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault()
-                            handleRegionClick(region)
-                          }
-                        }}
-                      >
-                        {region.shapes.map((shape, index) => renderFlagShape(shape, fill, `${region.id}-${index}`))}
-                        {!isFilled && (
-                          <g className="flag-region-hint">
-                            {region.shapes.map((shape, index) => renderFlagShape(shape, 'rgba(255,255,255,0.05)', `${region.id}-hint-${index}`))}
-                          </g>
-                        )}
-                      </g>
-                    )
-                  })}
-                  <rect x="0.8" y="0.8" width="298.4" height="198.4" rx="18" fill="url(#flag-sheen-soft)" opacity="0.34" pointerEvents="none" />
-                  <path d="M 8 26 C 48 12, 82 18, 120 10 S 198 14, 246 8 S 290 10, 294 24" stroke="rgba(255,255,255,0.22)" strokeWidth="2" fill="none" opacity="0.5" />
-                  <path d="M 8 182 C 44 170, 92 174, 134 182 S 210 190, 258 178 S 286 178, 294 186" stroke="rgba(255,216,129,0.16)" strokeWidth="2" fill="none" opacity="0.5" />
-                </g>
-              </svg>
+            <div className="france-play-ambient" aria-hidden="true">
+              <span className="france-ray france-ray-a" />
+              <span className="france-ray france-ray-b" />
+              <span className="france-glint" />
+              <span className="france-sheen" />
+              <span className="france-sparkle france-sparkle-a" />
+              <span className="france-sparkle france-sparkle-b" />
+              <span className="france-sparkle france-sparkle-c" />
             </div>
-            <div className="mt-4 flex flex-col items-center gap-3">
-              <div className="pencil-chip" aria-hidden="true">
-                <span className="pencil-chip-tip" style={{ background: round.palette[selectedColorIndex]?.color || '#fff' }} />
-                <span className="pencil-chip-body" style={{ background: round.palette[selectedColorIndex]?.color || '#fff' }} />
-                <span className="pencil-chip-label">{round.palette[selectedColorIndex]?.label || 'Select a color'}</span>
-              </div>
-              <div className="palette-row" role="toolbar" aria-label="Flag colors">
-                {selectedPalette.map((item, index) => {
-                  const active = index === selectedColorIndex
-                  return (
-                    <button
-                      key={`${item.label}-${item.color}`}
-                      type="button"
-                      className={`palette-pill ${active ? 'is-active' : ''}`}
-                      style={{ '--palette-color': item.color } as CSSProperties}
-                      aria-pressed={active}
-                      aria-label={item.label}
-                      onClick={() => setSelectedColorIndex(index)}
-                    >
-                      <span className="palette-swatch" />
-                      <span>{item.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-              <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.35em] text-white/82">
-                <span className="rounded-full border border-white/18 bg-white/12 px-4 py-2 backdrop-blur">{round.palette[selectedColorIndex]?.label || 'Select a color'}</span>
-                <span className={`rounded-full border px-4 py-2 backdrop-blur ${allComplete ? 'border-[#ffe59e]/30 bg-[#fff0b6]/18 text-[#fff7c5]' : 'border-white/18 bg-white/12 text-white/82'}`}>{allComplete ? 'Round complete' : 'Tap matching region'}</span>
-              </div>
-              {feedback && (
-                <div className={`flag-feedback ${feedback.state === 'correct' ? 'is-correct' : 'is-wrong'}`}>
-                  {feedback.state === 'correct' ? 'Lovely. That piece shines now.' : 'Almost. Try a different pencil color.'}
-                </div>
-              )}
-            </div>
+            {spark && (
+              <span
+                key={spark.key}
+                className="france-spark-burst"
+                style={{ left: `${spark.x}%`, top: `${spark.y}%`, background: spark.hue }}
+                aria-hidden="true"
+              />
+            )}
           </div>
-          {celebrate && (
-            <div className="flag-celebration" aria-live="polite">
-              <div className="flag-celebration-card">
-                <div className="text-[11px] font-black uppercase tracking-[0.5em] text-[#f3d18d]">ROUND COMPLETE</div>
-                <div className="mt-2 font-display text-4xl font-black text-[#fff6df]">{round.countryName.toUpperCase()}</div>
-                <div className="mt-1 text-sm font-bold uppercase tracking-[0.28em] text-white/74">All regions colored correctly</div>
-              </div>
-            </div>
-          )}
-          <div
-            className={`colored-pencil ${pointer.active ? 'is-visible' : ''} ${allComplete ? 'is-celebrating' : ''}`}
-            style={{ left: `${pointer.x}%`, top: `${pointer.y}%`, '--pencil-color': round.palette[selectedColorIndex]?.color || '#fff' } as CSSProperties}
-            aria-hidden="true"
-          >
-            <span className="colored-pencil-tip" />
-            <span className="colored-pencil-body" />
+          <button
+            type="button"
+            onClick={onBack}
+            className="france-play-back-hitbox invisible-hotspot"
+            aria-label="Back"
+          />
+          <div className="sr-only" aria-live="polite">
+            {selectedOrb.charAt(0).toUpperCase() + selectedOrb.slice(1)} orb selected
           </div>
         </div>
-
-        <nav className="mt-4 flex items-center justify-center gap-2 pb-1 md:gap-3">
-          <button type="button" onClick={onBack} className="nav-pill nav-pill-fantasy">Back</button>
-          <button type="button" onClick={() => setCompletedRegions({})} className="nav-pill nav-pill-fantasy">Reset</button>
-        </nav>
       </div>
     </section>
   )
@@ -440,7 +355,7 @@ function FlagColorSelectScreen({
           />
           <button
             type="button"
-            className="flag-select-hitbox flag-select-back-hitbox"
+            className="flag-select-hitbox flag-select-back-hitbox invisible-hotspot"
             aria-label="Back"
             onPointerDown={() => triggerSparkle('back', 50, 12)}
             onClick={onBack}
@@ -453,7 +368,7 @@ function FlagColorSelectScreen({
                 type="button"
                 aria-label={hitbox.label}
                 aria-pressed={active}
-                className={`flag-select-hitbox ${active ? 'is-active' : ''}`}
+                className={`flag-select-hitbox invisible-hotspot ${active ? 'is-active' : ''}`}
                 style={{ left: `${hitbox.x}%`, top: `${hitbox.y}%`, width: `${hitbox.w}%`, height: `${hitbox.h}%` } as React.CSSProperties}
                 onPointerDown={() => triggerSparkle(hitbox.label, hitbox.x, hitbox.y)}
                 onClick={() => {
@@ -470,7 +385,7 @@ function FlagColorSelectScreen({
                 type="button"
                 aria-label={hitbox.label}
                 aria-pressed={active}
-                className={`flag-select-hitbox flag-select-difficulty-hitbox ${active ? 'is-active' : ''}`}
+                className={`flag-select-hitbox flag-select-difficulty-hitbox invisible-hotspot ${active ? 'is-active' : ''}`}
                 style={{ left: `${hitbox.x}%`, top: `${hitbox.y}%`, width: `${hitbox.w}%`, height: `${hitbox.h}%` } as React.CSSProperties}
                 onPointerDown={() => triggerSparkle(hitbox.label, hitbox.x, hitbox.y)}
                 onClick={() => {
@@ -540,7 +455,7 @@ function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') handlePlayTrigger(event)
             }}
-            className="intro-play-hitbox"
+            className="intro-play-hitbox invisible-hotspot"
             aria-label="Play Ronan's Flag Game"
           />
         </div>

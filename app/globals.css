@@ -418,15 +418,12 @@
 .reference-hitbox {
   position: absolute;
   transform: translate(-50%, -50%);
-  background: transparent;
   border-radius: 12px;
   z-index: 30;
-  outline: none;
-  border: 1px solid transparent;
 }
 .reference-hitbox:focus,
-.reference-hitbox:hover { box-shadow: 0 0 0 6px rgba(255, 214, 102, 0.12); border-color: rgba(255, 214, 102, 0.18); cursor: pointer; }
-.reference-hitbox.is-active { box-shadow: 0 0 18px rgba(94, 144, 255, 0.18); }
+.reference-hitbox:hover { box-shadow: none; border-color: transparent; cursor: pointer; }
+.reference-hitbox.is-active { box-shadow: none; }
 
 /* Reduce visibility of the duplicated CSS UI elements when we use the reference image */
 .home-header,
@@ -497,10 +494,10 @@
 .intro-play-hitbox {
   position: absolute;
   left: 50%;
-  top: 71%;
+  top: 70.5%;
   transform: translate(-50%, -50%);
-  width: min(34%, 17rem);
-  height: min(10.5%, 5.6rem);
+  width: min(29%, 14.5rem);
+  height: min(8.6%, 4.4rem);
   border: 0;
   border-radius: 9999px;
   background: transparent;
@@ -509,6 +506,24 @@
   z-index: 10;
   pointer-events: auto;
   touch-action: manipulation;
+}
+
+.invisible-hotspot {
+  background: transparent;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  color: transparent;
+  font-size: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.invisible-hotspot:focus-visible {
+  outline: 2px solid rgba(255, 232, 158, 0.72);
+  outline-offset: 3px;
 }
 
 .intro-play-hitbox:focus-visible {
@@ -652,24 +667,19 @@
 .flag-select-hitbox {
   position: absolute;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(255, 214, 102, 0);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0);
-  color: transparent;
   cursor: pointer;
   touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
   z-index: 5;
 }
 
 .flag-select-hitbox:hover {
-  border-color: rgba(255, 214, 102, 0.12);
-  box-shadow: 0 0 0 4px rgba(255, 214, 102, 0.08);
-  transform: translate(-50%, -50%) scale(1.02);
+  box-shadow: none;
+  transform: translate(-50%, -50%);
 }
 
 .flag-select-hitbox:active {
-  transform: translate(-50%, -50%) scale(0.985);
+  transform: translate(-50%, -50%);
 }
 
 .flag-select-hitbox:focus-visible {
@@ -678,20 +688,13 @@
 }
 
 .flag-select-hitbox.is-active {
-  border-color: rgba(255, 214, 102, 0.45);
-  box-shadow:
-    0 0 0 3px rgba(255, 214, 102, 0.12),
-    0 0 18px rgba(255, 214, 102, 0.18),
-    inset 0 0 0 999px rgba(255, 231, 170, 0.04);
+  box-shadow: none;
 }
 
 .flag-select-hitbox.is-active:hover,
 .flag-select-hitbox.is-active:focus-visible,
 .flag-select-hitbox.is-active:active {
-  box-shadow:
-    0 0 0 4px rgba(255, 214, 102, 0.16),
-    0 0 22px rgba(255, 214, 102, 0.24),
-    inset 0 0 0 999px rgba(255, 231, 170, 0.06);
+  box-shadow: none;
 }
 
 .flag-select-difficulty-hitbox {
@@ -2081,6 +2084,224 @@
   inset: 3px 8px 3px 10px;
   border-radius: inherit;
   background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0));
+}
+
+.france-play-stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #08060f;
+  color: #fff7ea;
+}
+
+.france-play-shell {
+  width: min(100vw, calc(100vh * 1232 / 864));
+  max-height: 100vh;
+  aspect-ratio: 1232 / 864;
+  display: grid;
+  place-items: center;
+  container-type: size;
+}
+
+.france-play-stage-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.france-play-image-shell {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.france-play-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.france-play-title-ribbon {
+  position: absolute;
+  left: 50%;
+  top: 2.2%;
+  transform: translateX(-50%);
+  z-index: 4;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 236, 173, 0.18);
+  background: linear-gradient(180deg, rgba(100, 71, 30, 0.52), rgba(28, 18, 12, 0.32));
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(255, 245, 224, 0.88);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.14);
+}
+
+.france-play-hotspots,
+.france-play-ambient {
+  position: absolute;
+  inset: 0;
+}
+
+.france-hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.france-hotspot.stripe {
+  border-radius: 10px;
+}
+
+.france-hotspot.orb {
+  border-radius: 9999px;
+}
+
+.france-hotspot.nav {
+  border-radius: 9999px;
+}
+
+.france-hotspot:focus-visible {
+  outline: 2px solid rgba(255, 226, 128, 0.96);
+  outline-offset: 3px;
+}
+
+.france-hotspot.orb.is-selected::after {
+  content: '';
+  position: absolute;
+  inset: -11%;
+  border-radius: inherit;
+  border: 1.5px solid rgba(255, 214, 102, 0.92);
+  box-shadow: 0 0 0 3px rgba(255, 214, 102, 0.14), 0 0 18px rgba(255, 214, 102, 0.34);
+  animation: france-orb-ring 1.6s ease-in-out infinite;
+}
+
+.france-spark-burst {
+  position: absolute;
+  width: clamp(22px, 2.2cqw, 30px);
+  height: clamp(22px, 2.2cqw, 30px);
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  filter: blur(0.3px) drop-shadow(0 0 10px rgba(255, 236, 170, 0.6));
+  animation: france-spark-burst 700ms ease-out forwards;
+}
+
+.france-play-ambient {
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.france-ray,
+.france-sparkle,
+.france-glint,
+.france-sheen {
+  position: absolute;
+}
+
+.france-ray {
+  inset: 0;
+  background:
+    linear-gradient(106deg, rgba(255, 255, 255, 0) 40%, rgba(255, 244, 197, 0.12) 48%, rgba(255, 255, 255, 0) 56%),
+    linear-gradient(74deg, rgba(255, 255, 255, 0) 44%, rgba(255, 220, 142, 0.08) 50%, rgba(255, 255, 255, 0) 56%);
+  mix-blend-mode: screen;
+  opacity: 0.4;
+}
+
+.france-ray-a {
+  animation: france-ray-drift 14s ease-in-out infinite;
+}
+
+.france-ray-b {
+  animation: france-ray-drift-slow 18s ease-in-out infinite;
+}
+
+.france-glint {
+  left: 50%;
+  top: 7%;
+  width: 18%;
+  height: 12%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(255, 246, 214, 0.5), rgba(255, 246, 214, 0) 70%);
+  filter: blur(14px);
+  opacity: 0.55;
+}
+
+.france-sheen {
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0) 18%),
+    radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 0) 38%, rgba(255, 241, 197, 0.06) 58%, rgba(255, 255, 255, 0) 73%);
+  mix-blend-mode: screen;
+  opacity: 0.8;
+}
+
+.france-sparkle {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255, 228, 135, 0.9) 42%, rgba(255, 228, 135, 0) 74%);
+  box-shadow: 0 0 16px rgba(255, 228, 135, 0.7);
+  animation: france-sparkle 4.2s ease-in-out infinite;
+}
+
+.france-sparkle-a { left: 18%; top: 22%; }
+.france-sparkle-b { right: 18%; top: 24%; animation-delay: 0.8s; }
+.france-sparkle-c { left: 58%; top: 14%; animation-delay: 1.6s; }
+
+.france-play-back-hitbox {
+  position: absolute;
+  left: 20.5%;
+  bottom: 1.25%;
+  width: 11.5%;
+  height: 6%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  z-index: 6;
+}
+
+@keyframes france-orb-ring {
+  0%, 100% { transform: scale(0.95); opacity: 0.9; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes france-spark-burst {
+  0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0.2; }
+  30% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+@keyframes france-ray-drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-1.5%); }
+}
+
+@keyframes france-ray-drift-slow {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(1.2%); }
+}
+
+@keyframes france-sparkle {
+  0%, 100% { transform: translateY(0) scale(0.95); opacity: 0.7; }
+  50% { transform: translateY(-8px) scale(1.08); opacity: 1; }
 }
 
 @media (max-width: 767px) {
