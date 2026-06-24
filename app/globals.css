@@ -579,8 +579,7 @@
 }
 
 .flag-select-orbit {
-  border: 1px solid rgba(255, 215, 120, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(255, 248, 224, 0.05);
+  display: none;
 }
 
 .flag-select-orbit-a {
@@ -589,7 +588,8 @@
   width: min(86vw, 44rem);
   height: min(86vw, 44rem);
   transform: translate(-50%, -50%);
-  animation: flag-orbit-spin 24s linear infinite;
+  opacity: 0;
+  animation: none;
 }
 
 .flag-select-orbit-b {
@@ -599,8 +599,8 @@
   height: min(70vw, 36rem);
   transform: translate(-50%, -50%);
   border-style: dashed;
-  opacity: 0.5;
-  animation: flag-orbit-spin-reverse 18s linear infinite;
+  opacity: 0;
+  animation: none;
 }
 
 .flag-select-orbit-c {
@@ -610,12 +610,12 @@
   height: min(52vw, 28rem);
   transform: translate(-50%, -50%);
   border-color: rgba(255, 227, 148, 0.12);
-  animation: flag-orbit-pulse 6s ease-in-out infinite;
+  opacity: 0;
+  animation: none;
 }
 
 .flag-select-spot {
-  filter: blur(20px);
-  opacity: 0.78;
+  display: none;
 }
 
 .flag-select-spot-a {
@@ -2129,21 +2129,7 @@
 }
 
 .france-play-title-ribbon {
-  position: absolute;
-  left: 50%;
-  top: 2.2%;
-  transform: translateX(-50%);
-  z-index: 4;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 236, 173, 0.18);
-  background: linear-gradient(180deg, rgba(100, 71, 30, 0.52), rgba(28, 18, 12, 0.32));
-  font-size: 0.58rem;
-  font-weight: 900;
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: rgba(255, 245, 224, 0.88);
-  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.14);
+  display: none;
 }
 
 .france-play-hotspots,
@@ -2181,11 +2167,11 @@
 .france-hotspot.orb.is-selected::after {
   content: '';
   position: absolute;
-  inset: -11%;
+  inset: -4%;
   border-radius: inherit;
-  border: 1.5px solid rgba(255, 214, 102, 0.92);
-  box-shadow: 0 0 0 3px rgba(255, 214, 102, 0.14), 0 0 18px rgba(255, 214, 102, 0.34);
-  animation: france-orb-ring 1.6s ease-in-out infinite;
+  border: 1px solid rgba(255, 214, 102, 0.72);
+  box-shadow: 0 0 0 2px rgba(255, 214, 102, 0.08), 0 0 10px rgba(255, 214, 102, 0.2);
+  animation: france-orb-ring 2.4s ease-in-out infinite;
 }
 
 .france-spark-burst {
@@ -2279,8 +2265,8 @@
 }
 
 @keyframes france-orb-ring {
-  0%, 100% { transform: scale(0.95); opacity: 0.9; }
-  50% { transform: scale(1.08); opacity: 1; }
+  0%, 100% { transform: scale(0.98); opacity: 0.78; }
+  50% { transform: scale(1.02); opacity: 0.95; }
 }
 
 @keyframes france-spark-burst {
