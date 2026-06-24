@@ -2167,11 +2167,14 @@
 .france-hotspot.orb.is-selected::after {
   content: '';
   position: absolute;
-  inset: -4%;
+  inset: 8%;
   border-radius: inherit;
-  border: 1px solid rgba(255, 214, 102, 0.72);
-  box-shadow: 0 0 0 2px rgba(255, 214, 102, 0.08), 0 0 10px rgba(255, 214, 102, 0.2);
-  animation: france-orb-ring 2.4s ease-in-out infinite;
+  border: 1px solid rgba(255, 228, 156, 0.92);
+  box-shadow:
+    inset 0 0 10px rgba(255, 236, 170, 0.26),
+    0 0 0 1px rgba(255, 214, 102, 0.08);
+  pointer-events: none;
+  animation: france-orb-rim 1.6s ease-in-out infinite;
 }
 
 .france-spark-burst {
@@ -2264,9 +2267,9 @@
   z-index: 6;
 }
 
-@keyframes france-orb-ring {
-  0%, 100% { transform: scale(0.98); opacity: 0.78; }
-  50% { transform: scale(1.02); opacity: 0.95; }
+@keyframes france-orb-rim {
+  0%, 100% { opacity: 0.72; box-shadow: inset 0 0 8px rgba(255, 236, 170, 0.22), 0 0 0 1px rgba(255, 214, 102, 0.06); }
+  50% { opacity: 1; box-shadow: inset 0 0 12px rgba(255, 236, 170, 0.34), 0 0 0 1px rgba(255, 214, 102, 0.12); }
 }
 
 @keyframes france-spark-burst {
