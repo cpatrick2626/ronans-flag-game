@@ -494,10 +494,10 @@
 .intro-play-hitbox {
   position: absolute;
   left: 50%;
-  top: 70.5%;
+  top: 77.5%;
   transform: translate(-50%, -50%);
-  width: min(29%, 14.5rem);
-  height: min(8.6%, 4.4rem);
+  width: min(38%, 18rem);
+  height: min(13%, 6.4rem);
   border: 0;
   border-radius: 9999px;
   background: transparent;
