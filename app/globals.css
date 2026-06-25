@@ -2174,7 +2174,7 @@
     inset 0 0 10px rgba(255, 236, 170, 0.26),
     0 0 0 1px rgba(255, 214, 102, 0.08);
   pointer-events: none;
-  animation: france-orb-rim 1.6s ease-in-out infinite;
+  animation: france-orb-rim 0.8s ease-in-out infinite alternate;
 }
 
 .france-spark-burst {
@@ -2211,11 +2211,13 @@
 }
 
 .france-ray-a {
-  animation: france-ray-drift 14s ease-in-out infinite;
+  animation: none;
+  transform: translateX(0);
 }
 
 .france-ray-b {
-  animation: france-ray-drift-slow 18s ease-in-out infinite;
+  animation: none;
+  transform: translateX(0);
 }
 
 .france-glint {
@@ -2244,7 +2246,8 @@
   border-radius: 9999px;
   background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255, 228, 135, 0.9) 42%, rgba(255, 228, 135, 0) 74%);
   box-shadow: 0 0 16px rgba(255, 228, 135, 0.7);
-  animation: france-sparkle 4.2s ease-in-out infinite;
+  animation: none;
+  opacity: 0;
 }
 
 .france-sparkle-a { left: 18%; top: 22%; }
@@ -2268,8 +2271,8 @@
 }
 
 @keyframes france-orb-rim {
-  0%, 100% { opacity: 0.72; box-shadow: inset 0 0 8px rgba(255, 236, 170, 0.22), 0 0 0 1px rgba(255, 214, 102, 0.06); }
-  50% { opacity: 1; box-shadow: inset 0 0 12px rgba(255, 236, 170, 0.34), 0 0 0 1px rgba(255, 214, 102, 0.12); }
+  from { opacity: 0.72; box-shadow: inset 0 0 8px rgba(255, 236, 170, 0.22), 0 0 0 1px rgba(255, 214, 102, 0.06); }
+  to { opacity: 1; box-shadow: inset 0 0 12px rgba(255, 236, 170, 0.34), 0 0 0 1px rgba(255, 214, 102, 0.12); }
 }
 
 @keyframes france-spark-burst {
