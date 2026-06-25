@@ -73,6 +73,30 @@ Avoid:
 - animations running constantly when they should be triggered
 - changing unrelated screens
 
+## Design Skill Picker
+
+For frontend, UI, and design tasks, ask which design skill to use unless the task already names one.
+
+Available design skills:
+
+- `frontend-design` - `C:\Users\ChrisPatrick\.agents\skills\frontend-design\SKILL.md`
+- `gpt-taste` - `C:\Users\ChrisPatrick\.agents\skills\gpt-taste\SKILL.md`
+- `design-taste-frontend` - `C:\Users\ChrisPatrick\.agents\skills\design-taste-frontend\SKILL.md`
+- `high-end-visual-design` - `C:\Users\ChrisPatrick\.agents\skills\high-end-visual-design\SKILL.md`
+- `redesign-existing-projects` - `C:\Users\ChrisPatrick\.agents\skills\redesign-existing-projects\SKILL.md`
+- `webapp-testing` - `C:\Users\ChrisPatrick\.agents\skills\webapp-testing\SKILL.md`
+
+Ronan-specific priorities always win:
+
+- kid-friendly clarity
+- magical geography style
+- approved reference/screenshot parity
+- asset-first France screen preservation
+- no design drift
+- no gameplay logic changes unless explicitly requested
+- no building more countries until the current country/gameplay loop is correct
+- small finishable tasks only
+
 ## Default Completion Loop
 
 For every coding, repo, audit, validation, or docs task, the agent must automatically run a complete goal/build/validate/self-judge loop.
