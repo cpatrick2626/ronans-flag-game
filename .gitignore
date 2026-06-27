@@ -8,3 +8,5 @@ dist/
 *.log
 tsconfig.tsbuildinfo
 .DS_Store
+test-results/
+playwright-report/
