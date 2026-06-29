@@ -417,6 +417,13 @@ function FlagColorSelectScreen({
 
 function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean }) {
   const playLockRef = useRef(false)
+  const videoARef = useRef<HTMLVideoElement | null>(null)
+  const videoBRef = useRef<HTMLVideoElement | null>(null)
+  const activeVideoRef = useRef<0 | 1>(0)
+  const [activeVideo, setActiveVideo] = useState<0 | 1>(0)
+  const [readyVideos, setReadyVideos] = useState<{ 0: boolean; 1: boolean }>({ 0: false, 1: false })
+  const loopSwapLockRef = useRef(false)
+  const restartDelayRef = useRef<number | null>(null)
 
   function handlePlayTrigger(event: React.SyntheticEvent) {
     event.preventDefault()
@@ -425,36 +432,107 @@ function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean
     onPlay()
   }
 
+  function getVideo(index: 0 | 1) {
+    return index === 0 ? videoARef.current : videoBRef.current
+  }
+
+  function resetVideo(video: HTMLVideoElement | null) {
+    if (!video) return
+    video.pause()
+    video.currentTime = 0
+  }
+
+  function playVideo(video: HTMLVideoElement | null) {
+    if (!video) return
+    const maybePromise = video.play()
+    if (maybePromise && typeof maybePromise.catch === 'function') {
+      void maybePromise.catch(() => void 0)
+    }
+  }
+
+  function switchTo(index: 0 | 1) {
+    const current = getVideo(activeVideoRef.current)
+    const next = getVideo(index)
+    if (!next || current === next) return
+    resetVideo(current)
+    setActiveVideo(index)
+    activeVideoRef.current = index
+    playVideo(next)
+  }
+
+  function handleVideoCanPlay(index: 0 | 1) {
+    setReadyVideos((current) => ({ ...current, [index]: true }))
+    if (index !== activeVideoRef.current) return
+    playVideo(getVideo(index))
+  }
+
+  function handleVideoTimeUpdate(index: 0 | 1) {
+    if (index !== activeVideoRef.current || loopSwapLockRef.current) return
+    const video = getVideo(index)
+    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return
+    const remaining = video.duration - video.currentTime
+    if (remaining > 0.18) return
+    loopSwapLockRef.current = true
+    const nextIndex: 0 | 1 = index === 0 ? 1 : 0
+    const nextVideo = getVideo(nextIndex)
+    if (!nextVideo) return
+    resetVideo(nextVideo)
+    nextVideo.currentTime = 0
+    setActiveVideo(nextIndex)
+    activeVideoRef.current = nextIndex
+    playVideo(nextVideo)
+    restartDelayRef.current = window.setTimeout(() => {
+      resetVideo(video)
+      loopSwapLockRef.current = false
+    }, 260)
+  }
+
+  useEffect(() => {
+    if (readyVideos[activeVideo]) playVideo(getVideo(activeVideo))
+  }, [activeVideo, readyVideos])
+
+  useEffect(() => () => {
+    if (restartDelayRef.current) window.clearTimeout(restartDelayRef.current)
+  }, [])
+
   return (
-    <div
-      className={`intro-screen-container ${exiting ? 'intro-screen-exiting' : ''}`}
-      role="button"
-      tabIndex={0}
-      aria-label="Play Ronan's Flag Game"
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault()
-          onPlay()
-        }
-      }}
-    >
+    <div className={`intro-screen-container ${exiting ? 'intro-screen-exiting' : ''}`}>
       <div className="intro-screen-video-shell">
         <div className="intro-screen-video-frame">
           <video
+            ref={videoARef}
             autoPlay
             muted
             loop
             playsInline
+            preload="auto"
             className="intro-screen-video"
             src="/assets/loading/ronans-loading-screen.mp4"
+            aria-hidden={activeVideo !== 0}
+            style={{ opacity: activeVideo === 0 ? 1 : 0, transition: 'opacity 180ms linear' }}
+            onCanPlay={() => handleVideoCanPlay(0)}
+            onTimeUpdate={() => handleVideoTimeUpdate(0)}
+            onEnded={() => switchTo(1)}
+          />
+          <video
+            ref={videoBRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="intro-screen-video intro-screen-video-layer"
+            src="/assets/loading/ronans-loading-screen.mp4"
+            aria-hidden={activeVideo !== 1}
+            style={{ opacity: activeVideo === 1 ? 1 : 0, transition: 'opacity 180ms linear' }}
+            onCanPlay={() => handleVideoCanPlay(1)}
+            onTimeUpdate={() => handleVideoTimeUpdate(1)}
+            onEnded={() => switchTo(0)}
           />
           <button
             type="button"
             onPointerDown={handlePlayTrigger}
             onClick={handlePlayTrigger}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') handlePlayTrigger(event)
-            }}
             className="intro-play-hitbox invisible-hotspot"
             aria-label="Play Ronan's Flag Game"
           />
