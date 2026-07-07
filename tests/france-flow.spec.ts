@@ -53,12 +53,62 @@ test('France challenge flow: entry, orbs, stripes, back navigation', async ({ pa
   await expect(redOrb).toHaveAttribute('aria-pressed', 'true');
   await expect(blueOrb).toHaveAttribute('aria-pressed', 'false');
 
-  // Stripe hotspots respond
-  await page.getByRole('button', { name: 'France blue stripe' }).click();
-  await page.getByRole('button', { name: 'France white stripe' }).click();
-  await page.getByRole('button', { name: 'France red stripe' }).click();
+  // Flag regions respond (they idle-animate, so force past the stability check)
+  await page.getByRole('button', { name: 'France blue stripe' }).click({ force: true });
+  await page.getByRole('button', { name: 'France white stripe' }).click({ force: true });
+  await page.getByRole('button', { name: 'France red stripe' }).click({ force: true });
 
   // Back to select screen, then back to home
+  await page.getByRole('button', { name: 'Back', exact: true }).first().click();
+  await expect(page.getByRole('button', { name: 'PLAY SOLO' })).toBeVisible();
+  await page.getByRole('button', { name: 'Back', exact: true }).first().click();
+  await expect(page.getByRole('button', { name: 'Flag Color Challenge' })).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
+test('France gameplay: wrong feedback, correct fills, completion, reset', async ({ page }) => {
+  await page.setViewportSize(viewports[0]);
+  const errors: string[] = [];
+  await playThroughToFrance(page, errors);
+
+  const blueStripe = page.getByRole('button', { name: 'France blue stripe' });
+  const whiteStripe = page.getByRole('button', { name: 'France white stripe' });
+  const redStripe = page.getByRole('button', { name: 'France red stripe' });
+
+  // Wrong color: yellow on the blue stripe shakes and does not fill
+  await page.getByRole('button', { name: 'Yellow orb' }).click();
+  await blueStripe.click({ force: true });
+  await expect(blueStripe).toHaveClass(/wrong/);
+  await expect(blueStripe).not.toHaveClass(/is-filled/);
+
+  // Correct colors fill each region
+  await page.getByRole('button', { name: 'Blue orb' }).click();
+  await blueStripe.click({ force: true });
+  await expect(blueStripe).toHaveClass(/is-filled/);
+  await page.getByRole('button', { name: 'White orb' }).click();
+  await whiteStripe.click({ force: true });
+  await expect(whiteStripe).toHaveClass(/is-filled/);
+  await page.getByRole('button', { name: 'Red orb' }).click();
+  await redStripe.click({ force: true });
+  await expect(redStripe).toHaveClass(/is-filled/);
+
+  // Completion card, then the reward flow triggers automatically exactly once
+  await expect(page.getByText('FLAG COMPLETE')).toBeVisible();
+  await expect(page.getByText('COUNTRY DISCOVERED')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('COUNTRY DISCOVERED')).toHaveCount(1);
+  // The celebration card animates continuously, so force past the stability check
+  await page.getByRole('button', { name: 'Continue' }).click({ force: true });
+  await expect(page.getByText('COUNTRY DISCOVERED')).toHaveCount(0);
+
+  // Re-entering the challenge resets the round
+  await page.getByRole('button', { name: 'Back', exact: true }).first().click();
+  await expect(page.getByRole('button', { name: 'PLAY SOLO' })).toBeVisible();
+  await page.getByRole('button', { name: 'PLAY SOLO' }).click();
+  await expect(page.getByAltText('France Flag Color Challenge')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'France blue stripe' })).not.toHaveClass(/is-filled/);
+
+  // Back navigation still works after a completed round
   await page.getByRole('button', { name: 'Back', exact: true }).first().click();
   await expect(page.getByRole('button', { name: 'PLAY SOLO' })).toBeVisible();
   await page.getByRole('button', { name: 'Back', exact: true }).first().click();

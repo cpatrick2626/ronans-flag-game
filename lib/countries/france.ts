@@ -12,11 +12,9 @@ export const FRANCE: CountryChallengeConfig = {
     image: '/assets/france-scene.png',
     imageAlt: 'France Flag Color Challenge',
     titleRibbon: 'FLAG COLOR CHALLENGE',
-    regionHotspots: [
-      { id: 'left', label: 'France blue stripe', left: '29%', top: '17.5%', width: '14.6%', height: '41%', spark: { x: 36.3, y: 38 } },
-      { id: 'middle', label: 'France white stripe', left: '43.6%', top: '17.5%', width: '14.6%', height: '41%', spark: { x: 50.9, y: 38 } },
-      { id: 'right', label: 'France red stripe', left: '58.2%', top: '17.5%', width: '14.8%', height: '41%', spark: { x: 65.6, y: 38 } },
-    ],
+    // Covers the baked flag inside the gold frame (measured against the
+    // 1232x864 scene art: x 357-872, y 165-498).
+    flagOverlay: { left: '29%', top: '19.1%', width: '41.75%', height: '38.6%' },
     regionSparkHue: '#ffe08a',
     orbs: [
       { id: 'blue', label: 'Blue', left: '27.6%', hue: '#4aa6ff' },
@@ -52,9 +50,9 @@ export const FRANCE: CountryChallengeConfig = {
       { label: 'Green', color: '#3AA655' },
     ],
     regions: [
-      { id: 'left', label: 'Left stripe', correctColorIndex: 0, shapes: [{ t: 'rect', x: 0, y: 0, w: 100, h: 200 }] },
-      { id: 'middle', label: 'Middle stripe', correctColorIndex: 1, shapes: [{ t: 'rect', x: 100, y: 0, w: 100, h: 200 }] },
-      { id: 'right', label: 'Right stripe', correctColorIndex: 2, shapes: [{ t: 'rect', x: 200, y: 0, w: 100, h: 200 }] },
+      { id: 'left', label: 'France blue stripe', correctColorIndex: 0, shapes: [{ t: 'rect', x: 0, y: 0, w: 100, h: 200 }] },
+      { id: 'middle', label: 'France white stripe', correctColorIndex: 1, shapes: [{ t: 'rect', x: 100, y: 0, w: 100, h: 200 }] },
+      { id: 'right', label: 'France red stripe', correctColorIndex: 2, shapes: [{ t: 'rect', x: 200, y: 0, w: 100, h: 200 }] },
     ],
   },
   celebration: { confettiColors: ['#0055A4', '#FFFFFF', '#EF4135'], particleShape: 'diamond', soundHook: 'victory_france', themeLabel: 'French victory' },

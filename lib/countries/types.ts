@@ -17,17 +17,14 @@ export type FlagRegionConfig = {
   shapes: FlagShape[]
 }
 
-// Invisible hotspot over a flag region in the country scene artwork.
-// left/top/width/height are CSS values relative to the scene image;
-// spark is the percentage point where the tap sparkle bursts.
-export type SceneRegionHotspot = {
-  id: string
-  label: string
+// Interactive flag overlay placed over the baked flag in the scene artwork.
+// left/top/width/height are percentages of the scene image (top-left origin);
+// the overlay conceals the painted flag and hosts the colorable SVG regions.
+export type SceneFlagOverlay = {
   left: string
   top: string
   width: string
   height: string
-  spark: { x: number; y: number }
 }
 
 export type SceneOrb = { id: string; label: string; left: string; hue: string }
@@ -39,7 +36,7 @@ export type ChallengeScene = {
   image: string
   imageAlt: string
   titleRibbon: string
-  regionHotspots: SceneRegionHotspot[]
+  flagOverlay: SceneFlagOverlay
   regionSparkHue: string
   orbs: SceneOrb[]
   defaultOrbId: string

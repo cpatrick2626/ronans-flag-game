@@ -98,22 +98,50 @@ function renderFlagShape(shape: FlagRegionConfig['shapes'][number], fill: string
 function FlagColorChallengeGame({
   config,
   onBack,
+  onComplete,
 }: {
   config: CountryChallengeConfig
   onBack: () => void
+  onComplete: () => void
 }) {
   const scene = config.scene
+  const round = config.round
   const [selectedOrb, setSelectedOrb] = useState(scene.defaultOrbId)
   const [activeNav, setActiveNav] = useState(scene.defaultNavId)
   const [spark, setSpark] = useState<{ key: number; x: number; y: number; hue: string } | null>(null)
+  const [filledRegions, setFilledRegions] = useState<Record<string, boolean>>({})
+  const [regionFeedback, setRegionFeedback] = useState<{ regionId: string; state: 'correct' | 'wrong'; at: number } | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
+  const [pointer, setPointer] = useState({ x: 50, y: 50, active: false, pressing: false })
   const sparkTimerRef = useRef<number | null>(null)
+  const pointerTimerRef = useRef<number | null>(null)
+  const pressTimerRef = useRef<number | null>(null)
+  const completionFiredRef = useRef(false)
+  const stageRef = useRef<HTMLElement | null>(null)
+  const shellRef = useRef<HTMLDivElement | null>(null)
 
   const navItems = scene.nav
   const orbItems = scene.orbs
+  const selectedOrbHue = orbItems.find((orb) => orb.id === selectedOrb)?.hue || '#ffffff'
+  const allComplete = round.regions.every((region) => filledRegions[region.id])
 
   useEffect(() => () => {
     if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
+    if (pointerTimerRef.current) window.clearTimeout(pointerTimerRef.current)
+    if (pressTimerRef.current) window.clearTimeout(pressTimerRef.current)
   }, [])
+
+  useEffect(() => {
+    if (!allComplete || completionFiredRef.current) return
+    completionFiredRef.current = true
+    setCelebrate(true)
+    const rewardTimer = window.setTimeout(() => onComplete(), 1600)
+    const cardTimer = window.setTimeout(() => setCelebrate(false), 2400)
+    return () => {
+      window.clearTimeout(rewardTimer)
+      window.clearTimeout(cardTimer)
+    }
+  }, [allComplete, onComplete])
 
   function triggerSpark(x: number, y: number, hue: string) {
     if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
@@ -121,40 +149,115 @@ function FlagColorChallengeGame({
     sparkTimerRef.current = window.setTimeout(() => setSpark(null), 700)
   }
 
+  function updatePointer(event: React.PointerEvent) {
+    const stage = stageRef.current
+    if (!stage) return
+    const rect = stage.getBoundingClientRect()
+    setPointer((current) => ({
+      ...current,
+      x: ((event.clientX - rect.left) / rect.width) * 100,
+      y: ((event.clientY - rect.top) / rect.height) * 100,
+      active: true,
+    }))
+    if (pointerTimerRef.current) window.clearTimeout(pointerTimerRef.current)
+    pointerTimerRef.current = window.setTimeout(() => setPointer((current) => ({ ...current, active: false })), 900)
+  }
+
+  function pressPencil(event: React.PointerEvent) {
+    updatePointer(event)
+    setPointer((current) => ({ ...current, pressing: true }))
+    if (pressTimerRef.current) window.clearTimeout(pressTimerRef.current)
+    pressTimerRef.current = window.setTimeout(() => setPointer((current) => ({ ...current, pressing: false })), 180)
+  }
+
   function handleOrbSelect(orbId: string, x: number, y: number, hue: string) {
     setSelectedOrb(orbId)
     triggerSpark(x, y, hue)
   }
 
-  function handleStripeTap(x: number, y: number) {
-    triggerSpark(x, y, scene.regionSparkHue)
+  function handleRegionTap(region: FlagRegionConfig, event: React.MouseEvent | null) {
+    if (filledRegions[region.id]) return
+    const selectedPaletteIndex = round.palette.findIndex((entry) => entry.label.toLowerCase() === selectedOrb)
+    const isCorrect = selectedPaletteIndex === region.correctColorIndex
+    setRegionFeedback({ regionId: region.id, state: isCorrect ? 'correct' : 'wrong', at: Date.now() })
+    if (!isCorrect) return
+    setFilledRegions((current) => ({ ...current, [region.id]: true }))
+    const shell = shellRef.current
+    if (event && shell) {
+      const rect = shell.getBoundingClientRect()
+      triggerSpark(((event.clientX - rect.left) / rect.width) * 100, ((event.clientY - rect.top) / rect.height) * 100, scene.regionSparkHue)
+    }
   }
 
   return (
-    <section className="france-play-stage">
+    <section
+      ref={stageRef}
+      className="france-play-stage"
+      onPointerMove={updatePointer}
+      onPointerDown={pressPencil}
+    >
       <div className="france-play-shell">
         <div className="france-play-stage-frame">
           <div className="france-play-title-ribbon" aria-hidden="true">
             {scene.titleRibbon}
           </div>
-          <div className="france-play-image-shell">
+          <div className="france-play-image-shell" ref={shellRef}>
             <img
               src={scene.image}
               alt={scene.imageAlt}
               className="france-play-image"
               draggable={false}
             />
+            <div
+              className="challenge-flag-overlay"
+              style={{ left: scene.flagOverlay.left, top: scene.flagOverlay.top, width: scene.flagOverlay.width, height: scene.flagOverlay.height }}
+            >
+              <svg viewBox="0 0 300 200" preserveAspectRatio="none" className="challenge-flag-svg" aria-label={`${config.name} flag to color`}>
+                <defs>
+                  <clipPath id="challenge-flag-clip">
+                    <rect x="0" y="0" width="300" height="200" rx="10" />
+                  </clipPath>
+                  <linearGradient id="challenge-flag-sheen" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
+                    <stop offset="45%" stopColor="rgba(255,255,255,0.04)" />
+                    <stop offset="100%" stopColor="rgba(255,255,255,0.18)" />
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="300" height="200" rx="10" fill="#e9dcb7" />
+                <g clipPath="url(#challenge-flag-clip)">
+                  {round.regions.map((region) => {
+                    const isFilled = !!filledRegions[region.id]
+                    const fill = isFilled ? round.palette[region.correctColorIndex].color : 'rgba(249, 242, 222, 0.92)'
+                    const feedbackState = regionFeedback?.regionId === region.id ? regionFeedback.state : ''
+                    return (
+                      <g
+                        key={`${region.id}-${feedbackState ? regionFeedback?.at : 'idle'}`}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={region.label}
+                        className={`interactive-region ${isFilled ? 'is-filled' : ''} ${feedbackState}`}
+                        onClick={(event) => handleRegionTap(region, event)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            handleRegionTap(region, null)
+                          }
+                        }}
+                      >
+                        {region.shapes.map((shape, index) => renderFlagShape(shape, fill, `${region.id}-${index}`))}
+                        {!isFilled && (
+                          <g className="flag-region-hint">
+                            {region.shapes.map((shape, index) => renderFlagShape(shape, 'rgba(255,255,255,0.05)', `${region.id}-hint-${index}`))}
+                          </g>
+                        )}
+                      </g>
+                    )
+                  })}
+                  <rect x="0" y="0" width="300" height="200" rx="10" fill="url(#challenge-flag-sheen)" opacity="0.35" pointerEvents="none" />
+                </g>
+              </svg>
+            </div>
             <div className="france-play-hotspots">
-              {scene.regionHotspots.map((region) => (
-                <button
-                  key={region.id}
-                  type="button"
-                  aria-label={region.label}
-                  className="france-hotspot stripe invisible-hotspot"
-                  style={{ left: region.left, top: region.top, width: region.width, height: region.height }}
-                  onClick={() => handleStripeTap(region.spark.x, region.spark.y)}
-                />
-              ))}
               {orbItems.map((orb) => (
                 <button
                   key={orb.id}
@@ -195,6 +298,14 @@ function FlagColorChallengeGame({
                 aria-hidden="true"
               />
             )}
+            {celebrate && (
+              <div className="flag-celebration" aria-live="polite">
+                <div className="flag-celebration-card">
+                  <div className="text-[11px] font-black uppercase tracking-[0.5em] text-[#f3d18d]">FLAG COMPLETE</div>
+                  <div className="mt-2 font-display text-4xl font-black text-[#fff6df]">{config.name.toUpperCase()}</div>
+                </div>
+              </div>
+            )}
           </div>
           <button
             type="button"
@@ -206,6 +317,14 @@ function FlagColorChallengeGame({
             {selectedOrb.charAt(0).toUpperCase() + selectedOrb.slice(1)} orb selected
           </div>
         </div>
+      </div>
+      <div
+        className={`colored-pencil ${pointer.active ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${allComplete ? 'is-celebrating' : ''}`}
+        style={{ left: `${pointer.x}%`, top: `${pointer.y}%`, '--pencil-color': selectedOrbHue } as CSSProperties}
+        aria-hidden="true"
+      >
+        <span className="colored-pencil-tip" />
+        <span className="colored-pencil-body" />
       </div>
     </section>
   )
@@ -717,6 +836,7 @@ export default function FlagGamePage() {
   function startSolo() { playSound('arrival_theme'); setActiveCountryCode(resolvePlayableChallenge(activeCountryCode).iso2); setScreen('flag-color-challenge') }
   function colorRegion(regionId: string) { if (!palette.length) return; const region = country.flag_regions.find((item: any) => item.id === regionId); const isCorrect = region ? selectedColorIndex === region.color : false; setPaintFeedback((current) => ({ ...current, [regionId]: { state: isCorrect ? 'correct' : 'wrong', at: Date.now() } })); setColorState((current) => ({ ...current, [activeCountryCode]: { ...(current[activeCountryCode] || {}), [regionId]: selectedColorIndex } })) }
   function completeFlag() { if (!allRegionsFilled || completed) return; const result = completeCountry(activeCountryCode, progress, { stars: perfectFlag ? 3 : 2, completedAt: new Date().toISOString() }); setProgress(result.progress); setReward(result.reward) }
+  function completeChallengeRound() { if (completed) return; const result = completeCountry(activeCountryCode, progress, { stars: 3, completedAt: new Date().toISOString() }); setProgress(result.progress); setReward(result.reward) }
   function nextCountry() { const index = COUNTRIES.findIndex((item) => item.iso2 === activeCountryCode); const next = COUNTRIES[(index + 1) % COUNTRIES.length]; setActiveCountryCode(next.iso2); setReward(null); setScreen('country-arrival') }
   function createRoom(modeChoice: Exclude<Mode, 'solo'>) { const next = makeRoom(modeChoice, playerName, activeCountryCode); updateRoom(next, 'created', 'waiting-room'); setMode(modeChoice) }
   function joinRoom() { const existing = loadRoom(); if (!existing || existing.code !== roomCodeInput.trim().toUpperCase()) return; const joined: RoomState = { ...existing, guestName: playerName, status: 'active', updatedAt: new Date().toISOString() }; updateRoom(joined, 'joined'); setMode(joined.mode); setScreen(joined.mode === 'coop' ? 'coop' : 'versus') }
@@ -803,6 +923,7 @@ export default function FlagGamePage() {
           <FlagColorChallengeGame
             config={activeChallengeConfig}
             onBack={() => setScreen('play')}
+            onComplete={completeChallengeRound}
           />
         )}
 
