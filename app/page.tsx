@@ -3,13 +3,12 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { COUNTRIES, COUNTRY_BY_ISO2 } from '../public/countries.js'
 import { completeCountry, getCountryProgress, loadFlagProgress } from '../public/flag-progress.js'
+import { DEFAULT_CHALLENGE_ISO2, MAP_PINS, getCelebrationProfile, resolvePlayableChallenge, type CompletionSoundHook, type CountryChallengeConfig, type FlagRegionConfig } from '../lib/countries'
 
 type Screen = 'loading' | 'home' | 'country-arrival' | 'play' | 'flag-color-challenge' | 'create-room' | 'join-room' | 'waiting-room' | 'coop' | 'versus'
 type Mode = 'solo' | 'coop' | 'versus'
 type ChallengeDifficulty = 'easy' | 'medium' | 'hard' | 'expert'
 type RewardStage = 'stamp' | 'souvenir' | 'stars' | 'xp' | 'done'
-type CompletionSoundHook = 'button_click' | 'correct_fill' | 'wrong_fill' | 'stamp_thump' | 'country_complete' | 'arrival_theme' | 'home_theme' | 'victory_default' | 'victory_france' | 'victory_japan' | 'victory_brazil' | 'victory_egypt'
-type CelebrationProfile = { confettiColors: string[]; particleShape: 'dot' | 'petal' | 'diamond'; soundHook: CompletionSoundHook; themeLabel?: string }
 type RoomStatus = 'waiting' | 'ready' | 'active'
 type PaintFeedback = { state: 'correct' | 'wrong'; at: number }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
@@ -23,18 +22,10 @@ const ACTIVE_COUNTRY_KEY = 'flag_game_v1_active_country'
 const ROOM_STORAGE_KEY = 'ronan_flag_room'
 const ROOM_CHANNEL = 'ronan-flag-room-sync'
 
-const GLOBAL_CELEBRATION: CelebrationProfile = { confettiColors: ['#f59e0b', '#38bdf8', '#22c55e'], particleShape: 'dot', soundHook: 'victory_default' }
-const CELEBRATION_BY_COUNTRY: Record<string, CelebrationProfile> = {
-  FR: { confettiColors: ['#0055A4', '#FFFFFF', '#EF4135'], particleShape: 'diamond', soundHook: 'victory_france', themeLabel: 'French victory' },
-  JP: { confettiColors: ['#D4002A', '#FFFFFF', '#F5B7C4'], particleShape: 'petal', soundHook: 'victory_japan', themeLabel: 'Cherry blossom victory' },
-  BR: { confettiColors: ['#009C3B', '#FFDF00', '#002776'], particleShape: 'diamond', soundHook: 'victory_brazil', themeLabel: 'Carnival victory' },
-  EG: { confettiColors: ['#C8A04A', '#D8C7A1', '#123B7A'], particleShape: 'dot', soundHook: 'victory_egypt', themeLabel: 'Desert victory' },
-}
-
 function safeStorageGet(key: string) { if (typeof window === 'undefined') return null; return window.localStorage.getItem(key) }
 function safeStorageSet(key: string, value: string) { if (typeof window === 'undefined') return; window.localStorage.setItem(key, value) }
 function isValidCountryCode(code?: string | null) { return !!code && !!COUNTRY_BY_ISO2[code] }
-function getInitialCountry() { const saved = safeStorageGet(ACTIVE_COUNTRY_KEY); return isValidCountryCode(saved) ? (saved as string) : 'FR' }
+function getInitialCountry() { const saved = safeStorageGet(ACTIVE_COUNTRY_KEY); return isValidCountryCode(saved) ? (saved as string) : DEFAULT_CHALLENGE_ISO2 }
 function getCountryLanguage(country: (typeof COUNTRIES)[number]) { return country.languages?.[0] || 'Unknown' }
 function getCountryFunFact(country: (typeof COUNTRIES)[number]) { return country.fun_facts?.find((fact: string) => fact?.trim()) || country.landmark?.trim() || `${country.name} is in ${country.continent}.` }
 function roomCode() { return Math.random().toString(36).slice(2, 8).toUpperCase() }
@@ -97,44 +88,6 @@ function formatPercent(value: number) {
 function useRoomChannel(onSnapshot: (room: RoomState) => void) { const channelRef = useRef<BroadcastChannel | null>(null); useEffect(() => { if (typeof window === 'undefined') return; const onStorage = (event: StorageEvent) => { if (event.key !== ROOM_STORAGE_KEY || !event.newValue) return; try { onSnapshot(JSON.parse(event.newValue) as RoomState) } catch {} }; window.addEventListener('storage', onStorage); if ('BroadcastChannel' in window) { const channel = new BroadcastChannel(ROOM_CHANNEL); channel.onmessage = (event) => { const payload = event.data as RoomSnapshot | null; if (payload?.room) onSnapshot(payload.room) }; channelRef.current = channel } return () => { window.removeEventListener('storage', onStorage); channelRef.current?.close() } }, [onSnapshot]); return channelRef }
 function AtmosphereBackdrop() { return <div className="pointer-events-none absolute inset-0 overflow-hidden"><div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.62)_0%,_rgba(255,255,255,0.20)_26%,_rgba(142,213,255,0.00)_58%)]" /><div className="absolute inset-x-0 bottom-0 h-[42%] bg-[linear-gradient(180deg,rgba(255,240,204,0)_0%,rgba(246,213,143,0.50)_55%,rgba(231,183,105,0.96)_100%)]" /><div className="absolute left-1/2 top-[16%] h-40 w-40 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.94)_0%,_rgba(255,255,255,0.58)_42%,_rgba(255,255,255,0)_72%)] blur-[2px]" /></div> }
 
-type FlagRegionConfig = {
-  id: string
-  label: string
-  correctColorIndex: number
-  shapes: { t: 'rect' | 'circle' | 'polygon'; x?: number; y?: number; w?: number; h?: number; rx?: number; cx?: number; cy?: number; r?: number; points?: string }[]
-}
-
-type FlagRoundConfig = {
-  countryName: string
-  iso2: string
-  backgroundTagline: string
-  backgroundAccent: string
-  palette: { label: string; color: string }[]
-  distractors: { label: string; color: string }[]
-  regions: FlagRegionConfig[]
-}
-
-const FLAG_COLOR_CHALLENGE_ROUND: FlagRoundConfig = {
-  countryName: 'France',
-  iso2: 'FR',
-  backgroundTagline: 'Paris under a magical sky',
-  backgroundAccent: 'Eiffel glow',
-  palette: [
-    { label: 'Blue', color: '#0055A4' },
-    { label: 'White', color: '#FFFFFF' },
-    { label: 'Red', color: '#EF4135' },
-  ],
-  distractors: [
-    { label: 'Yellow', color: '#F4C542' },
-    { label: 'Green', color: '#3AA655' },
-  ],
-  regions: [
-    { id: 'left', label: 'Left stripe', correctColorIndex: 0, shapes: [{ t: 'rect', x: 0, y: 0, w: 100, h: 200 }] },
-    { id: 'middle', label: 'Middle stripe', correctColorIndex: 1, shapes: [{ t: 'rect', x: 100, y: 0, w: 100, h: 200 }] },
-    { id: 'right', label: 'Right stripe', correctColorIndex: 2, shapes: [{ t: 'rect', x: 200, y: 0, w: 100, h: 200 }] },
-  ],
-}
-
 function renderFlagShape(shape: FlagRegionConfig['shapes'][number], fill: string, key?: string) {
   if (shape.t === 'rect') return <rect key={key} x={shape.x} y={shape.y} width={shape.w} height={shape.h} rx={shape.rx || 0} fill={fill} />
   if (shape.t === 'circle') return <circle key={key} cx={shape.cx} cy={shape.cy} r={shape.r} fill={fill} />
@@ -143,31 +96,20 @@ function renderFlagShape(shape: FlagRegionConfig['shapes'][number], fill: string
 }
 
 function FlagColorChallengeGame({
-  round: _round,
+  config,
   onBack,
 }: {
-  round: FlagRoundConfig
+  config: CountryChallengeConfig
   onBack: () => void
 }) {
-  const [selectedOrb, setSelectedOrb] = useState<'blue' | 'white' | 'red' | 'yellow' | 'green'>('blue')
-  const [activeNav, setActiveNav] = useState<'home' | 'passport' | 'collections' | 'settings'>('home')
+  const scene = config.scene
+  const [selectedOrb, setSelectedOrb] = useState(scene.defaultOrbId)
+  const [activeNav, setActiveNav] = useState(scene.defaultNavId)
   const [spark, setSpark] = useState<{ key: number; x: number; y: number; hue: string } | null>(null)
   const sparkTimerRef = useRef<number | null>(null)
 
-  const navItems = [
-    { id: 'home' as const, label: 'Home', left: '24.8%' },
-    { id: 'passport' as const, label: 'Passport', left: '37.7%' },
-    { id: 'collections' as const, label: 'Collections', left: '49.3%' },
-    { id: 'settings' as const, label: 'Settings', left: '59.7%' },
-  ]
-
-  const orbItems = [
-    { id: 'blue' as const, label: 'Blue', left: '27.6%', hue: '#4aa6ff' },
-    { id: 'white' as const, label: 'White', left: '38.6%', hue: '#ffffff' },
-    { id: 'red' as const, label: 'Red', left: '49.4%', hue: '#ff5d63' },
-    { id: 'yellow' as const, label: 'Yellow', left: '60.3%', hue: '#ffd44a' },
-    { id: 'green' as const, label: 'Green', left: '71.1%', hue: '#4ddb7d' },
-  ]
+  const navItems = scene.nav
+  const orbItems = scene.orbs
 
   useEffect(() => () => {
     if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
@@ -179,13 +121,13 @@ function FlagColorChallengeGame({
     sparkTimerRef.current = window.setTimeout(() => setSpark(null), 700)
   }
 
-  function handleOrbSelect(orbId: typeof selectedOrb, x: number, y: number, hue: string) {
+  function handleOrbSelect(orbId: string, x: number, y: number, hue: string) {
     setSelectedOrb(orbId)
     triggerSpark(x, y, hue)
   }
 
   function handleStripeTap(x: number, y: number) {
-    triggerSpark(x, y, '#ffe08a')
+    triggerSpark(x, y, scene.regionSparkHue)
   }
 
   return (
@@ -193,19 +135,26 @@ function FlagColorChallengeGame({
       <div className="france-play-shell">
         <div className="france-play-stage-frame">
           <div className="france-play-title-ribbon" aria-hidden="true">
-            FLAG COLOR CHALLENGE
+            {scene.titleRibbon}
           </div>
           <div className="france-play-image-shell">
             <img
-              src="/assets/france-scene.png"
-              alt="France Flag Color Challenge"
+              src={scene.image}
+              alt={scene.imageAlt}
               className="france-play-image"
               draggable={false}
             />
             <div className="france-play-hotspots">
-              <button type="button" aria-label="France blue stripe" className="france-hotspot stripe invisible-hotspot" style={{ left: '29%', top: '17.5%', width: '14.6%', height: '41%' }} onClick={() => handleStripeTap(36.3, 38)} />
-              <button type="button" aria-label="France white stripe" className="france-hotspot stripe invisible-hotspot" style={{ left: '43.6%', top: '17.5%', width: '14.6%', height: '41%' }} onClick={() => handleStripeTap(50.9, 38)} />
-              <button type="button" aria-label="France red stripe" className="france-hotspot stripe invisible-hotspot" style={{ left: '58.2%', top: '17.5%', width: '14.8%', height: '41%' }} onClick={() => handleStripeTap(65.6, 38)} />
+              {scene.regionHotspots.map((region) => (
+                <button
+                  key={region.id}
+                  type="button"
+                  aria-label={region.label}
+                  className="france-hotspot stripe invisible-hotspot"
+                  style={{ left: region.left, top: region.top, width: region.width, height: region.height }}
+                  onClick={() => handleStripeTap(region.spark.x, region.spark.y)}
+                />
+              ))}
               {orbItems.map((orb) => (
                 <button
                   key={orb.id}
@@ -213,8 +162,8 @@ function FlagColorChallengeGame({
                   aria-label={`${orb.label} orb`}
                   aria-pressed={selectedOrb === orb.id}
                   className={`france-hotspot orb invisible-hotspot ${selectedOrb === orb.id ? 'is-selected' : ''}`}
-                  style={{ left: orb.left, top: '69.5%', width: '13cqh', height: '13cqh' }}
-                  onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), 69.5, orb.hue)}
+                  style={{ left: orb.left, top: scene.orbTop, width: scene.orbSize, height: scene.orbSize }}
+                  onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(scene.orbTop), orb.hue)}
                 />
               ))}
               {navItems.map((nav) => (
@@ -224,7 +173,7 @@ function FlagColorChallengeGame({
                   aria-label={nav.label}
                   aria-pressed={activeNav === nav.id}
                   className={`france-hotspot nav invisible-hotspot ${activeNav === nav.id ? 'is-active' : ''}`}
-                  style={{ left: nav.left, top: '89%', width: '13%', height: '11%' }}
+                  style={{ left: nav.left, top: scene.navTop, width: scene.navWidth, height: scene.navHeight }}
                   onClick={() => setActiveNav(nav.id)}
                 />
               ))}
@@ -712,7 +661,8 @@ export default function FlagGamePage() {
   const visibleProgress = clientReady ? progress : loadFlagProgress()
   const explorerCountries = useMemo(() => COUNTRIES.slice(0, 194), [])
   const completionProgress = getCompletionProgress(visibleProgress)
-  const celebrationProfile = useMemo(() => CELEBRATION_BY_COUNTRY[activeCountryCode] || GLOBAL_CELEBRATION, [activeCountryCode])
+  const celebrationProfile = useMemo(() => getCelebrationProfile(activeCountryCode), [activeCountryCode])
+  const activeChallengeConfig = useMemo(() => resolvePlayableChallenge(activeCountryCode), [activeCountryCode])
   const mapNodes = useMemo(() => buildMapNodes(visibleProgress, activeCountryCode), [visibleProgress, activeCountryCode])
   const travelRoutes = useMemo(() => routePairs(mapNodes), [mapNodes])
   const nextDestination = useMemo(() => {
@@ -722,14 +672,6 @@ export default function FlagGamePage() {
     return { country: next, status: nextProgress.status }
   }, [activeCountryCode, visibleProgress])
   const explorerTitle = getExplorerTier(completionProgress.percent)
-  const heroPins = [
-    { code: 'CA', label: 'Canada', x: '16%', y: '38%', tone: 'pin-red' },
-    { code: 'FR', label: 'France', x: '53%', y: '37%', tone: 'pin-blue' },
-    { code: 'BR', label: 'Brazil', x: '23%', y: '66%', tone: 'pin-green' },
-    { code: 'EG', label: 'Egypt', x: '56%', y: '62%', tone: 'pin-gold' },
-    { code: 'IN', label: 'India', x: '82%', y: '63%', tone: 'pin-purple' },
-    { code: '??', label: 'Mystery', x: '86%', y: '27%', tone: 'pin-mystery' },
-  ]
 
   useEffect(() => { const storedProgress = loadFlagProgress(); setProgress(storedProgress); setActiveCountryCode(getInitialCountry()); setPlayerName(safeStorageGet(PLAYER_NAME_KEY) ?? 'Ronan'); setPlayerNameConfirmed(safeStorageGet(PLAYER_NAME_CONFIRMED_KEY) === 'true'); setMode((safeStorageGet(ACTIVE_MODE_KEY) as Mode | null) ?? 'solo'); setChallengeDifficulty((safeStorageGet(CHALLENGE_DIFFICULTY_KEY) as ChallengeDifficulty | null) ?? 'easy'); setRoom(loadRoom()); setClientReady(true) }, [])
   useEffect(() => { safeStorageSet(PLAYER_NAME_KEY, playerName) }, [playerName])
@@ -772,7 +714,7 @@ export default function FlagGamePage() {
 
   function updateRoom(nextRoom: RoomState, note: RoomSnapshot['note'], nextScreen?: Screen) { setRoom(nextRoom); setRoomSnapshot({ room: nextRoom, note }); if (nextScreen) setScreen(nextScreen) }
   function enterGame() { playSound('home_theme'); setPlayerNameConfirmed(true); setScreen('home') }
-  function startSolo() { playSound('arrival_theme'); setActiveCountryCode('FR'); setScreen('flag-color-challenge') }
+  function startSolo() { playSound('arrival_theme'); setActiveCountryCode(resolvePlayableChallenge(activeCountryCode).iso2); setScreen('flag-color-challenge') }
   function colorRegion(regionId: string) { if (!palette.length) return; const region = country.flag_regions.find((item: any) => item.id === regionId); const isCorrect = region ? selectedColorIndex === region.color : false; setPaintFeedback((current) => ({ ...current, [regionId]: { state: isCorrect ? 'correct' : 'wrong', at: Date.now() } })); setColorState((current) => ({ ...current, [activeCountryCode]: { ...(current[activeCountryCode] || {}), [regionId]: selectedColorIndex } })) }
   function completeFlag() { if (!allRegionsFilled || completed) return; const result = completeCountry(activeCountryCode, progress, { stars: perfectFlag ? 3 : 2, completedAt: new Date().toISOString() }); setProgress(result.progress); setReward(result.reward) }
   function nextCountry() { const index = COUNTRIES.findIndex((item) => item.iso2 === activeCountryCode); const next = COUNTRIES[(index + 1) % COUNTRIES.length]; setActiveCountryCode(next.iso2); setReward(null); setScreen('country-arrival') }
@@ -797,12 +739,11 @@ export default function FlagGamePage() {
                 <img src="/assets/home/main-map-reference.png" alt="Main map reference" className="main-reference-image w-full h-full object-contain mx-auto" />
 
                 {/* Invisible / faint hitboxes over the image for interactivity */}
-                <button aria-label="France" className="reference-hitbox" style={{ left: '53%', top: '37%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('FR')} onPointerEnter={() => handlePinEnter('FR')} onPointerLeave={handlePinLeave} />
-                <button aria-label="Canada" className="reference-hitbox" style={{ left: '16%', top: '38%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('CA')} onPointerEnter={() => handlePinEnter('CA')} onPointerLeave={handlePinLeave} />
-                <button aria-label="Brazil" className="reference-hitbox" style={{ left: '23%', top: '66%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('BR')} onPointerEnter={() => handlePinEnter('BR')} onPointerLeave={handlePinLeave} />
-                <button aria-label="Egypt" className="reference-hitbox" style={{ left: '56%', top: '62%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('EG')} onPointerEnter={() => handlePinEnter('EG')} onPointerLeave={handlePinLeave} />
-                <button aria-label="India" className="reference-hitbox" style={{ left: '82%', top: '63%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode('IN')} onPointerEnter={() => handlePinEnter('IN')} onPointerLeave={handlePinLeave} />
-                <button aria-label="Mystery" className="reference-hitbox" style={{ left: '86%', top: '27%', width: '8%', height: '8%' } as React.CSSProperties} onClick={() => { /* mystery */ }} />
+                {MAP_PINS.map((pin) => pin.selectable ? (
+                  <button key={pin.label} aria-label={pin.label} className="reference-hitbox" style={{ left: pin.x, top: pin.y, width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode(pin.code)} onPointerEnter={() => handlePinEnter(pin.code)} onPointerLeave={handlePinLeave} />
+                ) : (
+                  <button key={pin.label} aria-label={pin.label} className="reference-hitbox" style={{ left: pin.x, top: pin.y, width: '8%', height: '8%' } as React.CSSProperties} onClick={() => { /* not yet unlocked */ }} />
+                ))}
 
                 {/* Card + nav hitboxes */}
                 <button aria-label="Next Destination (France)" className="reference-hitbox" style={{ left: '18%', top: '16%', width: '24%', height: '12%' } as React.CSSProperties} onClick={() => setActiveCountryCode('FR')} />
@@ -860,7 +801,7 @@ export default function FlagGamePage() {
 
         {screen === 'flag-color-challenge' && (
           <FlagColorChallengeGame
-            round={FLAG_COLOR_CHALLENGE_ROUND}
+            config={activeChallengeConfig}
             onBack={() => setScreen('play')}
           />
         )}
