@@ -11,6 +11,8 @@ type ChallengeDifficulty = 'easy' | 'medium' | 'hard' | 'expert'
 type RewardStage = 'stamp' | 'souvenir' | 'stars' | 'xp' | 'done'
 type RoomStatus = 'waiting' | 'ready' | 'active'
 type PaintFeedback = { state: 'correct' | 'wrong'; at: number }
+type RevealState = { x: number; y: number; at: number }
+type FranceSpark = { key: number; x: number; y: number; hue: string; kind: 'orb' | 'correct' | 'wrong' | 'complete' }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
 type RoomSnapshot = { room: RoomState; note: string }
 
@@ -108,15 +110,19 @@ function FlagColorChallengeGame({
   const round = config.round
   const [selectedOrb, setSelectedOrb] = useState(scene.defaultOrbId)
   const [activeNav, setActiveNav] = useState(scene.defaultNavId)
-  const [spark, setSpark] = useState<{ key: number; x: number; y: number; hue: string } | null>(null)
+  const [spark, setSpark] = useState<FranceSpark | null>(null)
   const [filledRegions, setFilledRegions] = useState<Record<string, boolean>>({})
+  const [regionReveals, setRegionReveals] = useState<Record<string, RevealState>>({})
   const [regionFeedback, setRegionFeedback] = useState<{ regionId: string; state: 'correct' | 'wrong'; at: number } | null>(null)
   const [celebrate, setCelebrate] = useState(false)
-  const [pointer, setPointer] = useState({ x: 50, y: 50, active: false, pressing: false })
+  const [selectedPulse, setSelectedPulse] = useState(0)
+  const [pointer, setPointer] = useState({ x: 50, y: 50, rotation: -14, active: false, pressing: false, recoil: false, touch: false })
   const sparkTimerRef = useRef<number | null>(null)
   const pointerTimerRef = useRef<number | null>(null)
   const pressTimerRef = useRef<number | null>(null)
+  const recoilTimerRef = useRef<number | null>(null)
   const completionFiredRef = useRef(false)
+  const lastPointerRef = useRef({ x: 50, y: 50 })
   const stageRef = useRef<HTMLElement | null>(null)
   const shellRef = useRef<HTMLDivElement | null>(null)
 
@@ -129,35 +135,47 @@ function FlagColorChallengeGame({
     if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
     if (pointerTimerRef.current) window.clearTimeout(pointerTimerRef.current)
     if (pressTimerRef.current) window.clearTimeout(pressTimerRef.current)
+    if (recoilTimerRef.current) window.clearTimeout(recoilTimerRef.current)
   }, [])
 
   useEffect(() => {
     if (!allComplete || completionFiredRef.current) return
     completionFiredRef.current = true
-    setCelebrate(true)
-    const rewardTimer = window.setTimeout(() => onComplete(), 1600)
-    const cardTimer = window.setTimeout(() => setCelebrate(false), 2400)
+    const completeSparkTimer = window.setTimeout(() => {
+      setCelebrate(true)
+      setSpark({ key: Date.now(), x: 50, y: 38, hue: '#ffe08a', kind: 'complete' })
+    }, 900)
+    const rewardTimer = window.setTimeout(() => onComplete(), 2500)
+    const cardTimer = window.setTimeout(() => setCelebrate(false), 3200)
     return () => {
+      window.clearTimeout(completeSparkTimer)
       window.clearTimeout(rewardTimer)
       window.clearTimeout(cardTimer)
     }
   }, [allComplete, onComplete])
 
-  function triggerSpark(x: number, y: number, hue: string) {
+  function triggerSpark(x: number, y: number, hue: string, kind: FranceSpark['kind']) {
     if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
-    setSpark({ key: Date.now(), x, y, hue })
-    sparkTimerRef.current = window.setTimeout(() => setSpark(null), 700)
+    setSpark({ key: Date.now(), x, y, hue, kind })
+    sparkTimerRef.current = window.setTimeout(() => setSpark(null), kind === 'complete' ? 1200 : 760)
   }
 
   function updatePointer(event: React.PointerEvent) {
     const stage = stageRef.current
     if (!stage) return
     const rect = stage.getBoundingClientRect()
+    const nextX = ((event.clientX - rect.left) / rect.width) * 100
+    const nextY = ((event.clientY - rect.top) / rect.height) * 100
+    const deltaX = nextX - lastPointerRef.current.x
+    const deltaY = nextY - lastPointerRef.current.y
+    lastPointerRef.current = { x: nextX, y: nextY }
     setPointer((current) => ({
       ...current,
-      x: ((event.clientX - rect.left) / rect.width) * 100,
-      y: ((event.clientY - rect.top) / rect.height) * 100,
+      x: nextX,
+      y: nextY,
+      rotation: Math.max(-30, Math.min(6, -14 + deltaX * 2.1 + deltaY * 0.9)),
       active: true,
+      touch: event.pointerType === 'touch',
     }))
     if (pointerTimerRef.current) window.clearTimeout(pointerTimerRef.current)
     pointerTimerRef.current = window.setTimeout(() => setPointer((current) => ({ ...current, active: false })), 900)
@@ -172,21 +190,46 @@ function FlagColorChallengeGame({
 
   function handleOrbSelect(orbId: string, x: number, y: number, hue: string) {
     setSelectedOrb(orbId)
-    triggerSpark(x, y, hue)
+    setSelectedPulse(Date.now())
+    triggerSpark(x, y, hue, 'orb')
   }
 
   function handleRegionTap(region: FlagRegionConfig, event: React.MouseEvent | null) {
     if (filledRegions[region.id]) return
     const selectedPaletteIndex = round.palette.findIndex((entry) => entry.label.toLowerCase() === selectedOrb)
     const isCorrect = selectedPaletteIndex === region.correctColorIndex
-    setRegionFeedback({ regionId: region.id, state: isCorrect ? 'correct' : 'wrong', at: Date.now() })
-    if (!isCorrect) return
-    setFilledRegions((current) => ({ ...current, [region.id]: true }))
     const shell = shellRef.current
+    const flagPoint = { x: 50, y: 50 }
+    const scenePoint = { x: 50, y: 50 }
     if (event && shell) {
       const rect = shell.getBoundingClientRect()
-      triggerSpark(((event.clientX - rect.left) / rect.width) * 100, ((event.clientY - rect.top) / rect.height) * 100, scene.regionSparkHue)
+      scenePoint.x = ((event.clientX - rect.left) / rect.width) * 100
+      scenePoint.y = ((event.clientY - rect.top) / rect.height) * 100
     }
+    if (event) {
+      const target = event.currentTarget as SVGGElement
+      const svg = target.ownerSVGElement
+      if (svg) {
+        const point = svg.createSVGPoint()
+        point.x = event.clientX
+        point.y = event.clientY
+        const transformed = point.matrixTransform(svg.getScreenCTM()?.inverse())
+        flagPoint.x = transformed.x
+        flagPoint.y = transformed.y
+      }
+    }
+    setRegionFeedback({ regionId: region.id, state: isCorrect ? 'correct' : 'wrong', at: Date.now() })
+    if (!isCorrect) {
+      setSelectedPulse(Date.now())
+      setPointer((current) => ({ ...current, pressing: false, recoil: true }))
+      if (recoilTimerRef.current) window.clearTimeout(recoilTimerRef.current)
+      recoilTimerRef.current = window.setTimeout(() => setPointer((current) => ({ ...current, recoil: false })), 260)
+      triggerSpark(scenePoint.x, scenePoint.y, selectedOrbHue, 'wrong')
+      return
+    }
+    setRegionReveals((current) => ({ ...current, [region.id]: { ...flagPoint, at: Date.now() } }))
+    setFilledRegions((current) => ({ ...current, [region.id]: true }))
+    triggerSpark(scenePoint.x, scenePoint.y, scene.regionSparkHue, 'correct')
   }
 
   return (
@@ -217,17 +260,31 @@ function FlagColorChallengeGame({
                   <clipPath id="challenge-flag-clip">
                     <rect x="0" y="0" width="300" height="200" rx="10" />
                   </clipPath>
+                  <filter id="france-paint-texture" x="-8%" y="-8%" width="116%" height="116%">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="2" seed="17" result="grain" />
+                    <feColorMatrix in="grain" type="saturate" values="0" result="softGrain" />
+                    <feBlend in="SourceGraphic" in2="softGrain" mode="soft-light" />
+                  </filter>
                   <linearGradient id="challenge-flag-sheen" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
                     <stop offset="45%" stopColor="rgba(255,255,255,0.04)" />
                     <stop offset="100%" stopColor="rgba(255,255,255,0.18)" />
+                  </linearGradient>
+                  <linearGradient id="france-white-pearl" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#fffefd" />
+                    <stop offset="36%" stopColor="#f4fbff" />
+                    <stop offset="68%" stopColor="#ffffff" />
+                    <stop offset="100%" stopColor="#dfeeff" />
                   </linearGradient>
                 </defs>
                 <rect x="0" y="0" width="300" height="200" rx="10" fill="#e9dcb7" />
                 <g clipPath="url(#challenge-flag-clip)">
                   {round.regions.map((region) => {
                     const isFilled = !!filledRegions[region.id]
-                    const fill = isFilled ? round.palette[region.correctColorIndex].color : 'rgba(249, 242, 222, 0.92)'
+                    const reveal = regionReveals[region.id]
+                    const paletteEntry = round.palette[region.correctColorIndex]
+                    const isWhiteRegion = paletteEntry.label.toLowerCase() === 'white'
+                    const fill = isFilled ? (isWhiteRegion ? 'url(#france-white-pearl)' : paletteEntry.color) : 'rgba(249, 242, 222, 0.92)'
                     const feedbackState = regionFeedback?.regionId === region.id ? regionFeedback.state : ''
                     return (
                       <g
@@ -235,7 +292,8 @@ function FlagColorChallengeGame({
                         role="button"
                         tabIndex={0}
                         aria-label={region.label}
-                        className={`interactive-region ${isFilled ? 'is-filled' : ''} ${feedbackState}`}
+                        className={`interactive-region ${isFilled ? 'is-filled' : ''} ${isWhiteRegion ? 'is-white-region' : ''} ${feedbackState}`}
+                        style={{ '--paint-x': `${reveal?.x ?? 150}px`, '--paint-y': `${reveal?.y ?? 100}px` } as CSSProperties}
                         onClick={(event) => handleRegionTap(region, event)}
                         onKeyDown={(event) => {
                           if (event.key === 'Enter' || event.key === ' ') {
@@ -245,6 +303,11 @@ function FlagColorChallengeGame({
                         }}
                       >
                         {region.shapes.map((shape, index) => renderFlagShape(shape, fill, `${region.id}-${index}`))}
+                        {isFilled && (
+                          <g className="france-paint-finish" filter="url(#france-paint-texture)" pointerEvents="none">
+                            {region.shapes.map((shape, index) => renderFlagShape(shape, fill, `${region.id}-finish-${index}`))}
+                          </g>
+                        )}
                         {!isFilled && (
                           <g className="flag-region-hint">
                             {region.shapes.map((shape, index) => renderFlagShape(shape, 'rgba(255,255,255,0.05)', `${region.id}-hint-${index}`))}
@@ -260,11 +323,11 @@ function FlagColorChallengeGame({
             <div className="france-play-hotspots">
               {orbItems.map((orb) => (
                 <button
-                  key={orb.id}
+                  key={`${orb.id}-${selectedOrb === orb.id ? selectedPulse : 0}`}
                   type="button"
                   aria-label={`${orb.label} orb`}
                   aria-pressed={selectedOrb === orb.id}
-                  className={`france-hotspot orb invisible-hotspot ${selectedOrb === orb.id ? 'is-selected' : ''}`}
+                  className={`france-hotspot orb invisible-hotspot ${selectedOrb === orb.id ? 'is-selected' : ''} ${selectedOrb === orb.id && selectedPulse ? 'is-pulsing' : ''}`}
                   style={{ left: orb.left, top: scene.orbTop, width: scene.orbSize, height: scene.orbSize }}
                   onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(scene.orbTop), orb.hue)}
                 />
@@ -284,8 +347,16 @@ function FlagColorChallengeGame({
             <div className="france-play-ambient" aria-hidden="true">
               <span className="france-ray france-ray-a" />
               <span className="france-ray france-ray-b" />
+              <span className="france-cloud france-cloud-a" />
+              <span className="france-cloud france-cloud-b" />
+              <span className="france-aurora france-aurora-a" />
+              <span className="france-aurora france-aurora-b" />
               <span className="france-glint" />
               <span className="france-sheen" />
+              <span className="france-window-shimmer france-window-shimmer-a" />
+              <span className="france-window-shimmer france-window-shimmer-b" />
+              <span className="france-dust france-dust-a" />
+              <span className="france-dust france-dust-b" />
               <span className="france-sparkle france-sparkle-a" />
               <span className="france-sparkle france-sparkle-b" />
               <span className="france-sparkle france-sparkle-c" />
@@ -293,7 +364,7 @@ function FlagColorChallengeGame({
             {spark && (
               <span
                 key={spark.key}
-                className="france-spark-burst"
+                className={`france-spark-burst is-${spark.kind}`}
                 style={{ left: `${spark.x}%`, top: `${spark.y}%`, background: spark.hue }}
                 aria-hidden="true"
               />
@@ -319,10 +390,14 @@ function FlagColorChallengeGame({
         </div>
       </div>
       <div
-        className={`colored-pencil ${pointer.active ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${allComplete ? 'is-celebrating' : ''}`}
-        style={{ left: `${pointer.x}%`, top: `${pointer.y}%`, '--pencil-color': selectedOrbHue } as CSSProperties}
+        className={`colored-pencil ${pointer.active ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${pointer.recoil ? 'is-recoiling' : ''} ${pointer.touch ? 'is-touching' : ''} ${allComplete ? 'is-celebrating' : ''}`}
+        style={{ '--pencil-x': `${pointer.x}vw`, '--pencil-y': `${pointer.y}vh`, '--pencil-color': selectedOrbHue, '--pencil-rotation': `${pointer.rotation}deg` } as CSSProperties}
         aria-hidden="true"
       >
+        <span className="colored-pencil-trail colored-pencil-trail-a" />
+        <span className="colored-pencil-trail colored-pencil-trail-b" />
+        <span className="colored-pencil-star colored-pencil-star-a" />
+        <span className="colored-pencil-star colored-pencil-star-b" />
         <span className="colored-pencil-tip" />
         <span className="colored-pencil-body" />
       </div>

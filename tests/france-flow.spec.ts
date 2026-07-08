@@ -81,14 +81,22 @@ test('France gameplay: wrong feedback, correct fills, completion, reset', async 
   await blueStripe.click({ force: true });
   await expect(blueStripe).toHaveClass(/wrong/);
   await expect(blueStripe).not.toHaveClass(/is-filled/);
+  await expect(page.locator('.france-spark-burst.is-wrong')).toBeAttached();
+
+  await page.getByRole('button', { name: 'Green orb' }).click();
+  await blueStripe.click({ force: true });
+  await expect(blueStripe).toHaveClass(/wrong/);
+  await expect(blueStripe).not.toHaveClass(/is-filled/);
 
   // Correct colors fill each region
   await page.getByRole('button', { name: 'Blue orb' }).click();
   await blueStripe.click({ force: true });
   await expect(blueStripe).toHaveClass(/is-filled/);
+  await expect(page.locator('.france-spark-burst.is-correct')).toBeAttached();
   await page.getByRole('button', { name: 'White orb' }).click();
   await whiteStripe.click({ force: true });
   await expect(whiteStripe).toHaveClass(/is-filled/);
+  await expect(whiteStripe).toHaveClass(/is-white-region/);
   await page.getByRole('button', { name: 'Red orb' }).click();
   await redStripe.click({ force: true });
   await expect(redStripe).toHaveClass(/is-filled/);
@@ -113,6 +121,29 @@ test('France gameplay: wrong feedback, correct fills, completion, reset', async 
   await expect(page.getByRole('button', { name: 'PLAY SOLO' })).toBeVisible();
   await page.getByRole('button', { name: 'Back', exact: true }).first().click();
   await expect(page.getByRole('button', { name: 'Flag Color Challenge' })).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
+test('France magical motion layer: scoped cursor, pencil, ambient, and reduced motion', async ({ page }) => {
+  await page.setViewportSize(viewports[0]);
+  const errors: string[] = [];
+  await playThroughToFrance(page, errors);
+
+  const stage = page.locator('.france-play-stage');
+  await expect(stage).toBeVisible();
+  await expect(stage).toHaveCSS('cursor', 'none');
+  await expect(page.locator('.france-play-ambient .france-cloud')).toHaveCount(2);
+  await expect(page.locator('.france-play-ambient .france-aurora')).toHaveCount(2);
+
+  await page.mouse.move(220, 220);
+  await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
+  await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: 'Blue orb' }).click();
+  await page.getByRole('button', { name: 'France blue stripe' }).click({ force: true });
+  await expect(page.getByRole('button', { name: 'France blue stripe' })).toHaveClass(/is-filled/);
 
   expect(errors).toEqual([]);
 });
