@@ -500,10 +500,10 @@
 .intro-play-hitbox {
   position: absolute;
   left: 50%;
-  top: 77.5%;
+  top: 88%;
   transform: translate(-50%, -50%);
-  width: min(38%, 18rem);
-  height: min(13%, 6.4rem);
+  width: 92%;
+  height: 15%;
   border: 0;
   border-radius: 9999px;
   background: transparent;
