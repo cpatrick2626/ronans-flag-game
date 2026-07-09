@@ -172,6 +172,40 @@ test('France magical motion layer: scoped cursor, pencil, ambient, and reduced m
   expect(errors).toEqual([]);
 });
 
+test('France fill choreography: random pattern class and stroking pencil during hold', async ({ page }) => {
+  await page.setViewportSize(viewports[0]);
+  const errors: string[] = [];
+  await playThroughToFrance(page, errors);
+
+  // Every region layer carries a randomized fill-pattern class for this attempt
+  await expect(page.locator('.france-fill-layer[class*="fill-pattern-"]')).toHaveCount(3);
+
+  await page.getByRole('button', { name: 'Blue orb' }).click();
+  const blueStripe = page.getByRole('button', { name: 'France blue stripe' });
+  const box = await blueStripe.boundingBox();
+  if (!box) throw new Error('blue stripe is not visible');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+
+  // While filling, the pencil detaches and strokes along the fill front
+  const pencil = page.locator('.colored-pencil');
+  await expect(pencil).toHaveClass(/is-scribbling/);
+  const readX = () => pencil.evaluate((el) => el.style.getPropertyValue('--pencil-x'));
+  const samples = [await readX()];
+  await page.waitForTimeout(180);
+  samples.push(await readX());
+  await page.waitForTimeout(180);
+  samples.push(await readX());
+  expect(new Set(samples).size).toBeGreaterThan(1);
+
+  // Releasing mid-fill stops the stroke and keeps the partial fill unfilled
+  await page.mouse.up();
+  await expect(pencil).not.toHaveClass(/is-scribbling/);
+  await expect(blueStripe).not.toHaveClass(/is-filled/);
+
+  expect(errors).toEqual([]);
+});
+
 test('France paint feedback: wrong shake, correct glow via country arrival', async ({ page }) => {
   await page.setViewportSize(viewports[0]);
   const errors: string[] = [];

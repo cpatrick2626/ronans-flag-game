@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { COUNTRIES, COUNTRY_BY_ISO2 } from '../public/countries.js'
 import { completeCountry, getCountryProgress, loadFlagProgress } from '../public/flag-progress.js'
-import { DEFAULT_CHALLENGE_ISO2, MAP_PINS, getCelebrationProfile, resolvePlayableChallenge, type CompletionSoundHook, type CountryChallengeConfig, type FlagRegionConfig } from '../lib/countries'
+import { DEFAULT_CHALLENGE_ISO2, MAP_PINS, getCelebrationProfile, resolvePlayableChallenge, type CompletionSoundHook, type CountryChallengeConfig, type FillPatternId, type FlagRegionConfig } from '../lib/countries'
 
 type Screen = 'loading' | 'home' | 'country-arrival' | 'play' | 'flag-color-challenge' | 'create-room' | 'join-room' | 'waiting-room' | 'coop' | 'versus'
 type Mode = 'solo' | 'coop' | 'versus'
@@ -11,7 +11,7 @@ type ChallengeDifficulty = 'easy' | 'medium' | 'hard' | 'expert'
 type RewardStage = 'stamp' | 'souvenir' | 'stars' | 'xp' | 'done'
 type RoomStatus = 'waiting' | 'ready' | 'active'
 type PaintFeedback = { state: 'correct' | 'wrong'; at: number }
-type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: number; y: number }; raf: number | null; lastTs: number | null }
+type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: number; y: number }; raf: number | null; lastTs: number | null; metrics: { svgRect: DOMRect; stageRect: DOMRect } | null }
 type FranceSpark = { key: number; x: number; y: number; hue: string; kind: 'orb' | 'correct' | 'wrong' | 'complete' }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
 type RoomSnapshot = { room: RoomState; note: string }
@@ -97,6 +97,90 @@ function renderFlagShape(shape: FlagRegionConfig['shapes'][number], fill: string
   return null
 }
 
+type AssignedFillPattern = { pattern: FillPatternId; variant: string }
+type RegionBox = { x: number; y: number; w: number; h: number }
+
+const ALL_FILL_PATTERNS: FillPatternId[] = ['vertical', 'horizontal', 'diagonal', 'perimeter']
+const FILL_PATTERN_VARIANTS: Record<FillPatternId, string[]> = {
+  vertical: ['down', 'up'],
+  horizontal: ['right', 'left'],
+  diagonal: ['tl', 'tr', 'bl', 'br'],
+  perimeter: ['cw', 'ccw'],
+}
+const PENCIL_STROKES_PER_SECOND = 3
+const PENCIL_BASE_ROTATION = -14
+
+// One random pattern+direction per region per attempt. Dealing shuffled
+// combos without replacement guarantees the regions of one flag never all
+// share a single pattern+direction in a playthrough.
+function assignFillPatterns(regions: FlagRegionConfig[], pool: FillPatternId[], reducedMotion: boolean): Record<string, AssignedFillPattern> {
+  const assigned: Record<string, AssignedFillPattern> = {}
+  if (reducedMotion || !pool.length) {
+    for (const region of regions) assigned[region.id] = { pattern: 'vertical', variant: 'down' }
+    return assigned
+  }
+  const combos = pool.flatMap((pattern) => FILL_PATTERN_VARIANTS[pattern].map((variant) => ({ pattern, variant })))
+  for (let i = combos.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[combos[i], combos[j]] = [combos[j], combos[i]]
+  }
+  regions.forEach((region, index) => { assigned[region.id] = combos[index % combos.length] })
+  return assigned
+}
+
+// Fill-front anchor in flag SVG coords for the current progress, plus the
+// unit direction the pencil strokes along (perpendicular to fill travel).
+// tSec drives the perimeter lap position; the sweep patterns ignore it.
+function fillFrontPoint(assigned: AssignedFillPattern, b: RegionBox, progress: number, tSec: number) {
+  const inset = Math.min(b.w, b.h) * 0.12
+  const clampX = (x: number) => Math.min(b.x + b.w - inset, Math.max(b.x + inset, x))
+  const clampY = (y: number) => Math.min(b.y + b.h - inset, Math.max(b.y + inset, y))
+  if (assigned.pattern === 'vertical') {
+    const y = assigned.variant === 'down' ? b.y + progress * b.h : b.y + (1 - progress) * b.h
+    return { x: b.x + b.w / 2, y: clampY(y), perpX: 1, perpY: 0 }
+  }
+  if (assigned.pattern === 'horizontal') {
+    const x = assigned.variant === 'right' ? b.x + progress * b.w : b.x + (1 - progress) * b.w
+    return { x: clampX(x), y: b.y + b.h / 2, perpX: 0, perpY: 1 }
+  }
+  if (assigned.pattern === 'diagonal') {
+    const fromLeft = assigned.variant === 'tl' || assigned.variant === 'bl'
+    const fromTop = assigned.variant === 'tl' || assigned.variant === 'tr'
+    const x = clampX((fromLeft ? b.x : b.x + b.w) + (fromLeft ? 1 : -1) * progress * b.w)
+    const y = clampY((fromTop ? b.y : b.y + b.h) + (fromTop ? 1 : -1) * progress * b.h)
+    const len = Math.hypot(b.w, b.h)
+    return { x, y, perpX: ((fromTop ? 1 : -1) * b.h) / len, perpY: ((fromLeft ? -1 : 1) * b.w) / len }
+  }
+  // Perimeter: ride the shrinking inner ring (matches the 0.56 CSS inset factor).
+  const ix = Math.min(progress * 0.56, 0.46) * b.w
+  const iy = Math.min(progress * 0.56, 0.46) * b.h
+  const rx = b.x + ix
+  const ry = b.y + iy
+  const rw = Math.max(4, b.w - 2 * ix)
+  const rh = Math.max(4, b.h - 2 * iy)
+  const lap = tSec * 1.1
+  let u = lap - Math.floor(lap)
+  if (assigned.variant === 'ccw') u = 1 - u
+  const d = u * 2 * (rw + rh)
+  let x = rx
+  let y = ry
+  let perpX = 0
+  let perpY = 1
+  if (d < rw) { x = rx + d; y = ry; perpX = 0; perpY = 1 }
+  else if (d < rw + rh) { x = rx + rw; y = ry + (d - rw); perpX = -1; perpY = 0 }
+  else if (d < rw + rh + rw) { x = rx + rw - (d - rw - rh); y = ry + rh; perpX = 0; perpY = -1 }
+  else { x = rx; y = ry + rh - (d - 2 * rw - rh); perpX = 1; perpY = 0 }
+  return { x: clampX(x), y: clampY(y), perpX, perpY }
+}
+
+// Local offsets for the three fill sparkles, spread along the fill front.
+function sparkleOffsets(assigned: AssignedFillPattern, b: RegionBox) {
+  if (assigned.pattern === 'perimeter') return [{ dx: -4, dy: 0 }, { dx: 2, dy: 3 }, { dx: 5, dy: -2 }]
+  const { perpX, perpY } = fillFrontPoint(assigned, b, 0, 0)
+  const span = assigned.pattern === 'diagonal' ? Math.min(b.w, b.h) : Math.abs(perpX) > 0 ? b.w : b.h
+  return [-0.24, 0.04, 0.28].map((s) => ({ dx: perpX * s * span, dy: perpY * s * span }))
+}
+
 function FlagColorChallengeGame({
   config,
   onBack,
@@ -129,6 +213,22 @@ function FlagColorChallengeGame({
   const holdRef = useRef<FillHold | null>(null)
   const fillLayerRefs = useRef<Record<string, SVGGElement | null>>({})
   const fillSparkleRefs = useRef<Record<string, SVGGElement | null>>({})
+  const pencilRef = useRef<HTMLDivElement | null>(null)
+  const flagSvgRef = useRef<SVGSVGElement | null>(null)
+  const reducedMotionRef = useRef(false)
+  const [regionPatterns] = useState(() => assignFillPatterns(
+    round.regions,
+    round.fillPatterns ?? ALL_FILL_PATTERNS,
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  ))
+
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
+    reducedMotionRef.current = query.matches
+    const onChange = () => { reducedMotionRef.current = query.matches }
+    query.addEventListener('change', onChange)
+    return () => query.removeEventListener('change', onChange)
+  }, [])
 
   const navItems = scene.nav
   const orbItems = scene.orbs
@@ -197,6 +297,9 @@ function FlagColorChallengeGame({
     const deltaX = nextX - lastPointerRef.current.x
     const deltaY = nextY - lastPointerRef.current.y
     lastPointerRef.current = { x: nextX, y: nextY }
+    // While a hold is filling, the pencil rides the fill front (rAF-driven);
+    // only remember the touch point so release can ease the pencil home.
+    if (holdRef.current) return
     setPointer((current) => ({
       ...current,
       x: nextX,
@@ -222,12 +325,53 @@ function FlagColorChallengeGame({
     triggerSpark(x, y, hue, 'orb')
   }
 
-  function applyFillVisual(regionId: string, progress: number) {
+  function applyFillVisual(regionId: string, progress: number, tSec: number) {
     const layer = fillLayerRefs.current[regionId]
     if (layer) layer.style.setProperty('--fill-progress', `${(progress * 100).toFixed(2)}%`)
     const sparkles = fillSparkleRefs.current[regionId]
     const bounds = regionBounds[regionId]
-    if (sparkles && bounds) sparkles.setAttribute('transform', `translate(0 ${(bounds.y + progress * bounds.h).toFixed(2)})`)
+    const assigned = regionPatterns[regionId]
+    if (sparkles && bounds && assigned) {
+      const anchor = fillFrontPoint(assigned, bounds, progress, tSec)
+      sparkles.setAttribute('transform', `translate(${anchor.x.toFixed(2)} ${anchor.y.toFixed(2)})`)
+    }
+  }
+
+  // Rides the pencil along the fill front, stroking back and forth
+  // perpendicular to the fill direction. Writes CSS vars straight to the
+  // element inside the existing rAF loop — no per-frame React state.
+  function updatePencilRide(hold: FillHold, progress: number, ts: number) {
+    const pencil = pencilRef.current
+    const metrics = hold.metrics
+    const assigned = regionPatterns[hold.regionId]
+    const bounds = regionBounds[hold.regionId]
+    if (!pencil || !metrics || !assigned || !bounds || reducedMotionRef.current) return
+    const tSec = ts / 1000
+    const phase = tSec * Math.PI * PENCIL_STROKES_PER_SECOND
+    const front = fillFrontPoint(assigned, bounds, progress, tSec)
+    const inset = Math.min(bounds.w, bounds.h) * 0.12
+    const amp = assigned.pattern === 'perimeter' ? Math.min(bounds.w, bounds.h) * 0.1 : Math.max(6, Math.min(bounds.w, bounds.h) / 2 - inset)
+    const sway = Math.sin(phase) * amp
+    const x = Math.min(bounds.x + bounds.w - inset, Math.max(bounds.x + inset, front.x + front.perpX * sway))
+    const y = Math.min(bounds.y + bounds.h - inset, Math.max(bounds.y + inset, front.y + front.perpY * sway))
+    const clientX = metrics.svgRect.left + (x / 300) * metrics.svgRect.width
+    const clientY = metrics.svgRect.top + (y / 200) * metrics.svgRect.height
+    pencil.style.setProperty('--pencil-x', `${(((clientX - metrics.stageRect.left) / metrics.stageRect.width) * 100).toFixed(3)}vw`)
+    pencil.style.setProperty('--pencil-y', `${(((clientY - metrics.stageRect.top) / metrics.stageRect.height) * 100).toFixed(3)}vh`)
+    pencil.style.setProperty('--pencil-rotation', `${(PENCIL_BASE_ROTATION + Math.cos(phase) * 9).toFixed(2)}deg`)
+  }
+
+  // Eases the pencil back to the last touch/rest point after a ride. The
+  // vars must be written directly because React's style diffing does not
+  // know about the per-frame writes above.
+  function restorePencilHome() {
+    const pencil = pencilRef.current
+    if (pencil) {
+      pencil.style.setProperty('--pencil-x', `${lastPointerRef.current.x}vw`)
+      pencil.style.setProperty('--pencil-y', `${lastPointerRef.current.y}vh`)
+      pencil.style.setProperty('--pencil-rotation', `${PENCIL_BASE_ROTATION}deg`)
+    }
+    setPointer((current) => ({ ...current, x: lastPointerRef.current.x, y: lastPointerRef.current.y, rotation: PENCIL_BASE_ROTATION }))
   }
 
   function runFillFrame(ts: number) {
@@ -237,13 +381,15 @@ function FlagColorChallengeGame({
       const dt = Math.min(ts - hold.lastTs, 50)
       const next = Math.min(1, (fillProgressRef.current[hold.regionId] ?? 0) + dt / fillDurationMs)
       fillProgressRef.current[hold.regionId] = next
-      applyFillVisual(hold.regionId, next)
+      applyFillVisual(hold.regionId, next, ts / 1000)
+      updatePencilRide(hold, next, ts)
       if (next >= 1) {
         holdRef.current = null
         setActiveFillRegion(null)
         setRegionFeedback({ regionId: hold.regionId, state: 'correct', at: Date.now() })
         setFilledRegions((current) => ({ ...current, [hold.regionId]: true }))
         triggerSpark(hold.scenePoint.x, hold.scenePoint.y, scene.regionSparkHue, 'correct')
+        restorePencilHome()
         return
       }
     }
@@ -259,6 +405,7 @@ function FlagColorChallengeGame({
     if (hold.raf !== null) window.cancelAnimationFrame(hold.raf)
     holdRef.current = null
     setActiveFillRegion(null)
+    restorePencilHome()
   }
 
   function handleRegionPress(region: FlagRegionConfig, event: React.PointerEvent | null) {
@@ -286,7 +433,10 @@ function FlagColorChallengeGame({
       triggerSpark(scenePoint.x, scenePoint.y, selectedOrbHue, 'wrong')
       return
     }
-    holdRef.current = { regionId: region.id, pointerId: event ? event.pointerId : null, scenePoint, raf: null, lastTs: null }
+    const svg = flagSvgRef.current
+    const stage = stageRef.current
+    const metrics = svg && stage ? { svgRect: svg.getBoundingClientRect(), stageRect: stage.getBoundingClientRect() } : null
+    holdRef.current = { regionId: region.id, pointerId: event ? event.pointerId : null, scenePoint, raf: null, lastTs: null, metrics }
     holdRef.current.raf = window.requestAnimationFrame(runFillFrame)
     setActiveFillRegion(region.id)
   }
@@ -314,7 +464,7 @@ function FlagColorChallengeGame({
               className="challenge-flag-overlay"
               style={{ left: scene.flagOverlay.left, top: scene.flagOverlay.top, width: scene.flagOverlay.width, height: scene.flagOverlay.height }}
             >
-              <svg viewBox="0 0 300 200" preserveAspectRatio="none" className="challenge-flag-svg" aria-label={`${config.name} flag to color`}>
+              <svg ref={flagSvgRef} viewBox="0 0 300 200" preserveAspectRatio="none" className="challenge-flag-svg" aria-label={`${config.name} flag to color`}>
                 <defs>
                   <clipPath id="challenge-flag-clip">
                     <rect x="0" y="0" width="300" height="200" rx="10" />
@@ -348,6 +498,9 @@ function FlagColorChallengeGame({
                     const isFilling = activeFillRegion === region.id
                     const bounds = regionBounds[region.id]
                     const progress = fillProgressRef.current[region.id] ?? 0
+                    const assigned = regionPatterns[region.id] ?? { pattern: 'vertical' as const, variant: 'down' }
+                    const sparkleAnchor = fillFrontPoint(assigned, bounds, progress, 0)
+                    const sparkleDots = sparkleOffsets(assigned, bounds)
                     return (
                       <g
                         key={`${region.id}-${feedbackState ? regionFeedback?.at : 'idle'}`}
@@ -372,7 +525,7 @@ function FlagColorChallengeGame({
                         {region.shapes.map((shape, index) => renderFlagShape(shape, fill, `${region.id}-${index}`))}
                         {!isFilled && (
                           <g
-                            className="france-fill-layer"
+                            className={`france-fill-layer fill-pattern-${assigned.pattern}-${assigned.variant}`}
                             pointerEvents="none"
                             ref={(el) => { fillLayerRefs.current[region.id] = el }}
                             style={{ '--fill-progress': `${progress * 100}%` } as CSSProperties}
@@ -390,11 +543,11 @@ function FlagColorChallengeGame({
                             className="france-fill-sparkles"
                             pointerEvents="none"
                             ref={(el) => { fillSparkleRefs.current[region.id] = el }}
-                            transform={`translate(0 ${bounds.y + progress * bounds.h})`}
+                            transform={`translate(${sparkleAnchor.x} ${sparkleAnchor.y})`}
                           >
-                            <circle className="france-fill-sparkle-dot" cx={bounds.x + bounds.w * 0.26} cy={0} r={2.6} />
-                            <circle className="france-fill-sparkle-dot" cx={bounds.x + bounds.w * 0.54} cy={0} r={2} />
-                            <circle className="france-fill-sparkle-dot" cx={bounds.x + bounds.w * 0.78} cy={0} r={2.4} />
+                            <circle className="france-fill-sparkle-dot" cx={sparkleDots[0].dx} cy={sparkleDots[0].dy} r={2.6} />
+                            <circle className="france-fill-sparkle-dot" cx={sparkleDots[1].dx} cy={sparkleDots[1].dy} r={2} />
+                            <circle className="france-fill-sparkle-dot" cx={sparkleDots[2].dx} cy={sparkleDots[2].dy} r={2.4} />
                           </g>
                         )}
                         {isFilled && (
@@ -484,6 +637,7 @@ function FlagColorChallengeGame({
         </div>
       </div>
       <div
+        ref={pencilRef}
         className={`colored-pencil ${pointer.active || activeFillRegion ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${pointer.recoil ? 'is-recoiling' : ''} ${pointer.touch ? 'is-touching' : ''} ${activeFillRegion ? 'is-scribbling' : ''} ${allComplete ? 'is-celebrating' : ''}`}
         style={{ '--pencil-x': `${pointer.x}vw`, '--pencil-y': `${pointer.y}vh`, '--pencil-color': selectedOrbHue, '--pencil-rotation': `${pointer.rotation}deg` } as CSSProperties}
         aria-hidden="true"

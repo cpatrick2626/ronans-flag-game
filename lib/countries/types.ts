@@ -10,6 +10,10 @@ export type PaletteEntry = { label: string; color: string }
 
 export type FlagShape = { t: 'rect' | 'circle' | 'polygon'; x?: number; y?: number; w?: number; h?: number; rx?: number; cx?: number; cy?: number; r?: number; points?: string }
 
+// Hold-to-fill coloring choreography families. Direction variants (e.g. the
+// sweep corner or axis reverse) are chosen at random per region per attempt.
+export type FillPatternId = 'vertical' | 'horizontal' | 'diagonal' | 'perimeter'
+
 export type FlagRegionConfig = {
   id: string
   label: string
@@ -58,6 +62,9 @@ export type FlagRound = {
   regions: FlagRegionConfig[]
   // Continuous hold time (ms) for one region to fill top-to-bottom. Default 1400.
   fillDurationMs?: number
+  // Allowed hold-to-fill patterns for this round's regions. Defaults to all
+  // pattern families; existing configs need no change.
+  fillPatterns?: FillPatternId[]
 }
 
 // Pin hitbox on the home map reference image. selectable=false pins
