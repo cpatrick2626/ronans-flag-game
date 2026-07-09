@@ -11,7 +11,7 @@ type ChallengeDifficulty = 'easy' | 'medium' | 'hard' | 'expert'
 type RewardStage = 'stamp' | 'souvenir' | 'stars' | 'xp' | 'done'
 type RoomStatus = 'waiting' | 'ready' | 'active'
 type PaintFeedback = { state: 'correct' | 'wrong'; at: number }
-type RevealState = { x: number; y: number; at: number }
+type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: number; y: number }; raf: number | null; lastTs: number | null }
 type FranceSpark = { key: number; x: number; y: number; hue: string; kind: 'orb' | 'correct' | 'wrong' | 'complete' }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
 type RoomSnapshot = { room: RoomState; note: string }
@@ -112,7 +112,7 @@ function FlagColorChallengeGame({
   const [activeNav, setActiveNav] = useState(scene.defaultNavId)
   const [spark, setSpark] = useState<FranceSpark | null>(null)
   const [filledRegions, setFilledRegions] = useState<Record<string, boolean>>({})
-  const [regionReveals, setRegionReveals] = useState<Record<string, RevealState>>({})
+  const [activeFillRegion, setActiveFillRegion] = useState<string | null>(null)
   const [regionFeedback, setRegionFeedback] = useState<{ regionId: string; state: 'correct' | 'wrong'; at: number } | null>(null)
   const [celebrate, setCelebrate] = useState(false)
   const [selectedPulse, setSelectedPulse] = useState(0)
@@ -125,18 +125,46 @@ function FlagColorChallengeGame({
   const lastPointerRef = useRef({ x: 50, y: 50 })
   const stageRef = useRef<HTMLElement | null>(null)
   const shellRef = useRef<HTMLDivElement | null>(null)
+  const fillProgressRef = useRef<Record<string, number>>({})
+  const holdRef = useRef<FillHold | null>(null)
+  const fillLayerRefs = useRef<Record<string, SVGGElement | null>>({})
+  const fillSparkleRefs = useRef<Record<string, SVGGElement | null>>({})
 
   const navItems = scene.nav
   const orbItems = scene.orbs
   const selectedOrbHue = orbItems.find((orb) => orb.id === selectedOrb)?.hue || '#ffffff'
   const allComplete = round.regions.every((region) => filledRegions[region.id])
+  const fillDurationMs = round.fillDurationMs ?? 1400
+  const regionBounds = useMemo(() => {
+    const bounds: Record<string, { x: number; y: number; w: number; h: number }> = {}
+    for (const region of round.regions) {
+      const rect = region.shapes.find((shape) => shape.t === 'rect' && shape.w != null && shape.h != null)
+      bounds[region.id] = rect ? { x: rect.x ?? 0, y: rect.y ?? 0, w: rect.w ?? 300, h: rect.h ?? 200 } : { x: 0, y: 0, w: 300, h: 200 }
+    }
+    return bounds
+  }, [round.regions])
 
   useEffect(() => () => {
     if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
     if (pointerTimerRef.current) window.clearTimeout(pointerTimerRef.current)
     if (pressTimerRef.current) window.clearTimeout(pressTimerRef.current)
     if (recoilTimerRef.current) window.clearTimeout(recoilTimerRef.current)
+    if (holdRef.current?.raf != null) window.cancelAnimationFrame(holdRef.current.raf)
   }, [])
+
+  useEffect(() => {
+    if (!activeFillRegion) return
+    const stop = () => releaseRegionHold(null)
+    window.addEventListener('pointerup', stop)
+    window.addEventListener('pointercancel', stop)
+    window.addEventListener('blur', stop)
+    return () => {
+      window.removeEventListener('pointerup', stop)
+      window.removeEventListener('pointercancel', stop)
+      window.removeEventListener('blur', stop)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFillRegion])
 
   useEffect(() => {
     if (!allComplete || completionFiredRef.current) return
@@ -194,32 +222,63 @@ function FlagColorChallengeGame({
     triggerSpark(x, y, hue, 'orb')
   }
 
-  function handleRegionTap(region: FlagRegionConfig, event: React.MouseEvent | null) {
-    if (filledRegions[region.id]) return
+  function applyFillVisual(regionId: string, progress: number) {
+    const layer = fillLayerRefs.current[regionId]
+    if (layer) layer.style.setProperty('--fill-progress', `${(progress * 100).toFixed(2)}%`)
+    const sparkles = fillSparkleRefs.current[regionId]
+    const bounds = regionBounds[regionId]
+    if (sparkles && bounds) sparkles.setAttribute('transform', `translate(0 ${(bounds.y + progress * bounds.h).toFixed(2)})`)
+  }
+
+  function runFillFrame(ts: number) {
+    const hold = holdRef.current
+    if (!hold) return
+    if (hold.lastTs !== null) {
+      const dt = Math.min(ts - hold.lastTs, 50)
+      const next = Math.min(1, (fillProgressRef.current[hold.regionId] ?? 0) + dt / fillDurationMs)
+      fillProgressRef.current[hold.regionId] = next
+      applyFillVisual(hold.regionId, next)
+      if (next >= 1) {
+        holdRef.current = null
+        setActiveFillRegion(null)
+        setRegionFeedback({ regionId: hold.regionId, state: 'correct', at: Date.now() })
+        setFilledRegions((current) => ({ ...current, [hold.regionId]: true }))
+        triggerSpark(hold.scenePoint.x, hold.scenePoint.y, scene.regionSparkHue, 'correct')
+        return
+      }
+    }
+    hold.lastTs = ts
+    hold.raf = window.requestAnimationFrame(runFillFrame)
+  }
+
+  function releaseRegionHold(regionId: string | null, pointerId?: number) {
+    const hold = holdRef.current
+    if (!hold) return
+    if (regionId && hold.regionId !== regionId) return
+    if (pointerId !== undefined && hold.pointerId !== null && hold.pointerId !== pointerId) return
+    if (hold.raf !== null) window.cancelAnimationFrame(hold.raf)
+    holdRef.current = null
+    setActiveFillRegion(null)
+  }
+
+  function handleRegionPress(region: FlagRegionConfig, event: React.PointerEvent | null) {
+    if (filledRegions[region.id] || holdRef.current) return
+    // Touch pointers implicitly capture to the region, which would keep the
+    // fill running after the finger slides off; release so pointerleave pauses.
+    if (event && event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
     const selectedPaletteIndex = round.palette.findIndex((entry) => entry.label.toLowerCase() === selectedOrb)
     const isCorrect = selectedPaletteIndex === region.correctColorIndex
     const shell = shellRef.current
-    const flagPoint = { x: 50, y: 50 }
     const scenePoint = { x: 50, y: 50 }
     if (event && shell) {
       const rect = shell.getBoundingClientRect()
       scenePoint.x = ((event.clientX - rect.left) / rect.width) * 100
       scenePoint.y = ((event.clientY - rect.top) / rect.height) * 100
     }
-    if (event) {
-      const target = event.currentTarget as SVGGElement
-      const svg = target.ownerSVGElement
-      if (svg) {
-        const point = svg.createSVGPoint()
-        point.x = event.clientX
-        point.y = event.clientY
-        const transformed = point.matrixTransform(svg.getScreenCTM()?.inverse())
-        flagPoint.x = transformed.x
-        flagPoint.y = transformed.y
-      }
-    }
-    setRegionFeedback({ regionId: region.id, state: isCorrect ? 'correct' : 'wrong', at: Date.now() })
     if (!isCorrect) {
+      setRegionFeedback({ regionId: region.id, state: 'wrong', at: Date.now() })
       setSelectedPulse(Date.now())
       setPointer((current) => ({ ...current, pressing: false, recoil: true }))
       if (recoilTimerRef.current) window.clearTimeout(recoilTimerRef.current)
@@ -227,9 +286,9 @@ function FlagColorChallengeGame({
       triggerSpark(scenePoint.x, scenePoint.y, selectedOrbHue, 'wrong')
       return
     }
-    setRegionReveals((current) => ({ ...current, [region.id]: { ...flagPoint, at: Date.now() } }))
-    setFilledRegions((current) => ({ ...current, [region.id]: true }))
-    triggerSpark(scenePoint.x, scenePoint.y, scene.regionSparkHue, 'correct')
+    holdRef.current = { regionId: region.id, pointerId: event ? event.pointerId : null, scenePoint, raf: null, lastTs: null }
+    holdRef.current.raf = window.requestAnimationFrame(runFillFrame)
+    setActiveFillRegion(region.id)
   }
 
   return (
@@ -281,11 +340,14 @@ function FlagColorChallengeGame({
                 <g clipPath="url(#challenge-flag-clip)">
                   {round.regions.map((region) => {
                     const isFilled = !!filledRegions[region.id]
-                    const reveal = regionReveals[region.id]
                     const paletteEntry = round.palette[region.correctColorIndex]
                     const isWhiteRegion = paletteEntry.label.toLowerCase() === 'white'
-                    const fill = isFilled ? (isWhiteRegion ? 'url(#france-white-pearl)' : paletteEntry.color) : 'rgba(249, 242, 222, 0.92)'
+                    const finalFill = isWhiteRegion ? 'url(#france-white-pearl)' : paletteEntry.color
+                    const fill = isFilled ? finalFill : 'rgba(249, 242, 222, 0.92)'
                     const feedbackState = regionFeedback?.regionId === region.id ? regionFeedback.state : ''
+                    const isFilling = activeFillRegion === region.id
+                    const bounds = regionBounds[region.id]
+                    const progress = fillProgressRef.current[region.id] ?? 0
                     return (
                       <g
                         key={`${region.id}-${feedbackState ? regionFeedback?.at : 'idle'}`}
@@ -293,16 +355,48 @@ function FlagColorChallengeGame({
                         tabIndex={0}
                         aria-label={region.label}
                         className={`interactive-region ${isFilled ? 'is-filled' : ''} ${isWhiteRegion ? 'is-white-region' : ''} ${feedbackState}`}
-                        style={{ '--paint-x': `${reveal?.x ?? 150}px`, '--paint-y': `${reveal?.y ?? 100}px` } as CSSProperties}
-                        onClick={(event) => handleRegionTap(region, event)}
+                        onPointerDown={(event) => handleRegionPress(region, event)}
+                        onPointerUp={(event) => releaseRegionHold(region.id, event.pointerId)}
+                        onPointerLeave={(event) => releaseRegionHold(region.id, event.pointerId)}
+                        onPointerCancel={(event) => releaseRegionHold(region.id, event.pointerId)}
                         onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
+                          if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
                             event.preventDefault()
-                            handleRegionTap(region, null)
+                            handleRegionPress(region, null)
                           }
+                        }}
+                        onKeyUp={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') releaseRegionHold(region.id)
                         }}
                       >
                         {region.shapes.map((shape, index) => renderFlagShape(shape, fill, `${region.id}-${index}`))}
+                        {!isFilled && (
+                          <g
+                            className="france-fill-layer"
+                            pointerEvents="none"
+                            ref={(el) => { fillLayerRefs.current[region.id] = el }}
+                            style={{ '--fill-progress': `${progress * 100}%` } as CSSProperties}
+                          >
+                            <g className="france-fill-paint">
+                              {region.shapes.map((shape, index) => renderFlagShape(shape, finalFill, `${region.id}-fill-${index}`))}
+                            </g>
+                            <g className="france-fill-edge">
+                              {region.shapes.map((shape, index) => renderFlagShape(shape, finalFill, `${region.id}-edge-${index}`))}
+                            </g>
+                          </g>
+                        )}
+                        {!isFilled && isFilling && (
+                          <g
+                            className="france-fill-sparkles"
+                            pointerEvents="none"
+                            ref={(el) => { fillSparkleRefs.current[region.id] = el }}
+                            transform={`translate(0 ${bounds.y + progress * bounds.h})`}
+                          >
+                            <circle className="france-fill-sparkle-dot" cx={bounds.x + bounds.w * 0.26} cy={0} r={2.6} />
+                            <circle className="france-fill-sparkle-dot" cx={bounds.x + bounds.w * 0.54} cy={0} r={2} />
+                            <circle className="france-fill-sparkle-dot" cx={bounds.x + bounds.w * 0.78} cy={0} r={2.4} />
+                          </g>
+                        )}
                         {isFilled && (
                           <g className="france-paint-finish" filter="url(#france-paint-texture)" pointerEvents="none">
                             {region.shapes.map((shape, index) => renderFlagShape(shape, fill, `${region.id}-finish-${index}`))}
@@ -390,7 +484,7 @@ function FlagColorChallengeGame({
         </div>
       </div>
       <div
-        className={`colored-pencil ${pointer.active ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${pointer.recoil ? 'is-recoiling' : ''} ${pointer.touch ? 'is-touching' : ''} ${allComplete ? 'is-celebrating' : ''}`}
+        className={`colored-pencil ${pointer.active || activeFillRegion ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${pointer.recoil ? 'is-recoiling' : ''} ${pointer.touch ? 'is-touching' : ''} ${activeFillRegion ? 'is-scribbling' : ''} ${allComplete ? 'is-celebrating' : ''}`}
         style={{ '--pencil-x': `${pointer.x}vw`, '--pencil-y': `${pointer.y}vh`, '--pencil-color': selectedOrbHue, '--pencil-rotation': `${pointer.rotation}deg` } as CSSProperties}
         aria-hidden="true"
       >

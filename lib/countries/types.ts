@@ -56,6 +56,8 @@ export type FlagRound = {
   palette: PaletteEntry[]
   distractors: PaletteEntry[]
   regions: FlagRegionConfig[]
+  // Continuous hold time (ms) for one region to fill top-to-bottom. Default 1400.
+  fillDurationMs?: number
 }
 
 // Pin hitbox on the home map reference image. selectable=false pins

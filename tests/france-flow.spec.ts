@@ -40,6 +40,17 @@ async function playThroughToFrance(page: import('@playwright/test').Page, errors
   await expect(page.getByAltText('France Flag Color Challenge')).toBeVisible();
 }
 
+// Regions fill by press-and-hold (~1.4s). Press the region center, hold for
+// the given time, then release.
+async function holdRegion(page: import('@playwright/test').Page, region: import('@playwright/test').Locator, ms: number) {
+  const box = await region.boundingBox();
+  if (!box) throw new Error('region is not visible');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(ms);
+  await page.mouse.up();
+}
+
 test('France challenge flow: entry, orbs, stripes, back navigation', async ({ page }) => {
   await page.setViewportSize(viewports[0]);
   const errors: string[] = [];
@@ -76,9 +87,9 @@ test('France gameplay: wrong feedback, correct fills, completion, reset', async 
   const whiteStripe = page.getByRole('button', { name: 'France white stripe' });
   const redStripe = page.getByRole('button', { name: 'France red stripe' });
 
-  // Wrong color: yellow on the blue stripe shakes and does not fill
+  // Wrong color: holding yellow on the blue stripe shakes and never fills
   await page.getByRole('button', { name: 'Yellow orb' }).click();
-  await blueStripe.click({ force: true });
+  await holdRegion(page, blueStripe, 600);
   await expect(blueStripe).toHaveClass(/wrong/);
   await expect(blueStripe).not.toHaveClass(/is-filled/);
   await expect(page.locator('.france-spark-burst.is-wrong')).toBeAttached();
@@ -88,17 +99,30 @@ test('France gameplay: wrong feedback, correct fills, completion, reset', async 
   await expect(blueStripe).toHaveClass(/wrong/);
   await expect(blueStripe).not.toHaveClass(/is-filled/);
 
-  // Correct colors fill each region
+  // Correct color: a short hold pauses part-way and does not fill
   await page.getByRole('button', { name: 'Blue orb' }).click();
-  await blueStripe.click({ force: true });
-  await expect(blueStripe).toHaveClass(/is-filled/);
+  await holdRegion(page, blueStripe, 400);
+  await expect(blueStripe).not.toHaveClass(/is-filled/);
+
+  // Rapid taps accumulate no meaningful progress (no instant-complete exploit)
+  for (let i = 0; i < 5; i += 1) await blueStripe.click({ force: true });
+  await expect(blueStripe).not.toHaveClass(/is-filled/);
+
+  // Re-holding resumes from the paused progress and completes the fill
+  const blueBox = await blueStripe.boundingBox();
+  if (!blueBox) throw new Error('blue stripe is not visible');
+  await page.mouse.move(blueBox.x + blueBox.width / 2, blueBox.y + blueBox.height / 2);
+  await page.mouse.down();
+  await expect(blueStripe).toHaveClass(/is-filled/, { timeout: 4000 });
   await expect(page.locator('.france-spark-burst.is-correct')).toBeAttached();
+  await page.mouse.up();
+
   await page.getByRole('button', { name: 'White orb' }).click();
-  await whiteStripe.click({ force: true });
+  await holdRegion(page, whiteStripe, 2000);
   await expect(whiteStripe).toHaveClass(/is-filled/);
   await expect(whiteStripe).toHaveClass(/is-white-region/);
   await page.getByRole('button', { name: 'Red orb' }).click();
-  await redStripe.click({ force: true });
+  await holdRegion(page, redStripe, 2000);
   await expect(redStripe).toHaveClass(/is-filled/);
 
   // Completion card, then the reward flow triggers automatically exactly once
@@ -142,7 +166,7 @@ test('France magical motion layer: scoped cursor, pencil, ambient, and reduced m
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.getByRole('button', { name: 'Blue orb' }).click();
-  await page.getByRole('button', { name: 'France blue stripe' }).click({ force: true });
+  await holdRegion(page, page.getByRole('button', { name: 'France blue stripe' }), 2000);
   await expect(page.getByRole('button', { name: 'France blue stripe' })).toHaveClass(/is-filled/);
 
   expect(errors).toEqual([]);

@@ -1919,21 +1919,78 @@
   transform-box: fill-box;
   transform-origin: center;
   cursor: none;
+  touch-action: none;
   animation: flag-wave 6.5s ease-in-out infinite;
 }
 
 .interactive-region:hover { filter: brightness(1.02); }
 .interactive-region.is-filled {
   animation:
-    france-paint-reveal 780ms cubic-bezier(0.22, 0.92, 0.24, 1) both,
     flag-wave 6.5s cubic-bezier(0.33, 0.72, 0.24, 1) 780ms infinite,
-    france-fabric-settle 920ms cubic-bezier(0.22, 0.92, 0.24, 1) 560ms both;
+    france-fabric-settle 920ms cubic-bezier(0.22, 0.92, 0.24, 1) both;
 }
 .interactive-region.is-filled.is-white-region {
   filter: drop-shadow(0 0 5px rgba(196, 228, 255, 0.24));
 }
-.interactive-region.correct { animation: france-paint-reveal 780ms cubic-bezier(0.22, 0.92, 0.24, 1) both, france-fabric-settle 920ms cubic-bezier(0.22, 0.92, 0.24, 1) 560ms both; }
+.interactive-region.correct { animation: france-fabric-settle 920ms cubic-bezier(0.22, 0.92, 0.24, 1) both; }
 .interactive-region.wrong { animation: wrong-shake 0.42s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* Hold-to-fill crayon sweep. --fill-progress (0%-100%) is the vertical fill
+   front within the region's own box; the jagged polygon edges keep the
+   leading edge reading as hand-coloring rather than a straight wipe. All
+   jag offsets are <= 0 so the layer is fully hidden at 0% progress. */
+.france-fill-layer {
+  pointer-events: none;
+}
+
+.france-fill-paint {
+  clip-path: polygon(
+    -2% -4%, 102% -4%,
+    102% calc(var(--fill-progress, 0%) - 0.4%),
+    89% calc(var(--fill-progress, 0%) - 2.6%),
+    76% calc(var(--fill-progress, 0%) - 0.8%),
+    62% calc(var(--fill-progress, 0%) - 3.1%),
+    48% calc(var(--fill-progress, 0%) - 1.2%),
+    34% calc(var(--fill-progress, 0%) - 2.9%),
+    20% calc(var(--fill-progress, 0%) - 0.6%),
+    9% calc(var(--fill-progress, 0%) - 2.4%),
+    -2% calc(var(--fill-progress, 0%) - 1%)
+  );
+  filter: saturate(1.12) brightness(1.04);
+}
+
+.france-fill-edge {
+  clip-path: polygon(
+    -2% calc(var(--fill-progress, 0%) - 4.6%),
+    16% calc(var(--fill-progress, 0%) - 2.8%),
+    31% calc(var(--fill-progress, 0%) - 4.9%),
+    47% calc(var(--fill-progress, 0%) - 2.6%),
+    63% calc(var(--fill-progress, 0%) - 4.4%),
+    80% calc(var(--fill-progress, 0%) - 2.9%),
+    102% calc(var(--fill-progress, 0%) - 4.5%),
+    102% calc(var(--fill-progress, 0%) - 0.5%),
+    84% calc(var(--fill-progress, 0%) - 2.2%),
+    67% calc(var(--fill-progress, 0%) - 0.3%),
+    51% calc(var(--fill-progress, 0%) - 2%),
+    35% calc(var(--fill-progress, 0%) - 0.4%),
+    18% calc(var(--fill-progress, 0%) - 2.3%),
+    -2% calc(var(--fill-progress, 0%) - 0.7%)
+  );
+  opacity: 0.55;
+  filter: brightness(1.24) saturate(1.18);
+}
+
+.france-fill-sparkle-dot {
+  fill: #fff6d8;
+  mix-blend-mode: screen;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 3px rgba(255, 231, 158, 0.85));
+  animation: france-fill-sparkle-twinkle 640ms ease-in-out infinite;
+}
+
+.france-fill-sparkle-dot:nth-of-type(2) { animation-delay: 180ms; }
+.france-fill-sparkle-dot:nth-of-type(3) { animation-delay: 360ms; }
 
 .france-paint-finish {
   opacity: 0;
@@ -2163,6 +2220,10 @@
   filter:
     drop-shadow(0 12px 18px rgba(0, 0, 0, 0.24))
     drop-shadow(0 0 12px rgba(255, 211, 112, 0.46));
+}
+
+.colored-pencil.is-scribbling .colored-pencil-tip {
+  animation: france-pencil-scribble 240ms cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 .colored-pencil.is-celebrating {
@@ -2545,19 +2606,16 @@
   46% { transform: translate(-50%, -50%) scale(1.055); }
 }
 
-@keyframes france-paint-reveal {
-  0% {
-    clip-path: circle(0% at var(--paint-x, 150px) var(--paint-y, 100px));
-    filter: saturate(1.12) brightness(1.06) drop-shadow(0 0 0 rgba(255, 231, 158, 0));
-  }
-  48% {
-    clip-path: circle(58% at var(--paint-x, 150px) var(--paint-y, 100px));
-    filter: saturate(1.18) brightness(1.05) drop-shadow(0 0 8px rgba(255, 231, 158, 0.32));
-  }
-  100% {
-    clip-path: circle(300% at var(--paint-x, 150px) var(--paint-y, 100px));
-    filter: saturate(1) brightness(1) drop-shadow(0 0 0 rgba(255, 231, 158, 0));
-  }
+@keyframes france-fill-sparkle-twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.55); }
+  50% { opacity: 0.95; transform: scale(1.15); }
+}
+
+@keyframes france-pencil-scribble {
+  0%, 100% { transform: translate(0, -50%) rotate(0deg); }
+  25% { transform: translate(-1.6px, calc(-50% - 1.4px)) rotate(-2.4deg); }
+  50% { transform: translate(0.9px, calc(-50% + 1.2px)) rotate(1.6deg); }
+  75% { transform: translate(-1px, calc(-50% + 0.6px)) rotate(-1.2deg); }
 }
 
 @keyframes france-paint-texture-settle {
@@ -2702,6 +2760,8 @@
   .colored-pencil-trail,
   .colored-pencil-star,
   .france-paint-finish,
+  .colored-pencil.is-scribbling .colored-pencil-tip,
+  .france-fill-sparkle-dot,
   .france-hotspot.orb.is-selected::before,
   .france-hotspot.orb.is-selected::after,
   .france-hotspot.orb.is-pulsing,
@@ -2729,6 +2789,17 @@
   .interactive-region.is-filled {
     clip-path: none;
     filter: none;
+  }
+
+  /* Simple straight-edged, hold-driven progress fill; no sparkles or jitter. */
+  .france-fill-paint {
+    clip-path: inset(0 0 calc(100% - var(--fill-progress, 0%)) 0);
+    filter: none;
+  }
+
+  .france-fill-edge,
+  .france-fill-sparkles {
+    display: none;
   }
 
   .france-paint-finish {
