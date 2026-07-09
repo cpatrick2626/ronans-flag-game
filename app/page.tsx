@@ -104,6 +104,22 @@ function formatFriendlyDate(value?: string | null) {
 // panel. Shipping the next country (playable: true) re-enables it.
 const HAS_NEXT_PLAYABLE_CHALLENGE = Object.values(CHALLENGE_COUNTRIES).filter((config) => config.playable).length > 1
 
+// Viewport-driven orientation (not device-driven): a rotated phone and a
+// desktop window take the same landscape path. Exposed as data-orientation
+// on the root wrapper so later tasks can branch screen layouts on it; no
+// screen branches on it yet. SSR renders portrait; corrected on mount.
+function useViewportOrientation() {
+  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait')
+  useEffect(() => {
+    const query = window.matchMedia('(orientation: landscape)')
+    const apply = () => setOrientation(query.matches ? 'landscape' : 'portrait')
+    apply()
+    query.addEventListener('change', apply)
+    return () => query.removeEventListener('change', apply)
+  }, [])
+  return orientation
+}
+
 function useRoomChannel(onSnapshot: (room: RoomState) => void) { const channelRef = useRef<BroadcastChannel | null>(null); useEffect(() => { if (typeof window === 'undefined') return; const onStorage = (event: StorageEvent) => { if (event.key !== ROOM_STORAGE_KEY || !event.newValue) return; try { onSnapshot(JSON.parse(event.newValue) as RoomState) } catch {} }; window.addEventListener('storage', onStorage); if ('BroadcastChannel' in window) { const channel = new BroadcastChannel(ROOM_CHANNEL); channel.onmessage = (event) => { const payload = event.data as RoomSnapshot | null; if (payload?.room) onSnapshot(payload.room) }; channelRef.current = channel } return () => { window.removeEventListener('storage', onStorage); channelRef.current?.close() } }, [onSnapshot]); return channelRef }
 function AtmosphereBackdrop() { return <div className="pointer-events-none absolute inset-0 overflow-hidden"><div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.62)_0%,_rgba(255,255,255,0.20)_26%,_rgba(142,213,255,0.00)_58%)]" /><div className="absolute inset-x-0 bottom-0 h-[42%] bg-[linear-gradient(180deg,rgba(255,240,204,0)_0%,rgba(246,213,143,0.50)_55%,rgba(231,183,105,0.96)_100%)]" /><div className="absolute left-1/2 top-[16%] h-40 w-40 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.94)_0%,_rgba(255,255,255,0.58)_42%,_rgba(255,255,255,0)_72%)] blur-[2px]" /></div> }
 
@@ -465,6 +481,7 @@ function FlagColorChallengeGame({
       onPointerMove={updatePointer}
       onPointerDown={pressPencil}
     >
+      <img src={scene.image} alt="" aria-hidden="true" draggable={false} className="scene-backdrop" />
       <div className="france-play-shell">
         <div className="france-play-stage-frame">
           <div className="france-play-title-ribbon" aria-hidden="true">
@@ -744,6 +761,15 @@ function FlagColorSelectScreen({
 
   return (
     <section className="flag-select-screen" aria-label="Flag Color Challenge menu">
+      <video
+        className="scene-backdrop"
+        src="/assets/flag-color/flag-color-select-screen.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-hidden="true"
+      />
       <div className="flag-select-ambient" aria-hidden="true">
         <span className="flag-select-orbit flag-select-orbit-a" />
         <span className="flag-select-orbit flag-select-orbit-b" />
@@ -905,6 +931,16 @@ function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean
 
   return (
     <div className={`intro-screen-container ${exiting ? 'intro-screen-exiting' : ''}`}>
+      <video
+        className="scene-backdrop"
+        src="/assets/loading/ronans-loading-screen.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+      />
       <div className="intro-screen-video-shell">
         <div className="intro-screen-video-frame">
           <video
@@ -1107,6 +1143,7 @@ export default function FlagGamePage() {
   const pinTimerRef = useRef<number | null>(null)
   const channelRef = useRoomChannel((nextRoom) => setRoom((current) => (current && current.updatedAt > nextRoom.updatedAt ? current : nextRoom)))
   const { playSound } = useSoundHooks()
+  const orientation = useViewportOrientation()
 
   const country = COUNTRY_BY_ISO2[activeCountryCode] || COUNTRIES[0]
   const palette = countryPalette(country)
@@ -1185,12 +1222,12 @@ export default function FlagGamePage() {
   function paintClass(regionId: string) { const feedback = paintFeedback[regionId]; return feedback ? (feedback.state === 'correct' ? 'paint-correct correct-glow' : 'paint-wrong wrong-shake') : '' }
 
   return (
-    <main className="relative min-h-screen overflow-hidden text-[#fdf6ea]">
+    <main data-orientation={orientation} className="app-shell relative overflow-hidden text-[#fdf6ea]">
       <AtmosphereBackdrop />
       <div className="absolute inset-x-0 bottom-0 h-[30vh] bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,rgba(94,144,82,0.18)_40%,rgba(53,100,55,0.82)_100%)]" />
       <div className="absolute inset-x-0 bottom-[10%] flex justify-center"><div className="h-40 w-[92vw] max-w-6xl rounded-full bg-[radial-gradient(circle,_rgba(92,59,27,0.26)_0%,_rgba(92,59,27,0.20)_42%,_rgba(92,59,27,0)_72%)] blur-3xl" /></div>
       {screen === 'loading' && <IntroScreen onPlay={beginIntroExit} exiting={introExiting} />}
-      <div className="relative mx-auto flex min-h-screen w-full flex-col px-4 py-4 md:px-6 md:py-6">
+      <div className="app-playfield relative mx-auto flex w-full flex-col px-4 py-4 md:px-6 md:py-6">
         {screen === 'home' && (
           <section className="relative flex min-h-0 flex-1 items-center justify-center">
             <div className="home-map-shell relative flex h-full min-h-0 w-full max-w-[420px] flex-1 flex-col overflow-hidden rounded-[34px] border border-[#f6e0b2]/12 shadow-[0_36px_120px_rgba(61,36,12,0.12)]">

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
 import './globals.css'
 
@@ -19,6 +19,14 @@ const cormorantGaramond = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: 'Ronan Flag Game',
   description: 'A colorful flag coloring game with progress, multiplayer, and country discovery.',
+}
+
+// viewportFit: 'cover' lets the backdrop extend under notches/home indicators;
+// content stays clear of them via the env(safe-area-inset-*) padding in globals.css.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

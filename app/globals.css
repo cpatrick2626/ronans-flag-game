@@ -476,15 +476,22 @@
 .intro-screen-video-shell {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: grid;
   place-items: center;
-  padding: clamp(0.75rem, 2vw, 1.5rem);
+  padding:
+    max(clamp(0.75rem, 2vw, 1.5rem), var(--safe-top))
+    max(clamp(0.75rem, 2vw, 1.5rem), var(--safe-right))
+    max(clamp(0.75rem, 2vw, 1.5rem), var(--safe-bottom))
+    max(clamp(0.75rem, 2vw, 1.5rem), var(--safe-left));
 }
 
 .intro-screen-video-frame {
   position: relative;
-  width: min(calc(100vw - 1.5rem), calc((100vh - 1.5rem) * 0.5625));
-  height: min(calc(100vh - 1.5rem), calc((100vw - 1.5rem) * 1.7777777778));
+  width: min(calc(100vw - 1.5rem - var(--safe-x)), calc((100vh - 1.5rem - var(--safe-y)) * 0.5625));
+  width: min(calc(100vw - 1.5rem - var(--safe-x)), calc((100dvh - 1.5rem - var(--safe-y)) * 0.5625));
+  height: min(calc(100vh - 1.5rem - var(--safe-y)), calc((100vw - 1.5rem - var(--safe-x)) * 1.7777777778));
+  height: min(calc(100dvh - 1.5rem - var(--safe-y)), calc((100vw - 1.5rem - var(--safe-x)) * 1.7777777778));
   max-width: 100%;
   max-height: 100%;
 }
@@ -653,15 +660,22 @@
 .flag-select-shell {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: grid;
   place-items: center;
-  padding: clamp(0.5rem, 1.75vw, 1.25rem);
+  padding:
+    max(clamp(0.5rem, 1.75vw, 1.25rem), var(--safe-top))
+    max(clamp(0.5rem, 1.75vw, 1.25rem), var(--safe-right))
+    max(clamp(0.5rem, 1.75vw, 1.25rem), var(--safe-bottom))
+    max(clamp(0.5rem, 1.75vw, 1.25rem), var(--safe-left));
 }
 
 .flag-select-frame {
   position: relative;
-  width: min(calc(100vw - 1rem), calc((100vh - 1rem) * 0.5625));
-  height: min(calc(100vh - 1rem), calc((100vw - 1rem) * 1.7777777778));
+  width: min(calc(100vw - 1rem - var(--safe-x)), calc((100vh - 1rem - var(--safe-y)) * 0.5625));
+  width: min(calc(100vw - 1rem - var(--safe-x)), calc((100dvh - 1rem - var(--safe-y)) * 0.5625));
+  height: min(calc(100vh - 1rem - var(--safe-y)), calc((100vw - 1rem - var(--safe-x)) * 1.7777777778));
+  height: min(calc(100dvh - 1rem - var(--safe-y)), calc((100vw - 1rem - var(--safe-x)) * 1.7777777778));
   max-width: 100%;
   max-height: 100%;
   aspect-ratio: 9 / 16;
@@ -2568,11 +2582,15 @@
   background: #08060f;
   color: #fff7ea;
   cursor: none;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 
 .france-play-shell {
-  width: min(100vw, calc(100vh * 1232 / 864));
-  max-height: 100vh;
+  position: relative;
+  z-index: 1;
+  width: min(100%, calc((100vh - var(--safe-y)) * 1232 / 864));
+  width: min(100%, calc((100dvh - var(--safe-y)) * 1232 / 864));
+  max-height: 100%;
   aspect-ratio: 1232 / 864;
   display: grid;
   place-items: center;
@@ -3093,4 +3111,60 @@
   .france-spark-burst {
     opacity: 0;
   }
+}
+
+/* ============================================================
+   Responsive layout shell
+   Viewport-filling foundation: safe-area vars, full-bleed echo
+   backdrops, and the centered playfield. Screens' internal
+   layouts are untouched — they adapt in later tasks.
+   ============================================================ */
+
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-x: calc(var(--safe-left) + var(--safe-right));
+  --safe-y: calc(var(--safe-top) + var(--safe-bottom));
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+/* Root wrapper: fills the dynamic viewport and keeps flow content out of
+   notch/home-indicator zones. Absolute backdrop children still cover the
+   padding box, so art bleeds edge to edge. */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+/* Centered playfield. 1600px max: fills 1080p/1440p-class windows entirely
+   while stopping short of grotesque stretch on ultrawide/4K monitors. */
+.app-playfield {
+  min-height: calc(100vh - var(--safe-y));
+  min-height: calc(100dvh - var(--safe-y));
+  max-width: 1600px;
+}
+
+/* Full-bleed echo backdrop: a blurred, dimmed, cover-fit copy of the same
+   scene art behind each contain-fit playfield. Fills former letterbox bars
+   and blank margins with the scene's own colors at any aspect ratio without
+   cropping interactive art. scale() hides blur edge fringing. */
+.scene-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.12);
+  filter: blur(26px) saturate(1.08) brightness(0.6);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
 }
