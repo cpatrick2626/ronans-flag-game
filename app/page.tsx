@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { COUNTRIES, COUNTRY_BY_ISO2 } from '../public/countries.js'
 import { completeCountry, getCountryProgress, loadFlagProgress } from '../public/flag-progress.js'
-import { DEFAULT_CHALLENGE_ISO2, MAP_PINS, getCelebrationProfile, resolvePlayableChallenge, type CompletionSoundHook, type CountryChallengeConfig, type FillPatternId, type FlagRegionConfig } from '../lib/countries'
+import { CHALLENGE_COUNTRIES, DEFAULT_CHALLENGE_ISO2, MAP_PINS, getCelebrationProfile, resolvePlayableChallenge, type CompletionSoundHook, type CountryChallengeConfig, type FillPatternId, type FlagRegionConfig } from '../lib/countries'
 
 type Screen = 'loading' | 'home' | 'country-arrival' | 'play' | 'flag-color-challenge' | 'create-room' | 'join-room' | 'waiting-room' | 'coop' | 'versus'
 type Mode = 'solo' | 'coop' | 'versus'
@@ -86,6 +86,23 @@ function routePairs(nodes: WorldMapNode[]) {
 function formatPercent(value: number) {
   return `${Math.max(0, Math.min(100, value))}%`
 }
+
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+// Rewards panel shows completion dates kid-friendly ("July 9, 2026"). The
+// stored value stays untouched — this only formats for display, and hides
+// the line entirely if the stored string is not a recognizable date.
+function formatFriendlyDate(value?: string | null) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value || '')
+  if (!match) return null
+  const month = MONTH_NAMES[Number(match[2]) - 1]
+  return month ? `${month} ${Number(match[3])}, ${Number(match[1])}` : null
+}
+
+// Next Flag only appears once a second country is playable in the challenge
+// registry, so unfinished prototypes can never be reached from the rewards
+// panel. Shipping the next country (playable: true) re-enables it.
+const HAS_NEXT_PLAYABLE_CHALLENGE = Object.values(CHALLENGE_COUNTRIES).filter((config) => config.playable).length > 1
 
 function useRoomChannel(onSnapshot: (room: RoomState) => void) { const channelRef = useRef<BroadcastChannel | null>(null); useEffect(() => { if (typeof window === 'undefined') return; const onStorage = (event: StorageEvent) => { if (event.key !== ROOM_STORAGE_KEY || !event.newValue) return; try { onSnapshot(JSON.parse(event.newValue) as RoomState) } catch {} }; window.addEventListener('storage', onStorage); if ('BroadcastChannel' in window) { const channel = new BroadcastChannel(ROOM_CHANNEL); channel.onmessage = (event) => { const payload = event.data as RoomSnapshot | null; if (payload?.room) onSnapshot(payload.room) }; channelRef.current = channel } return () => { window.removeEventListener('storage', onStorage); channelRef.current?.close() } }, [onSnapshot]); return channelRef }
 function AtmosphereBackdrop() { return <div className="pointer-events-none absolute inset-0 overflow-hidden"><div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.62)_0%,_rgba(255,255,255,0.20)_26%,_rgba(142,213,255,0.00)_58%)]" /><div className="absolute inset-x-0 bottom-0 h-[42%] bg-[linear-gradient(180deg,rgba(255,240,204,0)_0%,rgba(246,213,143,0.50)_55%,rgba(231,183,105,0.96)_100%)]" /><div className="absolute left-1/2 top-[16%] h-40 w-40 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.94)_0%,_rgba(255,255,255,0.58)_42%,_rgba(255,255,255,0)_72%)] blur-[2px]" /></div> }
@@ -1310,19 +1327,21 @@ export default function FlagGamePage() {
         )}
 
         {reward && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-            <div className="celebration-shell w-full max-w-3xl overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(7,12,18,0.96)] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.5)]" style={{ '--confetti-color-1': celebrationProfile.confettiColors[0], '--confetti-color-2': celebrationProfile.confettiColors[1] ?? celebrationProfile.confettiColors[0], '--confetti-color-3': celebrationProfile.confettiColors[2] ?? celebrationProfile.confettiColors[0] } as CSSProperties}>
-              <div className={`confetti-layer confetti-${celebrationProfile.particleShape}`} aria-hidden="true" />
-              <div className="relative">
-                <div className="text-[11px] font-black uppercase tracking-[0.45em] text-[#b8a97b]">COUNTRY DISCOVERED</div>
-                <h3 className={`mt-2 font-display text-4xl font-black text-white ${rewardStage !== 'stamp' ? 'completion-title-rise' : ''}`}>{reward.countryName}</h3>
-                <div className="mt-1 text-sm font-bold uppercase tracking-[0.24em] text-[#8ca2b6]">{reward.message}</div>
-                {celebrationProfile.themeLabel && <div className="mt-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#f0c674]">{celebrationProfile.themeLabel}</div>}
-                <div className="mt-5 grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
-                  <div className="space-y-3"><div className={`relative rounded-[24px] border border-white/10 bg-white/5 p-4 ${rewardStage === 'stamp' ? 'stamp-slam' : 'opacity-80'}`}><div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#b8a97b]">Passport Stamp</div><div className="mt-2 text-2xl font-black text-white">{reward.passportStamp.label}</div><div className="mt-1 text-sm text-[#9fb3c8]">{reward.passportStamp.completedAt}</div></div><div className={`rounded-[24px] border border-white/10 bg-white/5 p-4 ${rewardStage === 'souvenir' ? 'souvenir-pop' : 'opacity-80'}`}><div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#b8a97b]">Souvenir Reveal</div><div className="mt-2 text-2xl font-black text-white">{reward.souvenir.name}</div></div></div>
-                  <div className="space-y-3"><div className={`rounded-[24px] border border-white/10 bg-white/5 p-4 ${rewardStage === 'xp' ? 'star-pop' : 'opacity-80'}`}><div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#b8a97b]">XP Reveal</div><div className={`mt-2 text-5xl font-black text-[#22c55e] ${rewardStage === 'xp' ? 'xp-pulse' : ''}`}>+{rewardXpVisible}</div></div><div className="rounded-[24px] border border-white/10 bg-white/5 p-4"><div className="text-[11px] font-black uppercase tracking-[0.35em] text-[#b8a97b]">Explorer Rank Progress</div><div className="mt-2 h-2 overflow-hidden rounded-full bg-white/8"><div className="h-full rounded-full bg-[linear-gradient(90deg,#38bdf8,#22c55e,#f59e0b)] transition-all duration-700" style={{ width: `${rewardRankProgress}%` }} /></div></div></div>
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-[#2a1704]/60">
+            <div className="flex min-h-full items-center justify-center px-4 py-6">
+              <div className="reward-panel relative w-full min-w-0 max-w-3xl overflow-hidden rounded-[30px] p-5 text-[#5f3a0c] sm:p-6">
+                <div className="reward-burst" aria-hidden="true"><span /><span /><span /><span /><span /><span /><span /><span /></div>
+                <div className="relative min-w-0">
+                  <div className="text-[11px] font-black uppercase tracking-[0.4em] text-[#a06a1d]">COUNTRY DISCOVERED</div>
+                  <h3 className={`mt-2 font-display text-3xl font-black text-[#4a2c0c] sm:text-4xl ${rewardStage !== 'stamp' ? 'completion-title-rise' : ''}`}>{reward.countryName}</h3>
+                  <div className="mt-1 text-sm font-bold uppercase tracking-[0.2em] text-[#8a5a22]">{reward.message}</div>
+                  {celebrationProfile.themeLabel && <div className="mt-2 text-[11px] font-black uppercase tracking-[0.3em] text-[#b97f16]">{celebrationProfile.themeLabel}</div>}
+                  <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-[1.1fr_0.9fr]">
+                    <div className="min-w-0 space-y-3"><div className={`reward-card relative rounded-[24px] p-4 ${rewardStage === 'stamp' ? 'stamp-slam' : 'opacity-90'}`}><div className="text-[11px] font-black uppercase tracking-[0.3em] text-[#a06a1d]">Passport Stamp</div><div className="mt-2 break-words text-2xl font-black text-[#4a2c0c]">{reward.passportStamp.label}</div>{formatFriendlyDate(reward.passportStamp.completedAt) && <div className="mt-1 text-sm font-bold text-[#8a5a22]">{formatFriendlyDate(reward.passportStamp.completedAt)}</div>}</div><div className={`reward-card rounded-[24px] p-4 ${rewardStage === 'souvenir' ? 'souvenir-pop' : 'opacity-90'}`}><div className="text-[11px] font-black uppercase tracking-[0.3em] text-[#a06a1d]">Souvenir Reveal</div><div className="mt-2 break-words text-2xl font-black text-[#4a2c0c]">{reward.souvenir.name}</div></div></div>
+                    <div className="min-w-0 space-y-3"><div className={`reward-card rounded-[24px] p-4 ${rewardStage === 'xp' ? 'star-pop' : 'opacity-90'}`}><div className="text-[11px] font-black uppercase tracking-[0.3em] text-[#a06a1d]">XP Reveal</div><div className={`mt-2 text-5xl font-black text-[#2e7d32] ${rewardStage === 'xp' ? 'xp-pulse' : ''}`}>+{rewardXpVisible}</div></div><div className="reward-card rounded-[24px] p-4"><div className="text-[11px] font-black uppercase tracking-[0.3em] text-[#a06a1d]">Explorer Rank Progress</div><div className="mt-2 h-2 overflow-hidden rounded-full bg-[#5f3a0c]/15"><div className="h-full rounded-full bg-[linear-gradient(90deg,#f7d074,#e8a13a,#c97f1b)] transition-all duration-700" style={{ width: `${rewardRankProgress}%` }} /></div></div></div>
+                  </div>
+                  <div className={`mt-4 flex flex-wrap gap-2 ${rewardStage === 'done' ? 'completion-actions' : 'opacity-70'}`}><button onClick={() => { playSound('button_click'); setReward(null) }} className="rounded-2xl bg-[linear-gradient(180deg,#ffe9ae,#e9b654)] px-6 py-3 font-black text-[#5f3a0c] shadow-[0_10px_24px_rgba(112,76,18,0.28)]">Continue</button>{HAS_NEXT_PLAYABLE_CHALLENGE && <button onClick={() => { playSound('button_click'); nextCountry() }} className="rounded-2xl border border-[#9b6a2b]/40 bg-white/40 px-5 py-3 font-black text-[#7b4f12]">Next Flag</button>}</div>
                 </div>
-                <div className={`mt-4 flex flex-wrap gap-2 ${rewardStage === 'done' ? 'completion-actions' : 'opacity-70'}`}><button onClick={() => { playSound('button_click'); nextCountry() }} className="rounded-2xl bg-[#f59e0b] px-5 py-3 font-black text-[#111827]">Next Flag</button><button onClick={() => { playSound('button_click'); setReward(null) }} className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-black text-white">Continue</button></div>
               </div>
             </div>
           </div>
