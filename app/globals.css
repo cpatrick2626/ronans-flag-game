@@ -2564,6 +2564,7 @@
 .challenge-flag-overlay {
   position: absolute;
   z-index: 2;
+  box-sizing: border-box;
 }
 
 .challenge-flag-svg {
@@ -2618,6 +2619,134 @@
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
+}
+
+.france-portrait-art {
+  display: none;
+}
+
+@media (orientation: portrait) {
+  .france-play-shell {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    aspect-ratio: auto;
+  }
+
+  .france-play-stage-frame,
+  .france-play-image-shell {
+    width: 100%;
+    height: 100%;
+  }
+
+  .france-play-image-shell {
+    z-index: 3;
+  }
+
+  .france-play-image {
+    display: block;
+    opacity: 0;
+  }
+
+  .france-portrait-art {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    background: linear-gradient(180deg, #202052 0%, #4c376a 38%, #d58a58 78%, #e5b46e 100%);
+    z-index: 1;
+  }
+
+  .france-portrait-art::before {
+    content: '';
+    position: absolute;
+    inset: -6%;
+    background: url('/assets/france-scene.png') center top / cover no-repeat;
+    filter: blur(18px) saturate(1.08) brightness(0.58);
+    transform: scale(1.06);
+  }
+
+  .france-portrait-slice {
+    position: absolute;
+    left: 50%;
+    display: block;
+    transform: translateX(-50%);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    z-index: 1;
+  }
+
+  .france-portrait-title {
+    top: 1%;
+    width: 100%;
+    height: 14%;
+    background-image: url('/assets/france-portrait/title.png');
+  }
+
+  .france-portrait-board {
+    top: 14%;
+    width: 96%;
+    height: 38%;
+    background-image: url('/assets/france-portrait/board.png');
+    z-index: 3;
+  }
+
+  .france-portrait-tray {
+    top: 50%;
+    width: 100%;
+    height: 15%;
+    background-image: url('/assets/france-portrait/tray.png');
+    z-index: 2;
+  }
+
+  .france-portrait-chips {
+    top: 64%;
+    width: 88%;
+    height: 12%;
+    background-image: url('/assets/france-portrait/chips.png');
+    z-index: 4;
+  }
+
+  .france-portrait-nav {
+    top: 84%;
+    width: 100%;
+    height: 16%;
+    background-image: url('/assets/france-portrait/nav.png');
+    z-index: 5;
+  }
+
+  .france-portrait-art + .france-play-image-shell .challenge-flag-overlay {
+    left: 15% !important;
+    top: 18% !important;
+    width: 70% !important;
+    height: 20% !important;
+    border: 4px solid rgba(198, 145, 53, 0.94);
+    border-radius: 16px;
+    box-shadow:
+      0 0 0 3px rgba(255, 239, 180, 0.68),
+      0 10px 26px rgba(54, 32, 8, 0.24),
+      0 0 26px rgba(255, 216, 116, 0.34);
+  }
+
+  .france-portrait-art + .france-play-image-shell .france-hotspot.orb {
+    top: 57% !important;
+    width: clamp(44px, 12cqw, 56px) !important;
+    height: clamp(44px, 12cqw, 56px) !important;
+  }
+
+  .france-portrait-art + .france-play-image-shell .france-hotspot.nav {
+    top: 92% !important;
+    height: 8% !important;
+  }
+}
+
+@media (orientation: landscape) {
+  .france-play-shell {
+    width: min(100%, calc((100dvh - var(--safe-y)) * 1232 / 864));
+    height: auto;
+    aspect-ratio: 1232 / 864;
+  }
 }
 
 .france-play-title-ribbon {

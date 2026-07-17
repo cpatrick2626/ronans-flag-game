@@ -487,6 +487,13 @@ function FlagColorChallengeGame({
           <div className="france-play-title-ribbon" aria-hidden="true">
             {scene.titleRibbon}
           </div>
+          <div className="france-portrait-art" aria-hidden="true">
+            <span className="france-portrait-slice france-portrait-title" />
+            <span className="france-portrait-slice france-portrait-board" />
+            <span className="france-portrait-slice france-portrait-tray" />
+            <span className="france-portrait-slice france-portrait-chips" />
+            <span className="france-portrait-slice france-portrait-nav" />
+          </div>
           <div className="france-play-image-shell" ref={shellRef}>
             <img
               src={scene.image}
