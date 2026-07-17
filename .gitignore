@@ -10,3 +10,10 @@ tsconfig.tsbuildinfo
 .DS_Store
 test-results/
 playwright-report/
+
+# Intentional local loading-video backups; preserve, never stage or delete.
+public/assets/loading/ronans-loading-screen-original-backup.mp4
+public/assets/loading/ronans-loading-screen-pingpong.mp4
+
+# Non-Ronan agent scratch output; never track.
+pet_runs/
