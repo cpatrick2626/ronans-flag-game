@@ -3297,3 +3297,94 @@ body {
   user-select: none;
   z-index: 0;
 }
+
+/* ============================================================
+   Phase 1 — Draw the Lines
+   Dotted region-boundary guides that ink in solid while the
+   player holds on the flag; the palette stays hidden until the
+   lines are complete. Placeholder visuals — polished art later.
+   ============================================================ */
+
+.flag-line-guide {
+  stroke: rgba(122, 92, 46, 0.42);
+  stroke-width: 2.4;
+  stroke-dasharray: 3 5;
+  stroke-linecap: round;
+  fill: none;
+}
+
+/* pathLength=1 on the element normalizes the dash space, so the unitless
+   --line-progress (0..1) written per rAF frame drives the draw-in. */
+.flag-line-ink {
+  stroke: rgba(96, 70, 30, 0.88);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  fill: none;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--line-progress, 0));
+}
+
+.flag-line-draw.is-complete .flag-line-ink {
+  filter: drop-shadow(0 0 5px rgba(255, 224, 138, 0.85));
+  animation: flag-line-reveal-glow 650ms ease-out;
+}
+
+@keyframes flag-line-reveal-glow {
+  0% { filter: drop-shadow(0 0 2px rgba(255, 224, 138, 0.4)); }
+  45% { filter: drop-shadow(0 0 12px rgba(255, 236, 170, 1)); }
+  100% { filter: drop-shadow(0 0 5px rgba(255, 224, 138, 0.85)); }
+}
+
+.flag-line-hold-target {
+  cursor: none;
+  touch-action: manipulation;
+  outline: none;
+}
+
+.flag-line-hold-target:focus-visible {
+  stroke: rgba(255, 226, 128, 0.96);
+  stroke-width: 3;
+}
+
+/* Placeholder cover: frosts the baked gem-palette art while the palette is
+   locked, then fades away once the lines complete and the palette unlocks. */
+.france-palette-veil {
+  position: absolute;
+  left: 19%;
+  top: 61%;
+  width: 62%;
+  height: 18%;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, rgba(74, 52, 96, 0.88), rgba(42, 30, 60, 0.92));
+  box-shadow: inset 0 0 22px rgba(20, 12, 34, 0.5);
+  backdrop-filter: blur(16px) saturate(0.85);
+  -webkit-backdrop-filter: blur(16px) saturate(0.85);
+  pointer-events: none;
+  transition: opacity 420ms ease;
+}
+
+.france-palette-veil.is-lifted {
+  opacity: 0;
+}
+
+/* Portrait: the gem palette is baked into the tray art slice mid-screen. */
+@media (orientation: portrait) {
+  .france-palette-veil {
+    left: 5%;
+    top: 50%;
+    width: 90%;
+    height: 15%;
+    border-radius: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flag-line-draw.is-complete .flag-line-ink {
+    animation: none;
+    filter: none;
+  }
+
+  .france-palette-veil {
+    transition: none;
+  }
+}

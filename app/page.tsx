@@ -225,6 +225,11 @@ function FlagColorChallengeGame({
 }) {
   const scene = config.scene
   const round = config.round
+  // Phase 1 draws the region boundary lines; the palette and coloring only
+  // exist once phase reaches 'color'. Re-entry remounts this component, so
+  // every play starts back at the blank dotted-line state.
+  const [phase, setPhase] = useState<'draw' | 'reveal' | 'color'>('draw')
+  const [lineHolding, setLineHolding] = useState(false)
   const [selectedOrb, setSelectedOrb] = useState(scene.defaultOrbId)
   const [activeNav, setActiveNav] = useState(scene.defaultNavId)
   const [spark, setSpark] = useState<FranceSpark | null>(null)
@@ -244,6 +249,10 @@ function FlagColorChallengeGame({
   const shellRef = useRef<HTMLDivElement | null>(null)
   const fillProgressRef = useRef<Record<string, number>>({})
   const holdRef = useRef<FillHold | null>(null)
+  const lineProgressRef = useRef(0)
+  const lineHoldRef = useRef<{ raf: number | null; lastTs: number | null } | null>(null)
+  const lineLayerRef = useRef<SVGGElement | null>(null)
+  const revealTimerRef = useRef<number | null>(null)
   const fillLayerRefs = useRef<Record<string, SVGGElement | null>>({})
   const fillSparkleRefs = useRef<Record<string, SVGGElement | null>>({})
   const pencilRef = useRef<HTMLDivElement | null>(null)
@@ -276,6 +285,29 @@ function FlagColorChallengeGame({
     }
     return bounds
   }, [round.regions])
+  const lineDrawMs = round.lineDrawMs ?? 1200
+  // Region boundary guides for Phase 1: the interior edges of each region's
+  // bounding rect (edges not on the flag border), deduped across neighbors.
+  // For France this yields the two vertical stripe dividers.
+  const boundaryLines = useMemo(() => {
+    const seen = new Set<string>()
+    const lines: { x1: number; y1: number; x2: number; y2: number }[] = []
+    for (const region of round.regions) {
+      const b = regionBounds[region.id]
+      const edges = [
+        b.x > 0 ? { x1: b.x, y1: b.y, x2: b.x, y2: b.y + b.h } : null,
+        b.x + b.w < 300 ? { x1: b.x + b.w, y1: b.y, x2: b.x + b.w, y2: b.y + b.h } : null,
+        b.y > 0 ? { x1: b.x, y1: b.y, x2: b.x + b.w, y2: b.y } : null,
+        b.y + b.h < 200 ? { x1: b.x, y1: b.y + b.h, x2: b.x + b.w, y2: b.y + b.h } : null,
+      ]
+      for (const edge of edges) {
+        if (!edge) continue
+        const key = `${edge.x1},${edge.y1},${edge.x2},${edge.y2}`
+        if (!seen.has(key)) { seen.add(key); lines.push(edge) }
+      }
+    }
+    return lines
+  }, [round.regions, regionBounds])
 
   useEffect(() => () => {
     if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
@@ -283,7 +315,23 @@ function FlagColorChallengeGame({
     if (pressTimerRef.current) window.clearTimeout(pressTimerRef.current)
     if (recoilTimerRef.current) window.clearTimeout(recoilTimerRef.current)
     if (holdRef.current?.raf != null) window.cancelAnimationFrame(holdRef.current.raf)
+    if (lineHoldRef.current?.raf != null) window.cancelAnimationFrame(lineHoldRef.current.raf)
+    if (revealTimerRef.current) window.clearTimeout(revealTimerRef.current)
   }, [])
+
+  useEffect(() => {
+    if (!lineHolding) return
+    const stop = () => releaseLineHold()
+    window.addEventListener('pointerup', stop)
+    window.addEventListener('pointercancel', stop)
+    window.addEventListener('blur', stop)
+    return () => {
+      window.removeEventListener('pointerup', stop)
+      window.removeEventListener('pointercancel', stop)
+      window.removeEventListener('blur', stop)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineHolding])
 
   useEffect(() => {
     if (!activeFillRegion) return
@@ -441,8 +489,61 @@ function FlagColorChallengeGame({
     restorePencilHome()
   }
 
+  // Phase 1: one held press (anywhere on the flag) draws the dotted boundary
+  // guides into solid lines. Releasing pauses; re-holding resumes. Reuses the
+  // rAF hold-progress pattern from the coloring phase below.
+  function applyLineVisual(progress: number) {
+    const layer = lineLayerRef.current
+    if (layer) layer.style.setProperty('--line-progress', progress.toFixed(4))
+  }
+
+  function runLineDrawFrame(ts: number) {
+    const hold = lineHoldRef.current
+    if (!hold) return
+    if (hold.lastTs !== null) {
+      const dt = Math.min(ts - hold.lastTs, 50)
+      const next = Math.min(1, lineProgressRef.current + dt / lineDrawMs)
+      lineProgressRef.current = next
+      applyLineVisual(next)
+      if (next >= 1) {
+        lineHoldRef.current = null
+        setLineHolding(false)
+        finishLineDraw()
+        return
+      }
+    }
+    hold.lastTs = ts
+    hold.raf = window.requestAnimationFrame(runLineDrawFrame)
+  }
+
+  function finishLineDraw() {
+    setPhase('reveal')
+    if (!reducedMotionRef.current) triggerSpark(50, 34, scene.regionSparkHue, 'correct')
+    revealTimerRef.current = window.setTimeout(() => setPhase('color'), reducedMotionRef.current ? 0 : 650)
+  }
+
+  function startLineHold(event: React.PointerEvent | null) {
+    if (phase !== 'draw' || lineHoldRef.current) return
+    // Touch pointers implicitly capture; release so sliding off the flag
+    // pauses the draw, matching the coloring hold behavior.
+    if (event && event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+    lineHoldRef.current = { raf: null, lastTs: null }
+    lineHoldRef.current.raf = window.requestAnimationFrame(runLineDrawFrame)
+    setLineHolding(true)
+  }
+
+  function releaseLineHold() {
+    const hold = lineHoldRef.current
+    if (!hold) return
+    if (hold.raf !== null) window.cancelAnimationFrame(hold.raf)
+    lineHoldRef.current = null
+    setLineHolding(false)
+  }
+
   function handleRegionPress(region: FlagRegionConfig, event: React.PointerEvent | null) {
-    if (filledRegions[region.id] || holdRef.current) return
+    if (phase !== 'color' || filledRegions[region.id] || holdRef.current) return
     // Touch pointers implicitly capture to the region, which would keep the
     // fill running after the finger slides off; release so pointerleave pauses.
     if (event && event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -546,7 +647,7 @@ function FlagColorChallengeGame({
                       <g
                         key={`${region.id}-${feedbackState ? regionFeedback?.at : 'idle'}`}
                         role="button"
-                        tabIndex={0}
+                        tabIndex={phase === 'color' ? 0 : -1}
                         aria-label={region.label}
                         className={`interactive-region ${isFilled ? 'is-filled' : ''} ${isWhiteRegion ? 'is-white-region' : ''} ${feedbackState}`}
                         onPointerDown={(event) => handleRegionPress(region, event)}
@@ -604,12 +705,55 @@ function FlagColorChallengeGame({
                       </g>
                     )
                   })}
+                  <g
+                    ref={lineLayerRef}
+                    className={`flag-line-draw ${phase !== 'draw' ? 'is-complete' : ''}`}
+                    pointerEvents="none"
+                    style={{ '--line-progress': phase === 'draw' ? lineProgressRef.current : 1 } as CSSProperties}
+                  >
+                    {boundaryLines.map((line) => (
+                      <g key={`line-${line.x1}-${line.y1}-${line.x2}-${line.y2}`}>
+                        <line className="flag-line-guide" x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
+                        <line className="flag-line-ink" pathLength={1} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
+                      </g>
+                    ))}
+                  </g>
+                  {phase === 'draw' && (
+                    <rect
+                      x="0"
+                      y="0"
+                      width="300"
+                      height="200"
+                      rx="10"
+                      fill="transparent"
+                      className="flag-line-hold-target"
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Hold to draw the flag lines"
+                      onPointerDown={(event) => startLineHold(event)}
+                      onPointerUp={() => releaseLineHold()}
+                      onPointerLeave={() => releaseLineHold()}
+                      onPointerCancel={() => releaseLineHold()}
+                      onKeyDown={(event) => {
+                        if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
+                          event.preventDefault()
+                          startLineHold(null)
+                        }
+                      }}
+                      onKeyUp={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') releaseLineHold()
+                      }}
+                    />
+                  )}
                   <rect x="0" y="0" width="300" height="200" rx="10" fill="url(#challenge-flag-sheen)" opacity="0.35" pointerEvents="none" />
                 </g>
               </svg>
             </div>
+            {/* Placeholder cover frosting the baked gem-palette art while the
+                palette is locked; the real hidden-palette art comes later. */}
+            <div className={`france-palette-veil ${phase === 'color' ? 'is-lifted' : ''}`} aria-hidden="true" />
             <div className="france-play-hotspots">
-              {orbItems.map((orb) => (
+              {phase === 'color' && orbItems.map((orb) => (
                 <button
                   key={`${orb.id}-${selectedOrb === orb.id ? selectedPulse : 0}`}
                   type="button"
@@ -673,7 +817,11 @@ function FlagColorChallengeGame({
             aria-label="Back"
           />
           <div className="sr-only" aria-live="polite">
-            {selectedOrb.charAt(0).toUpperCase() + selectedOrb.slice(1)} orb selected
+            {phase === 'draw'
+              ? 'Hold the flag to draw the lines'
+              : phase === 'reveal'
+                ? 'Lines complete. Colors unlocked.'
+                : `${selectedOrb.charAt(0).toUpperCase() + selectedOrb.slice(1)} orb selected`}
           </div>
         </div>
       </div>

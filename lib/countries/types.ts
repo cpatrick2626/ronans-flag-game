@@ -65,6 +65,10 @@ export type FlagRound = {
   // Allowed hold-to-fill patterns for this round's regions. Defaults to all
   // pattern families; existing configs need no change.
   fillPatterns?: FillPatternId[]
+  // Phase 1 "draw the lines" continuous hold time (ms) before coloring
+  // unlocks. Default 1200. Harder variants (per-line draws, path tracing)
+  // will extend this config later; existing configs need no change.
+  lineDrawMs?: number
 }
 
 // Pin hitbox on the home map reference image. selectable=false pins

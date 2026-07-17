@@ -51,10 +51,66 @@ async function holdRegion(page: import('@playwright/test').Page, region: import(
   await page.mouse.up();
 }
 
+// Phase 1: the palette stays hidden until the player holds on the flag and
+// the dotted boundary lines finish drawing (~1.2s). Hold through completion
+// and the reveal, then release once the palette has arrived.
+async function drawTheLines(page: import('@playwright/test').Page) {
+  const holdTarget = page.getByRole('button', { name: 'Hold to draw the flag lines' });
+  await expect(holdTarget).toBeAttached();
+  const box = await holdTarget.boundingBox();
+  if (!box) throw new Error('line hold target is not visible');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await expect(page.getByRole('button', { name: 'Blue orb' })).toBeAttached({ timeout: 6000 });
+  await page.mouse.up();
+}
+
+test('France draw-the-lines phase: palette hidden, hold pauses and resumes, reveal unlocks coloring', async ({ page }) => {
+  await page.setViewportSize(viewports[0]);
+  const errors: string[] = [];
+  await playThroughToFrance(page, errors);
+
+  // Blank flag with dotted guides; the palette is not rendered at all
+  await expect(page.locator('.flag-line-guide')).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Blue orb' })).toHaveCount(0);
+  const holdTarget = page.getByRole('button', { name: 'Hold to draw the flag lines' });
+  await expect(holdTarget).toBeAttached();
+  const box = await holdTarget.boundingBox();
+  if (!box) throw new Error('line hold target is not visible');
+
+  // A short hold advances the draw part-way; releasing pauses it
+  const readProgress = () => page.locator('.flag-line-draw').evaluate((el) => Number.parseFloat((el as SVGGElement).style.getPropertyValue('--line-progress') || '0'));
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(400);
+  await page.mouse.up();
+  const paused = await readProgress();
+  expect(paused).toBeGreaterThan(0.1);
+  expect(paused).toBeLessThan(1);
+
+  // Still no palette and no coloring while paused mid-draw
+  await expect(page.getByRole('button', { name: 'Blue orb' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'France blue stripe' })).not.toHaveClass(/is-filled/);
+
+  // Re-holding resumes from the paused progress; completion reveals the palette
+  await page.mouse.down();
+  await expect(page.getByRole('button', { name: 'Blue orb' })).toBeAttached({ timeout: 6000 });
+  await page.mouse.up();
+
+  // Coloring works only now
+  await page.getByRole('button', { name: 'Blue orb' }).click();
+  const blueStripe = page.getByRole('button', { name: 'France blue stripe' });
+  await holdRegion(page, blueStripe, 2500);
+  await expect(blueStripe).toHaveClass(/is-filled/);
+
+  expect(errors).toEqual([]);
+});
+
 test('France challenge flow: entry, orbs, stripes, back navigation', async ({ page }) => {
   await page.setViewportSize(viewports[0]);
   const errors: string[] = [];
   await playThroughToFrance(page, errors);
+  await drawTheLines(page);
 
   // Orb selection behavior
   const blueOrb = page.getByRole('button', { name: 'Blue orb' });
@@ -82,6 +138,7 @@ test('France gameplay: wrong feedback, correct fills, completion, reset', async 
   await page.setViewportSize(viewports[0]);
   const errors: string[] = [];
   await playThroughToFrance(page, errors);
+  await drawTheLines(page);
 
   const blueStripe = page.getByRole('button', { name: 'France blue stripe' });
   const whiteStripe = page.getByRole('button', { name: 'France white stripe' });
@@ -139,6 +196,9 @@ test('France gameplay: wrong feedback, correct fills, completion, reset', async 
   await page.getByRole('button', { name: 'PLAY SOLO' }).click();
   await expect(page.getByAltText('France Flag Color Challenge')).toBeVisible();
   await expect(page.getByRole('button', { name: 'France blue stripe' })).not.toHaveClass(/is-filled/);
+  // Full reset of both phases: back to the blank dotted-line state, palette hidden
+  await expect(page.getByRole('button', { name: 'Hold to draw the flag lines' })).toBeAttached();
+  await expect(page.getByRole('button', { name: 'Blue orb' })).toHaveCount(0);
 
   // Back navigation still works after a completed round
   await page.getByRole('button', { name: 'Back', exact: true }).first().click();
@@ -153,6 +213,7 @@ test('France magical motion layer: scoped cursor, pencil, ambient, and reduced m
   await page.setViewportSize(viewports[0]);
   const errors: string[] = [];
   await playThroughToFrance(page, errors);
+  await drawTheLines(page);
 
   const stage = page.locator('.france-play-stage');
   await expect(stage).toBeVisible();
@@ -176,6 +237,7 @@ test('France fill choreography: random pattern class and stroking pencil during 
   await page.setViewportSize(viewports[0]);
   const errors: string[] = [];
   await playThroughToFrance(page, errors);
+  await drawTheLines(page);
 
   // Every region layer carries a randomized fill-pattern class for this attempt
   await expect(page.locator('.france-fill-layer[class*="fill-pattern-"]')).toHaveCount(3);
