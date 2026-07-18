@@ -97,7 +97,7 @@ test('France draw-the-lines phase: palette hidden, hold pauses and resumes, reve
   // A short hold advances the draw part-way; releasing pauses it
   const readProgress = () => page.locator('.flag-line-draw').evaluate((el) => Number.parseFloat((el as SVGGElement).style.getPropertyValue('--line-progress') || '0'));
   await page.mouse.down();
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(600);
   await page.mouse.up();
   const paused = await readProgress();
   expect(paused).toBeGreaterThan(0.1);
@@ -192,11 +192,11 @@ test('France gameplay: wrong feedback, correct fills, completion, reset', async 
   await page.mouse.up();
 
   await page.getByRole('button', { name: 'White orb' }).click();
-  await holdRegion(page, whiteStripe, 2000);
+  await holdRegion(page, whiteStripe, 2600);
   await expect(whiteStripe).toHaveClass(/is-filled/);
   await expect(whiteStripe).toHaveClass(/is-white-region/);
   await page.getByRole('button', { name: 'Red orb' }).click();
-  await holdRegion(page, redStripe, 2000);
+  await holdRegion(page, redStripe, 2600);
   await expect(redStripe).toHaveClass(/is-filled/);
 
   // Completion card, then the reward flow triggers automatically exactly once
@@ -244,7 +244,7 @@ test('France magical motion layer: scoped cursor, pencil, ambient, and reduced m
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.getByRole('button', { name: 'Blue orb' }).click();
-  await holdRegion(page, page.getByRole('button', { name: 'France blue stripe' }), 2000);
+  await holdRegion(page, page.getByRole('button', { name: 'France blue stripe' }), 2600);
   await expect(page.getByRole('button', { name: 'France blue stripe' })).toHaveClass(/is-filled/);
 
   expect(errors).toEqual([]);

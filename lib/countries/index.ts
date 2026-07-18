@@ -1,13 +1,15 @@
 import type { CelebrationProfile, CountryChallengeConfig, MapPin } from './types'
 import { FRANCE } from './france'
+import { ITALY } from './italy'
 
 export * from './types'
-export { FRANCE }
+export { FRANCE, ITALY }
 
 // Registry of countries wired into the Flag Color Challenge.
 // Add a new country by creating its config file and listing it here.
 export const CHALLENGE_COUNTRIES: Record<string, CountryChallengeConfig> = {
   FR: FRANCE,
+  IT: ITALY,
 }
 
 export const DEFAULT_CHALLENGE_ISO2 = 'FR'

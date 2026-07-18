@@ -2,7 +2,7 @@
 // A country becomes playable in the Flag Color Challenge by providing one
 // CountryChallengeConfig and its scene assets — no gameplay code changes.
 
-export type CompletionSoundHook = 'button_click' | 'correct_fill' | 'wrong_fill' | 'stamp_thump' | 'country_complete' | 'arrival_theme' | 'home_theme' | 'victory_default' | 'victory_france' | 'victory_japan' | 'victory_brazil' | 'victory_egypt'
+export type CompletionSoundHook = 'button_click' | 'correct_fill' | 'wrong_fill' | 'stamp_thump' | 'country_complete' | 'arrival_theme' | 'home_theme' | 'victory_default' | 'victory_france' | 'victory_italy' | 'victory_japan' | 'victory_brazil' | 'victory_egypt'
 
 export type CelebrationProfile = { confettiColors: string[]; particleShape: 'dot' | 'petal' | 'diamond'; soundHook: CompletionSoundHook; themeLabel?: string }
 
@@ -79,6 +79,24 @@ export type FlagRound = {
   lineDrawMs?: number
 }
 
+// Optional landscape presentation measured on a country's dedicated
+// landscape art. Countries without one keep the portrait scene in landscape.
+// regions must reuse the portrait region ids so fill/completion state carries
+// the same keys in both orientations.
+export type LandscapeSceneOverride = {
+  image: string
+  flagOverlay: SceneFlagOverlay
+  regions: FlagRegionConfig[]
+  // Per-slot control positions; indexes line up with the portrait scene's
+  // orb slots and nav items.
+  orbLefts: string[]
+  navLefts: string[]
+  orbTop: string
+  navTop: string
+  navWidth: string
+  navHeight: string
+}
+
 // Pin hitbox on the home map reference image. selectable=false pins
 // (e.g. Mystery) render but do not change the active country.
 export type MapPin = {
@@ -96,6 +114,7 @@ export type CountryChallengeConfig = {
   name: string
   playable: boolean
   scene: ChallengeScene
+  landscape?: LandscapeSceneOverride
   round: FlagRound
   celebration: CelebrationProfile
 }

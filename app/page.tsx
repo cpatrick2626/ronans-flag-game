@@ -174,24 +174,6 @@ const FILL_PATTERN_VARIANTS: Record<FillPatternId, string[]> = {
 const PENCIL_STROKES_PER_SECOND = 3
 const PENCIL_BASE_ROTATION = -14
 
-// Landscape presentation geometry measured on the committed 2752x1536 art.
-// The blank flag interior spans x 1008-1855 and y 289-1003; its dotted
-// dividers sit at x 1302 and 1561. Keep this local to the responsive France
-// branch so the calibrated portrait country config remains untouched.
-const FRANCE_LANDSCAPE_IMAGE = '/assets/france-scene-landscape-v1.png'
-const FRANCE_LANDSCAPE_STRIPE_ONE = ((1302 - 1008) / (1855 - 1008)) * 300
-const FRANCE_LANDSCAPE_STRIPE_TWO = ((1561 - 1008) / (1855 - 1008)) * 300
-const FRANCE_LANDSCAPE_FLAG_OVERLAY = {
-  left: `${(1008 / 2752) * 100}%`,
-  top: `${(289 / 1536) * 100}%`,
-  width: `${((1855 - 1008) / 2752) * 100}%`,
-  height: `${((1003 - 289) / 1536) * 100}%`,
-  clipPath: 'polygon(0% 5%, 5.9% 2.7%, 11.8% 1.3%, 17.7% 1%, 23.6% 0.3%, 29.5% 0.8%, 35.4% 2%, 41.3% 3.6%, 47.2% 5.3%, 53.1% 7%, 59% 8.4%, 64.9% 9.8%, 70.8% 10.4%, 76.7% 10.4%, 82.6% 10.1%, 88.5% 9.1%, 94.5% 7.7%, 100% 6%, 100% 94.7%, 94.5% 96.9%, 88.5% 98.5%, 82.6% 99.4%, 76.7% 99.9%, 70.8% 99.9%, 64.9% 99.9%, 59% 98.5%, 53.1% 97.2%, 47.2% 95.7%, 41.3% 94.1%, 35.4% 92.7%, 29.5% 91.7%, 23.6% 91%, 17.7% 91.2%, 11.8% 91.9%, 5.9% 93.1%, 0% 95.5%)',
-  preserveBlankArtwork: true,
-}
-const FRANCE_LANDSCAPE_ORB_LEFT = ['30%', '36%', '42%', '48%', '54%']
-const FRANCE_LANDSCAPE_NAV_LEFT = ['66%', '74%', '82%', '90%']
-
 // One random pattern+direction per region per attempt. Dealing shuffled
 // combos without replacement guarantees the regions of one flag never all
 // share a single pattern+direction in a playthrough.
@@ -278,7 +260,9 @@ function FlagColorChallengeGame({
 }) {
   const scene = config.scene
   const round = config.round
-  const isFranceLandscape = config.iso2 === 'FR' && orientation === 'landscape'
+  // Countries with dedicated landscape art swap in its measured geometry;
+  // the rest keep the calibrated portrait scene in both orientations.
+  const landscape = orientation === 'landscape' ? config.landscape : undefined
   const [roundPalette] = useState(() => buildRoundPalette(config))
   // Phase 1 draws the region boundary lines; the palette and coloring only
   // exist once phase reaches 'color'. Re-entry remounts this component, so
@@ -329,25 +313,9 @@ function FlagColorChallengeGame({
     return () => query.removeEventListener('change', onChange)
   }, [])
 
-  const displayRegions = useMemo(() => {
-    if (!isFranceLandscape) return round.regions
-    return round.regions.map((region, index) => ({
-      ...region,
-      shapes: [{
-        t: 'rect' as const,
-        x: index === 0 ? 0 : index === 1 ? FRANCE_LANDSCAPE_STRIPE_ONE : FRANCE_LANDSCAPE_STRIPE_TWO,
-        y: 0,
-        w: index === 0
-          ? FRANCE_LANDSCAPE_STRIPE_ONE
-          : index === 1
-            ? FRANCE_LANDSCAPE_STRIPE_TWO - FRANCE_LANDSCAPE_STRIPE_ONE
-            : 300 - FRANCE_LANDSCAPE_STRIPE_TWO,
-        h: 200,
-      }],
-    }))
-  }, [isFranceLandscape, round.regions])
-  const navItems = isFranceLandscape
-    ? scene.nav.map((nav, index) => ({ ...nav, left: FRANCE_LANDSCAPE_NAV_LEFT[index] ?? nav.left }))
+  const displayRegions = useMemo(() => landscape?.regions ?? round.regions, [landscape, round.regions])
+  const navItems = landscape
+    ? scene.nav.map((nav, index) => ({ ...nav, left: landscape.navLefts[index] ?? nav.left }))
     : scene.nav
   const orbSlotIndexes = paletteSlotIndexes(scene.orbs.length, roundPalette.length)
   const orbItems = roundPalette.map((orb, index) => {
@@ -355,15 +323,15 @@ function FlagColorChallengeGame({
     const portraitLeft = scene.orbs[slotIndex]?.left ?? '50%'
     return {
       ...orb,
-      left: isFranceLandscape ? FRANCE_LANDSCAPE_ORB_LEFT[slotIndex] ?? portraitLeft : portraitLeft,
+      left: landscape ? landscape.orbLefts[slotIndex] ?? portraitLeft : portraitLeft,
     }
   })
-  const sceneImage = isFranceLandscape ? FRANCE_LANDSCAPE_IMAGE : scene.image
-  const flagOverlay = isFranceLandscape ? FRANCE_LANDSCAPE_FLAG_OVERLAY : scene.flagOverlay
-  const orbTop = isFranceLandscape ? '84.7%' : scene.orbTop
-  const navTop = isFranceLandscape ? '84.7%' : scene.navTop
-  const navWidth = isFranceLandscape ? '6.5%' : scene.navWidth
-  const navHeight = isFranceLandscape ? '9%' : scene.navHeight
+  const sceneImage = landscape?.image ?? scene.image
+  const flagOverlay = landscape?.flagOverlay ?? scene.flagOverlay
+  const orbTop = landscape?.orbTop ?? scene.orbTop
+  const navTop = landscape?.navTop ?? scene.navTop
+  const navWidth = landscape?.navWidth ?? scene.navWidth
+  const navHeight = landscape?.navHeight ?? scene.navHeight
   const selectedOrbHue = orbItems.find((orb) => orb.id === selectedOrb)?.hue || '#ffffff'
   const allComplete = round.regions.every((region) => filledRegions[region.id])
   const completedRegionCount = round.regions.filter((region) => filledRegions[region.id]).length
@@ -675,7 +643,7 @@ function FlagColorChallengeGame({
       onPointerDown={pressPencil}
       onContextMenu={(event) => event.preventDefault()}
     >
-      {!isFranceLandscape && <img src={scene.image} alt="" aria-hidden="true" draggable={false} className="scene-backdrop" />}
+      {!landscape && <img src={scene.image} alt="" aria-hidden="true" draggable={false} className="scene-backdrop" />}
       <div className="france-play-shell">
         <div className="france-play-stage-frame">
           <div className="france-play-title-ribbon" aria-hidden="true">
@@ -1431,7 +1399,9 @@ export default function FlagGamePage() {
   useEffect(() => { safeStorageSet(PLAYER_NAME_KEY, playerName) }, [playerName])
   useEffect(() => { safeStorageSet(PLAYER_NAME_CONFIRMED_KEY, String(playerNameConfirmed)) }, [playerNameConfirmed])
   useEffect(() => { safeStorageSet(ACTIVE_MODE_KEY, mode) }, [mode])
-  useEffect(() => { safeStorageSet(ACTIVE_COUNTRY_KEY, activeCountryCode) }, [activeCountryCode])
+  // Persist only after the stored country has been read on mount; writing
+  // sooner clobbers the saved selection with the initial 'FR' default.
+  useEffect(() => { if (clientReady) safeStorageSet(ACTIVE_COUNTRY_KEY, activeCountryCode) }, [clientReady, activeCountryCode])
   useEffect(() => { saveRoom(room); if (room && channelRef.current) channelRef.current.postMessage({ room, note: 'sync' } satisfies RoomSnapshot); if (room) setRoomSnapshot({ room, note: 'sync' }) }, [room, channelRef])
   useEffect(() => () => { timersRef.current.forEach((timer) => window.clearTimeout(timer)); if (pinTimerRef.current) window.clearTimeout(pinTimerRef.current) }, [])
 
