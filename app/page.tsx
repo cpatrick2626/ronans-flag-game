@@ -581,6 +581,7 @@ function FlagColorChallengeGame({
       className="france-play-stage"
       onPointerMove={updatePointer}
       onPointerDown={pressPencil}
+      onContextMenu={(event) => event.preventDefault()}
     >
       <img src={scene.image} alt="" aria-hidden="true" draggable={false} className="scene-backdrop" />
       <div className="france-play-shell">

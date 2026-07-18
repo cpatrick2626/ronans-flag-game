@@ -2584,6 +2584,12 @@
   color: #fff7ea;
   cursor: none;
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  /* Hold gestures belong to the game here: no scroll/zoom, no iOS long-press
+     callout, no text/element selection popup. Scoped to the play stage only. */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .france-play-shell {
@@ -3295,6 +3301,9 @@ body {
   filter: blur(26px) saturate(1.08) brightness(0.6);
   pointer-events: none;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
   z-index: 0;
 }
 
