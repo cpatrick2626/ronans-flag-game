@@ -130,6 +130,37 @@ function renderFlagShape(shape: FlagRegionConfig['shapes'][number], fill: string
   return null
 }
 
+function shuffleItems<T>(items: T[]) {
+  const shuffled = [...items]
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
+// Base rounds expose only colors referenced by their regions. A future
+// difficulty can opt into some or all configured distractors via the second
+// argument without changing palette rendering or color validation.
+function buildRoundPalette(config: CountryChallengeConfig, distractorCount = 0) {
+  const requiredIndexes = [...new Set(config.round.regions.map((region) => region.correctColorIndex))]
+  const entries = [
+    ...requiredIndexes.map((index) => config.round.palette[index]).filter(Boolean),
+    ...(config.round.distractors ?? []).slice(0, distractorCount),
+  ]
+  return shuffleItems(entries.map((entry) => ({
+    id: entry.label.toLowerCase(),
+    label: entry.label,
+    hue: entry.color,
+  })))
+}
+
+function paletteSlotIndexes(slotCount: number, itemCount: number) {
+  if (itemCount <= 0) return []
+  if (itemCount === 1) return [Math.floor((slotCount - 1) / 2)]
+  return Array.from({ length: itemCount }, (_, index) => Math.round((index * (slotCount - 1)) / (itemCount - 1)))
+}
+
 type AssignedFillPattern = { pattern: FillPatternId; variant: string }
 type RegionBox = { x: number; y: number; w: number; h: number }
 
@@ -248,12 +279,15 @@ function FlagColorChallengeGame({
   const scene = config.scene
   const round = config.round
   const isFranceLandscape = config.iso2 === 'FR' && orientation === 'landscape'
+  const [roundPalette] = useState(() => buildRoundPalette(config))
   // Phase 1 draws the region boundary lines; the palette and coloring only
   // exist once phase reaches 'color'. Re-entry remounts this component, so
   // every play starts back at the blank dotted-line state.
   const [phase, setPhase] = useState<'draw' | 'reveal' | 'color'>('draw')
   const [lineHolding, setLineHolding] = useState(false)
-  const [selectedOrb, setSelectedOrb] = useState(scene.defaultOrbId)
+  const [selectedOrb, setSelectedOrb] = useState(() => (
+    roundPalette.some((entry) => entry.id === scene.defaultOrbId) ? scene.defaultOrbId : roundPalette[0]?.id ?? ''
+  ))
   const [activeNav, setActiveNav] = useState(scene.defaultNavId)
   const [spark, setSpark] = useState<FranceSpark | null>(null)
   const [filledRegions, setFilledRegions] = useState<Record<string, boolean>>({})
@@ -315,9 +349,15 @@ function FlagColorChallengeGame({
   const navItems = isFranceLandscape
     ? scene.nav.map((nav, index) => ({ ...nav, left: FRANCE_LANDSCAPE_NAV_LEFT[index] ?? nav.left }))
     : scene.nav
-  const orbItems = isFranceLandscape
-    ? scene.orbs.map((orb, index) => ({ ...orb, left: FRANCE_LANDSCAPE_ORB_LEFT[index] ?? orb.left }))
-    : scene.orbs
+  const orbSlotIndexes = paletteSlotIndexes(scene.orbs.length, roundPalette.length)
+  const orbItems = roundPalette.map((orb, index) => {
+    const slotIndex = orbSlotIndexes[index]
+    const portraitLeft = scene.orbs[slotIndex]?.left ?? '50%'
+    return {
+      ...orb,
+      left: isFranceLandscape ? FRANCE_LANDSCAPE_ORB_LEFT[slotIndex] ?? portraitLeft : portraitLeft,
+    }
+  })
   const sceneImage = isFranceLandscape ? FRANCE_LANDSCAPE_IMAGE : scene.image
   const flagOverlay = isFranceLandscape ? FRANCE_LANDSCAPE_FLAG_OVERLAY : scene.flagOverlay
   const orbTop = isFranceLandscape ? '84.7%' : scene.orbTop

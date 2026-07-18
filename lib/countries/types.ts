@@ -64,7 +64,9 @@ export type FlagRound = {
   backgroundTagline: string
   backgroundAccent: string
   palette: PaletteEntry[]
-  distractors: PaletteEntry[]
+  // Optional colors that a future harder difficulty may add. Base play uses
+  // required region colors only, so existing and new rounds safely omit this.
+  distractors?: PaletteEntry[]
   regions: FlagRegionConfig[]
   // Continuous hold time (ms) for one region to fill top-to-bottom. Default 1400.
   fillDurationMs?: number

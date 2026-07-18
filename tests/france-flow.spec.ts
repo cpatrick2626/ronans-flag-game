@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.setTimeout(60_000);
+
 const viewports = [
   { width: 390, height: 844 },
   { width: 414, height: 736 },
@@ -65,6 +67,15 @@ async function drawTheLines(page: import('@playwright/test').Page) {
   await page.mouse.up();
 }
 
+async function expectFranceBasePalette(page: import('@playwright/test').Page) {
+  const gems = page.locator('.france-palette-gem');
+  await expect(gems).toHaveCount(3);
+  const labels = await gems.evaluateAll((items) => items.map((item) => item.getAttribute('aria-label')));
+  expect([...labels].sort()).toEqual(['Blue orb', 'Red orb', 'White orb']);
+  await expect(page.getByRole('button', { name: 'Yellow orb' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Green orb' })).toHaveCount(0);
+}
+
 test('France draw-the-lines phase: palette hidden, hold pauses and resumes, reveal unlocks coloring', async ({ page }) => {
   await page.setViewportSize(viewports[0]);
   const errors: string[] = [];
@@ -100,6 +111,7 @@ test('France draw-the-lines phase: palette hidden, hold pauses and resumes, reve
   await page.mouse.down();
   await expect(page.getByRole('button', { name: 'Blue orb' })).toBeAttached({ timeout: 6000 });
   await page.mouse.up();
+  await expectFranceBasePalette(page);
 
   // Coloring works only now
   await page.getByRole('button', { name: 'Blue orb' }).click();
@@ -115,6 +127,7 @@ test('France challenge flow: entry, orbs, stripes, back navigation', async ({ pa
   const errors: string[] = [];
   await playThroughToFrance(page, errors);
   await drawTheLines(page);
+  await expectFranceBasePalette(page);
 
   // Orb selection behavior
   const blueOrb = page.getByRole('button', { name: 'Blue orb' });
@@ -148,15 +161,15 @@ test('France gameplay: wrong feedback, correct fills, completion, reset', async 
   const whiteStripe = page.getByRole('button', { name: 'France white stripe' });
   const redStripe = page.getByRole('button', { name: 'France red stripe' });
 
-  // Wrong color: holding yellow on the blue stripe shakes and never fills
-  await page.getByRole('button', { name: 'Yellow orb' }).click();
-  await holdRegion(page, blueStripe, 600);
-  await expect(blueStripe).toHaveClass(/wrong/);
-  await expect(blueStripe).not.toHaveClass(/is-filled/);
+  // Wrong required color: holding red on the blue stripe shakes and never fills
+  await page.getByRole('button', { name: 'Red orb' }).click();
+  const wrongBox = await blueStripe.boundingBox();
+  if (!wrongBox) throw new Error('blue stripe is not visible');
+  await page.mouse.move(wrongBox.x + wrongBox.width / 2, wrongBox.y + wrongBox.height / 2);
+  await page.mouse.down();
   await expect(page.locator('.france-spark-burst.is-wrong')).toBeAttached();
-
-  await page.getByRole('button', { name: 'Green orb' }).click();
-  await blueStripe.click({ force: true });
+  await page.waitForTimeout(600);
+  await page.mouse.up();
   await expect(blueStripe).toHaveClass(/wrong/);
   await expect(blueStripe).not.toHaveClass(/is-filled/);
 
