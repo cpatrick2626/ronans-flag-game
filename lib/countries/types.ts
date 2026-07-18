@@ -29,6 +29,12 @@ export type SceneFlagOverlay = {
   top: string
   width: string
   height: string
+  // Optional silhouette for non-rectangular painted flags. Existing scenes
+  // remain rectangular when this is omitted.
+  clipPath?: string
+  // Preserve a blank flag already painted into the source art until regions
+  // are colored. Existing scenes keep the current opaque SVG base by default.
+  preserveBlankArtwork?: boolean
 }
 
 export type SceneOrb = { id: string; label: string; left: string; hue: string }

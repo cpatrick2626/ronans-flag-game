@@ -2595,10 +2595,10 @@
 .france-play-shell {
   position: relative;
   z-index: 1;
-  width: min(100%, calc((100vh - var(--safe-y)) * 1232 / 864));
-  width: min(100%, calc((100dvh - var(--safe-y)) * 1232 / 864));
+  width: min(100%, calc((100vh - var(--safe-y)) * 1520 / 2688));
+  width: min(100%, calc((100dvh - var(--safe-y)) * 1520 / 2688));
   max-height: 100%;
-  aspect-ratio: 1232 / 864;
+  aspect-ratio: 1520 / 2688;
   display: grid;
   place-items: center;
   container-type: size;
@@ -2627,132 +2627,56 @@
   -webkit-user-drag: none;
 }
 
-.france-portrait-art {
-  display: none;
+.france-play-ui-art {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
 }
 
-@media (orientation: portrait) {
-  .france-play-shell {
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    aspect-ratio: auto;
-  }
-
-  .france-play-stage-frame,
-  .france-play-image-shell {
-    width: 100%;
-    height: 100%;
-  }
-
-  .france-play-image-shell {
-    z-index: 3;
-  }
-
-  .france-play-image {
-    display: block;
-    opacity: 0;
-  }
-
-  .france-portrait-art {
-    position: absolute;
-    inset: 0;
-    display: block;
-    overflow: hidden;
-    background: linear-gradient(180deg, #202052 0%, #4c376a 38%, #d58a58 78%, #e5b46e 100%);
-    z-index: 1;
-  }
-
-  .france-portrait-art::before {
-    content: '';
-    position: absolute;
-    inset: -6%;
-    background: url('/assets/france-scene.png') center top / cover no-repeat;
-    filter: blur(18px) saturate(1.08) brightness(0.58);
-    transform: scale(1.06);
-  }
-
-  .france-portrait-slice {
-    position: absolute;
-    left: 50%;
-    display: block;
-    transform: translateX(-50%);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 100% 100%;
-    z-index: 1;
-  }
-
-  .france-portrait-title {
-    top: 1%;
-    width: 100%;
-    height: 14%;
-    background-image: url('/assets/france-portrait/title.png');
-  }
-
-  .france-portrait-board {
-    top: 14%;
-    width: 96%;
-    height: 38%;
-    background-image: url('/assets/france-portrait/board.png');
-    z-index: 3;
-  }
-
-  .france-portrait-tray {
-    top: 50%;
-    width: 100%;
-    height: 15%;
-    background-image: url('/assets/france-portrait/tray.png');
-    z-index: 2;
-  }
-
-  .france-portrait-chips {
-    top: 64%;
-    width: 88%;
-    height: 12%;
-    background-image: url('/assets/france-portrait/chips.png');
-    z-index: 4;
-  }
-
-  .france-portrait-nav {
-    top: 84%;
-    width: 100%;
-    height: 16%;
-    background-image: url('/assets/france-portrait/nav.png');
-    z-index: 5;
-  }
-
-  .france-portrait-art + .france-play-image-shell .challenge-flag-overlay {
-    left: 15% !important;
-    top: 18% !important;
-    width: 70% !important;
-    height: 20% !important;
-    border: 4px solid rgba(198, 145, 53, 0.94);
-    border-radius: 16px;
-    box-shadow:
-      0 0 0 3px rgba(255, 239, 180, 0.68),
-      0 10px 26px rgba(54, 32, 8, 0.24),
-      0 0 26px rgba(255, 216, 116, 0.34);
-  }
-
-  .france-portrait-art + .france-play-image-shell .france-hotspot.orb {
-    top: 57% !important;
-    width: clamp(44px, 12cqw, 56px) !important;
-    height: clamp(44px, 12cqw, 56px) !important;
-  }
-
-  .france-portrait-art + .france-play-image-shell .france-hotspot.nav {
-    top: 92% !important;
-    height: 8% !important;
-  }
+.france-play-ui-slice {
+  position: absolute;
+  left: 50%;
+  display: block;
+  transform: translateX(-50%);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
 }
 
-@media (orientation: landscape) {
-  .france-play-shell {
-    width: min(100%, calc((100dvh - var(--safe-y)) * 1232 / 864));
-    height: auto;
-    aspect-ratio: 1232 / 864;
-  }
+.france-play-ui-players {
+  top: 72%;
+  width: 70%;
+  height: 6.5%;
+  border-radius: 9999px;
+  box-shadow: 0 8px 20px rgba(82, 47, 20, 0.18);
+  overflow: hidden;
+  background-image: url('/assets/france-portrait/chips.png');
+}
+
+.france-play-ui-palette {
+  top: 80%;
+  width: 84%;
+  height: 8.5%;
+  opacity: 0;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(82, 47, 20, 0.2);
+  overflow: hidden;
+  background-image: url('/assets/france-portrait/tray.png');
+  transition: opacity 420ms ease;
+}
+
+.france-play-ui-palette.is-visible {
+  opacity: 1;
+}
+
+.france-play-ui-nav {
+  top: 92.5%;
+  width: 96%;
+  height: 5%;
+  background-image: url('/assets/france-portrait/nav.png');
+  background-position: center bottom;
+  background-size: 100% auto;
 }
 
 .france-play-title-ribbon {
@@ -2765,8 +2689,14 @@
   inset: 0;
 }
 
+.france-play-hotspots {
+  z-index: 4;
+  pointer-events: none;
+}
+
 .france-hotspot {
   position: absolute;
+  pointer-events: auto;
   transform: translate(-50%, -50%);
   border: 0;
   padding: 0;
@@ -3355,45 +3285,13 @@ body {
   stroke-width: 3;
 }
 
-/* Placeholder cover: frosts the baked gem-palette art while the palette is
-   locked, then fades away once the lines complete and the palette unlocks. */
-.france-palette-veil {
-  position: absolute;
-  left: 19%;
-  top: 61%;
-  width: 62%;
-  height: 18%;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, rgba(74, 52, 96, 0.88), rgba(42, 30, 60, 0.92));
-  box-shadow: inset 0 0 22px rgba(20, 12, 34, 0.5);
-  backdrop-filter: blur(16px) saturate(0.85);
-  -webkit-backdrop-filter: blur(16px) saturate(0.85);
-  pointer-events: none;
-  transition: opacity 420ms ease;
-}
-
-.france-palette-veil.is-lifted {
-  opacity: 0;
-}
-
-/* Portrait: the gem palette is baked into the tray art slice mid-screen. */
-@media (orientation: portrait) {
-  .france-palette-veil {
-    left: 5%;
-    top: 50%;
-    width: 90%;
-    height: 15%;
-    border-radius: 26px;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .flag-line-draw.is-complete .flag-line-ink {
     animation: none;
     filter: none;
   }
 
-  .france-palette-veil {
+  .france-play-ui-palette {
     transition: none;
   }
 }

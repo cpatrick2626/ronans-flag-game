@@ -589,13 +589,6 @@ function FlagColorChallengeGame({
           <div className="france-play-title-ribbon" aria-hidden="true">
             {scene.titleRibbon}
           </div>
-          <div className="france-portrait-art" aria-hidden="true">
-            <span className="france-portrait-slice france-portrait-title" />
-            <span className="france-portrait-slice france-portrait-board" />
-            <span className="france-portrait-slice france-portrait-tray" />
-            <span className="france-portrait-slice france-portrait-chips" />
-            <span className="france-portrait-slice france-portrait-nav" />
-          </div>
           <div className="france-play-image-shell" ref={shellRef}>
             <img
               src={scene.image}
@@ -603,9 +596,14 @@ function FlagColorChallengeGame({
               className="france-play-image"
               draggable={false}
             />
+            <div className="france-play-ui-art" aria-hidden="true">
+              <span className="france-play-ui-slice france-play-ui-players" />
+              <span className={`france-play-ui-slice france-play-ui-palette ${phase === 'color' ? 'is-visible' : ''}`} />
+              <span className="france-play-ui-slice france-play-ui-nav" />
+            </div>
             <div
               className="challenge-flag-overlay"
-              style={{ left: scene.flagOverlay.left, top: scene.flagOverlay.top, width: scene.flagOverlay.width, height: scene.flagOverlay.height }}
+              style={{ left: scene.flagOverlay.left, top: scene.flagOverlay.top, width: scene.flagOverlay.width, height: scene.flagOverlay.height, clipPath: scene.flagOverlay.clipPath }}
             >
               <svg ref={flagSvgRef} viewBox="0 0 300 200" preserveAspectRatio="none" className="challenge-flag-svg" aria-label={`${config.name} flag to color`}>
                 <defs>
@@ -629,14 +627,14 @@ function FlagColorChallengeGame({
                     <stop offset="100%" stopColor="#dfeeff" />
                   </linearGradient>
                 </defs>
-                <rect x="0" y="0" width="300" height="200" rx="10" fill="#e9dcb7" />
+                <rect x="0" y="0" width="300" height="200" rx="10" fill={scene.flagOverlay.preserveBlankArtwork ? 'transparent' : '#e9dcb7'} />
                 <g clipPath="url(#challenge-flag-clip)">
                   {round.regions.map((region) => {
                     const isFilled = !!filledRegions[region.id]
                     const paletteEntry = round.palette[region.correctColorIndex]
                     const isWhiteRegion = paletteEntry.label.toLowerCase() === 'white'
                     const finalFill = isWhiteRegion ? 'url(#france-white-pearl)' : paletteEntry.color
-                    const fill = isFilled ? finalFill : 'rgba(249, 242, 222, 0.92)'
+                    const fill = isFilled ? finalFill : scene.flagOverlay.preserveBlankArtwork ? 'transparent' : 'rgba(249, 242, 222, 0.92)'
                     const feedbackState = regionFeedback?.regionId === region.id ? regionFeedback.state : ''
                     const isFilling = activeFillRegion === region.id
                     const bounds = regionBounds[region.id]
@@ -750,9 +748,6 @@ function FlagColorChallengeGame({
                 </g>
               </svg>
             </div>
-            {/* Placeholder cover frosting the baked gem-palette art while the
-                palette is locked; the real hidden-palette art comes later. */}
-            <div className={`france-palette-veil ${phase === 'color' ? 'is-lifted' : ''}`} aria-hidden="true" />
             <div className="france-play-hotspots">
               {phase === 'color' && orbItems.map((orb) => (
                 <button
