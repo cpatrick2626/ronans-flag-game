@@ -1459,7 +1459,10 @@ export default function FlagGamePage() {
   function colorRegion(regionId: string) { if (!palette.length) return; const region = country.flag_regions.find((item: any) => item.id === regionId); const isCorrect = region ? selectedColorIndex === region.color : false; setPaintFeedback((current) => ({ ...current, [regionId]: { state: isCorrect ? 'correct' : 'wrong', at: Date.now() } })); setColorState((current) => ({ ...current, [activeCountryCode]: { ...(current[activeCountryCode] || {}), [regionId]: selectedColorIndex } })) }
   function completeFlag() { if (!allRegionsFilled || completed) return; const result = completeCountry(activeCountryCode, progress, { stars: perfectFlag ? 3 : 2, completedAt: new Date().toISOString() }); setProgress(result.progress); setReward(result.reward) }
   function completeChallengeRound() { if (completed) return; const result = completeCountry(activeCountryCode, progress, { stars: 3, completedAt: new Date().toISOString() }); setProgress(result.progress); setReward(result.reward) }
-  function nextCountry() { const index = COUNTRIES.findIndex((item) => item.iso2 === activeCountryCode); const next = COUNTRIES[(index + 1) % COUNTRIES.length]; setActiveCountryCode(next.iso2); setReward(null); setScreen('country-arrival') }
+  // Next Flag advances through the playable challenge registry (not the raw
+  // COUNTRIES list) and lands on the same config-driven challenge screen as
+  // PLAY SOLO, so every playable country gets the identical gameplay path.
+  function nextCountry() { const playable = Object.values(CHALLENGE_COUNTRIES).filter((config) => config.playable); const index = playable.findIndex((config) => config.iso2 === activeCountryCode); const next = playable[(index + 1) % playable.length] ?? playable[0]; setActiveCountryCode(next.iso2); setReward(null); setScreen('flag-color-challenge') }
   function createRoom(modeChoice: Exclude<Mode, 'solo'>) { const next = makeRoom(modeChoice, playerName, activeCountryCode); updateRoom(next, 'created', 'waiting-room'); setMode(modeChoice) }
   function joinRoom() { const existing = loadRoom(); if (!existing || existing.code !== roomCodeInput.trim().toUpperCase()) return; const joined: RoomState = { ...existing, guestName: playerName, status: 'active', updatedAt: new Date().toISOString() }; updateRoom(joined, 'joined'); setMode(joined.mode); setScreen(joined.mode === 'coop' ? 'coop' : 'versus') }
   function promoteRoom(modeChoice: Exclude<Mode, 'solo'>) { if (!room) return; updateRoom({ ...room, mode: modeChoice, status: room.guestName ? 'active' : 'waiting', updatedAt: new Date().toISOString() }, 'updated') }
@@ -1543,6 +1546,7 @@ export default function FlagGamePage() {
 
         {screen === 'flag-color-challenge' && (
           <FlagColorChallengeGame
+            key={activeChallengeConfig.iso2}
             config={activeChallengeConfig}
             players={[playerName]}
             orientation={orientation}

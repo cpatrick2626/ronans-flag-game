@@ -189,8 +189,12 @@ test('Next Flag routes from a completed France to Italy', async ({ page }) => {
   await expect(nextFlag).toBeVisible();
   await nextFlag.click({ force: true });
 
-  // Next Flag advances to the Italy country-arrival screen
-  await expect(page.getByText('Italy').first()).toBeVisible();
+  // Next Flag lands on the Italy challenge screen, reset to the blank
+  // draw-the-lines phase — the same path PLAY SOLO takes.
+  await expect(page.getByAltText('Italy Flag Color Challenge')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Hold to draw the flag lines' })).toBeAttached();
+  await expect(page.locator('.flag-line-guide')).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Green orb' })).toHaveCount(0);
 
   expect(errors).toEqual([]);
 });
