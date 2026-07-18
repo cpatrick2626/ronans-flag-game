@@ -78,6 +78,16 @@ test.describe('Italy challenge', () => {
     await expect(page.getByRole('button', { name: 'Blue orb' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Green orb' })).toHaveAttribute('aria-pressed', 'true');
 
+    const greenStripe = page.getByRole('button', { name: 'Italy green stripe' });
+    const greenBox = await greenStripe.boundingBox();
+    if (!greenBox) throw new Error('green stripe is not visible');
+    await page.mouse.move(greenBox.x + greenBox.width / 2, greenBox.y + greenBox.height / 2);
+    await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
+    await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
+    await page.mouse.move(0, 0);
+    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
+    await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
+
     expect(errors).toEqual([]);
   });
 
@@ -113,6 +123,8 @@ test.describe('Italy challenge', () => {
     await page.getByRole('button', { name: 'Red orb' }).click();
     await holdRegion(page, redStripe, 2500);
     await expect(redStripe).toHaveClass(/is-filled/);
+    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
+    await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
 
     // Completion card names Italy, then the reward flow fires exactly once
     await expect(page.getByText('FLAG COMPLETE')).toBeVisible();
@@ -132,16 +144,29 @@ test.describe('Italy challenge', () => {
     await expect(page.getByAltText('Italy Flag Color Challenge')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Hold to draw the flag lines' })).toBeAttached();
     await expect(page.getByRole('button', { name: 'Green orb' })).toHaveCount(0);
+    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
 
     expect(errors).toEqual([]);
   });
 
   test('Italy landscape orientation uses the landscape scene', async ({ page }) => {
-    await page.setViewportSize({ width: 844, height: 390 });
+    await page.setViewportSize({ width: 1280, height: 800 });
     const errors: string[] = [];
     await playThroughToChallenge(page, errors, 'Italy Flag Color Challenge');
     await expect(page.getByAltText('Italy Flag Color Challenge')).toHaveAttribute('src', '/assets/italy-scene-landscape-v1.png');
     await expect(page.locator('.flag-line-guide')).toHaveCount(2);
+    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
+    await drawTheLines(page, 'Green orb');
+
+    const greenStripe = page.getByRole('button', { name: 'Italy green stripe' });
+    const box = await greenStripe.boundingBox();
+    if (!box) throw new Error('green stripe is not visible');
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
+    await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
+    await page.mouse.move(0, 0);
+    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
+    await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
     expect(errors).toEqual([]);
   });
 });

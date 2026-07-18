@@ -281,7 +281,6 @@ function FlagColorChallengeGame({
   const [selectedPulse, setSelectedPulse] = useState(0)
   const [pointer, setPointer] = useState({ x: 50, y: 50, rotation: -14, active: false, pressing: false, recoil: false, touch: false })
   const sparkTimerRef = useRef<number | null>(null)
-  const pointerTimerRef = useRef<number | null>(null)
   const pressTimerRef = useRef<number | null>(null)
   const recoilTimerRef = useRef<number | null>(null)
   const completionFiredRef = useRef(false)
@@ -371,7 +370,6 @@ function FlagColorChallengeGame({
 
   useEffect(() => () => {
     if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
-    if (pointerTimerRef.current) window.clearTimeout(pointerTimerRef.current)
     if (pressTimerRef.current) window.clearTimeout(pressTimerRef.current)
     if (recoilTimerRef.current) window.clearTimeout(recoilTimerRef.current)
     if (holdRef.current?.raf != null) window.cancelAnimationFrame(holdRef.current.raf)
@@ -446,11 +444,18 @@ function FlagColorChallengeGame({
       x: nextX,
       y: nextY,
       rotation: Math.max(-30, Math.min(6, -14 + deltaX * 2.1 + deltaY * 0.9)),
-      active: true,
       touch: event.pointerType === 'touch',
     }))
-    if (pointerTimerRef.current) window.clearTimeout(pointerTimerRef.current)
-    pointerTimerRef.current = window.setTimeout(() => setPointer((current) => ({ ...current, active: false })), 900)
+  }
+
+  function enterFlagSurface(event: React.PointerEvent) {
+    updatePointer(event)
+    setPointer((current) => ({ ...current, active: event.pointerType !== 'touch' }))
+  }
+
+  function leaveFlagSurface(event: React.PointerEvent) {
+    if (event.pointerType === 'touch') return
+    setPointer((current) => ({ ...current, active: false, pressing: false }))
   }
 
   function pressPencil(event: React.PointerEvent) {
@@ -635,6 +640,10 @@ function FlagColorChallengeGame({
     setActiveFillRegion(region.id)
   }
 
+  const pencilVisible = !allComplete && (
+    activeFillRegion !== null || (phase === 'color' && pointer.active && !pointer.touch)
+  )
+
   return (
     <section
       ref={stageRef}
@@ -675,7 +684,15 @@ function FlagColorChallengeGame({
               className="challenge-flag-overlay"
               style={{ left: flagOverlay.left, top: flagOverlay.top, width: flagOverlay.width, height: flagOverlay.height, clipPath: flagOverlay.clipPath }}
             >
-              <svg ref={flagSvgRef} viewBox="0 0 300 200" preserveAspectRatio="none" className="challenge-flag-svg" aria-label={`${config.name} flag to color`}>
+              <svg
+                ref={flagSvgRef}
+                viewBox="0 0 300 200"
+                preserveAspectRatio="none"
+                className="challenge-flag-svg"
+                aria-label={`${config.name} flag to color`}
+                onPointerEnter={enterFlagSurface}
+                onPointerLeave={leaveFlagSurface}
+              >
                 <defs>
                   <clipPath id="challenge-flag-clip">
                     <rect x="0" y="0" width="300" height="200" rx="10" />
@@ -898,7 +915,7 @@ function FlagColorChallengeGame({
       </div>
       <div
         ref={pencilRef}
-        className={`colored-pencil ${activeFillRegion ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${pointer.recoil ? 'is-recoiling' : ''} ${pointer.touch ? 'is-touching' : ''} ${activeFillRegion ? 'is-scribbling' : ''} ${allComplete ? 'is-celebrating' : ''}`}
+        className={`colored-pencil ${pencilVisible ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${pointer.recoil ? 'is-recoiling' : ''} ${pointer.touch ? 'is-touching' : ''} ${activeFillRegion ? 'is-scribbling' : ''} ${allComplete ? 'is-celebrating' : ''}`}
         style={{ '--pencil-x': `${pointer.x}vw`, '--pencil-y': `${pointer.y}vh`, '--pencil-color': selectedOrbHue, '--pencil-rotation': `${pointer.rotation}deg` } as CSSProperties}
         aria-hidden="true"
       >
