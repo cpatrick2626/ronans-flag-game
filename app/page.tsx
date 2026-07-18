@@ -842,7 +842,7 @@ function FlagColorChallengeGame({
       </div>
       <div
         ref={pencilRef}
-        className={`colored-pencil ${pointer.active || activeFillRegion ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${pointer.recoil ? 'is-recoiling' : ''} ${pointer.touch ? 'is-touching' : ''} ${activeFillRegion ? 'is-scribbling' : ''} ${allComplete ? 'is-celebrating' : ''}`}
+        className={`colored-pencil ${activeFillRegion ? 'is-visible' : ''} ${pointer.pressing ? 'is-pressing' : ''} ${pointer.recoil ? 'is-recoiling' : ''} ${pointer.touch ? 'is-touching' : ''} ${activeFillRegion ? 'is-scribbling' : ''} ${allComplete ? 'is-celebrating' : ''}`}
         style={{ '--pencil-x': `${pointer.x}vw`, '--pencil-y': `${pointer.y}vh`, '--pencil-color': selectedOrbHue, '--pencil-rotation': `${pointer.rotation}deg` } as CSSProperties}
         aria-hidden="true"
       >

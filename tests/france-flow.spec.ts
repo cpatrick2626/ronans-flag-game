@@ -78,9 +78,13 @@ test('France draw-the-lines phase: palette hidden, hold pauses and resumes, reve
   const box = await holdTarget.boundingBox();
   if (!box) throw new Error('line hold target is not visible');
 
+  // Pointer movement alone never reveals the coloring pencil in Phase 1.
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
+  await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
+
   // A short hold advances the draw part-way; releasing pauses it
   const readProgress = () => page.locator('.flag-line-draw').evaluate((el) => Number.parseFloat((el as SVGGElement).style.getPropertyValue('--line-progress') || '0'));
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
   await page.waitForTimeout(400);
   await page.mouse.up();
@@ -222,8 +226,8 @@ test('France magical motion layer: scoped cursor, pencil, ambient, and reduced m
   await expect(page.locator('.france-play-ambient .france-aurora')).toHaveCount(2);
 
   await page.mouse.move(220, 220);
-  await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
-  await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
+  await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.getByRole('button', { name: 'Blue orb' }).click();
@@ -251,7 +255,9 @@ test('France fill choreography: random pattern class and stroking pencil during 
 
   // While filling, the pencil detaches and strokes along the fill front
   const pencil = page.locator('.colored-pencil');
+  await expect(pencil).toHaveClass(/is-visible/);
   await expect(pencil).toHaveClass(/is-scribbling/);
+  await expect(pencil).toHaveCSS('opacity', '1');
   const readX = () => pencil.evaluate((el) => el.style.getPropertyValue('--pencil-x'));
   const samples = [await readX()];
   await page.waitForTimeout(180);
@@ -262,7 +268,9 @@ test('France fill choreography: random pattern class and stroking pencil during 
 
   // Releasing mid-fill stops the stroke and keeps the partial fill unfilled
   await page.mouse.up();
+  await expect(pencil).not.toHaveClass(/is-visible/);
   await expect(pencil).not.toHaveClass(/is-scribbling/);
+  await expect(pencil).toHaveCSS('opacity', '0');
   await expect(blueStripe).not.toHaveClass(/is-filled/);
 
   expect(errors).toEqual([]);
