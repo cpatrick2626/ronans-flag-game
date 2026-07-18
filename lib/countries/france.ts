@@ -3,6 +3,12 @@ import type { CountryChallengeConfig } from './types'
 const PORTRAIT_STRIPE_ONE = 105.8
 const PORTRAIT_STRIPE_TWO = 195.65
 
+// Landscape presentation geometry measured on the committed 2752x1536 art.
+// The blank flag interior spans x 1008-1855 and y 289-1003; its dotted
+// dividers sit at x 1302 and 1561.
+const LANDSCAPE_STRIPE_ONE = ((1302 - 1008) / (1855 - 1008)) * 300
+const LANDSCAPE_STRIPE_TWO = ((1561 - 1008) / (1855 - 1008)) * 300
+
 // France — the validation country for the challenge engine.
 // Portrait hotspot geometry is calibrated to /assets/france-scene-v2.png.
 export const FRANCE: CountryChallengeConfig = {
@@ -45,6 +51,28 @@ export const FRANCE: CountryChallengeConfig = {
     navTop: '95%',
     navWidth: '13%',
     navHeight: '10%',
+  },
+  landscape: {
+    image: '/assets/france-scene-landscape-v1.png',
+    flagOverlay: {
+      left: `${(1008 / 2752) * 100}%`,
+      top: `${(289 / 1536) * 100}%`,
+      width: `${((1855 - 1008) / 2752) * 100}%`,
+      height: `${((1003 - 289) / 1536) * 100}%`,
+      clipPath: 'polygon(0% 5%, 5.9% 2.7%, 11.8% 1.3%, 17.7% 1%, 23.6% 0.3%, 29.5% 0.8%, 35.4% 2%, 41.3% 3.6%, 47.2% 5.3%, 53.1% 7%, 59% 8.4%, 64.9% 9.8%, 70.8% 10.4%, 76.7% 10.4%, 82.6% 10.1%, 88.5% 9.1%, 94.5% 7.7%, 100% 6%, 100% 94.7%, 94.5% 96.9%, 88.5% 98.5%, 82.6% 99.4%, 76.7% 99.9%, 70.8% 99.9%, 64.9% 99.9%, 59% 98.5%, 53.1% 97.2%, 47.2% 95.7%, 41.3% 94.1%, 35.4% 92.7%, 29.5% 91.7%, 23.6% 91%, 17.7% 91.2%, 11.8% 91.9%, 5.9% 93.1%, 0% 95.5%)',
+      preserveBlankArtwork: true,
+    },
+    regions: [
+      { id: 'left', label: 'France blue stripe', correctColorIndex: 0, shapes: [{ t: 'rect', x: 0, y: 0, w: LANDSCAPE_STRIPE_ONE, h: 200 }] },
+      { id: 'middle', label: 'France white stripe', correctColorIndex: 1, shapes: [{ t: 'rect', x: LANDSCAPE_STRIPE_ONE, y: 0, w: LANDSCAPE_STRIPE_TWO - LANDSCAPE_STRIPE_ONE, h: 200 }] },
+      { id: 'right', label: 'France red stripe', correctColorIndex: 2, shapes: [{ t: 'rect', x: LANDSCAPE_STRIPE_TWO, y: 0, w: 300 - LANDSCAPE_STRIPE_TWO, h: 200 }] },
+    ],
+    orbLefts: ['30%', '36%', '42%', '48%', '54%'],
+    navLefts: ['66%', '74%', '82%', '90%'],
+    orbTop: '84.7%',
+    navTop: '84.7%',
+    navWidth: '6.5%',
+    navHeight: '9%',
   },
   round: {
     backgroundTagline: 'Paris under a magical sky',
