@@ -143,6 +143,24 @@ const FILL_PATTERN_VARIANTS: Record<FillPatternId, string[]> = {
 const PENCIL_STROKES_PER_SECOND = 3
 const PENCIL_BASE_ROTATION = -14
 
+// Landscape presentation geometry measured on the committed 2752x1536 art.
+// The blank flag interior spans x 1008-1855 and y 289-1003; its dotted
+// dividers sit at x 1302 and 1561. Keep this local to the responsive France
+// branch so the calibrated portrait country config remains untouched.
+const FRANCE_LANDSCAPE_IMAGE = '/assets/france-scene-landscape-v1.png'
+const FRANCE_LANDSCAPE_STRIPE_ONE = ((1302 - 1008) / (1855 - 1008)) * 300
+const FRANCE_LANDSCAPE_STRIPE_TWO = ((1561 - 1008) / (1855 - 1008)) * 300
+const FRANCE_LANDSCAPE_FLAG_OVERLAY = {
+  left: `${(1008 / 2752) * 100}%`,
+  top: `${(289 / 1536) * 100}%`,
+  width: `${((1855 - 1008) / 2752) * 100}%`,
+  height: `${((1003 - 289) / 1536) * 100}%`,
+  clipPath: 'polygon(0% 5%, 5.9% 2.7%, 11.8% 1.3%, 17.7% 1%, 23.6% 0.3%, 29.5% 0.8%, 35.4% 2%, 41.3% 3.6%, 47.2% 5.3%, 53.1% 7%, 59% 8.4%, 64.9% 9.8%, 70.8% 10.4%, 76.7% 10.4%, 82.6% 10.1%, 88.5% 9.1%, 94.5% 7.7%, 100% 6%, 100% 94.7%, 94.5% 96.9%, 88.5% 98.5%, 82.6% 99.4%, 76.7% 99.9%, 70.8% 99.9%, 64.9% 99.9%, 59% 98.5%, 53.1% 97.2%, 47.2% 95.7%, 41.3% 94.1%, 35.4% 92.7%, 29.5% 91.7%, 23.6% 91%, 17.7% 91.2%, 11.8% 91.9%, 5.9% 93.1%, 0% 95.5%)',
+  preserveBlankArtwork: true,
+}
+const FRANCE_LANDSCAPE_ORB_LEFT = ['30%', '36%', '42%', '48%', '54%']
+const FRANCE_LANDSCAPE_NAV_LEFT = ['66%', '74%', '82%', '90%']
+
 // One random pattern+direction per region per attempt. Dealing shuffled
 // combos without replacement guarantees the regions of one flag never all
 // share a single pattern+direction in a playthrough.
@@ -217,16 +235,19 @@ function sparkleOffsets(assigned: AssignedFillPattern, b: RegionBox) {
 function FlagColorChallengeGame({
   config,
   players,
+  orientation,
   onBack,
   onComplete,
 }: {
   config: CountryChallengeConfig
   players: string[]
+  orientation: 'portrait' | 'landscape'
   onBack: () => void
   onComplete: () => void
 }) {
   const scene = config.scene
   const round = config.round
+  const isFranceLandscape = config.iso2 === 'FR' && orientation === 'landscape'
   // Phase 1 draws the region boundary lines; the palette and coloring only
   // exist once phase reaches 'color'. Re-entry remounts this component, so
   // every play starts back at the blank dotted-line state.
@@ -274,8 +295,35 @@ function FlagColorChallengeGame({
     return () => query.removeEventListener('change', onChange)
   }, [])
 
-  const navItems = scene.nav
-  const orbItems = scene.orbs
+  const displayRegions = useMemo(() => {
+    if (!isFranceLandscape) return round.regions
+    return round.regions.map((region, index) => ({
+      ...region,
+      shapes: [{
+        t: 'rect' as const,
+        x: index === 0 ? 0 : index === 1 ? FRANCE_LANDSCAPE_STRIPE_ONE : FRANCE_LANDSCAPE_STRIPE_TWO,
+        y: 0,
+        w: index === 0
+          ? FRANCE_LANDSCAPE_STRIPE_ONE
+          : index === 1
+            ? FRANCE_LANDSCAPE_STRIPE_TWO - FRANCE_LANDSCAPE_STRIPE_ONE
+            : 300 - FRANCE_LANDSCAPE_STRIPE_TWO,
+        h: 200,
+      }],
+    }))
+  }, [isFranceLandscape, round.regions])
+  const navItems = isFranceLandscape
+    ? scene.nav.map((nav, index) => ({ ...nav, left: FRANCE_LANDSCAPE_NAV_LEFT[index] ?? nav.left }))
+    : scene.nav
+  const orbItems = isFranceLandscape
+    ? scene.orbs.map((orb, index) => ({ ...orb, left: FRANCE_LANDSCAPE_ORB_LEFT[index] ?? orb.left }))
+    : scene.orbs
+  const sceneImage = isFranceLandscape ? FRANCE_LANDSCAPE_IMAGE : scene.image
+  const flagOverlay = isFranceLandscape ? FRANCE_LANDSCAPE_FLAG_OVERLAY : scene.flagOverlay
+  const orbTop = isFranceLandscape ? '84.7%' : scene.orbTop
+  const navTop = isFranceLandscape ? '84.7%' : scene.navTop
+  const navWidth = isFranceLandscape ? '6.5%' : scene.navWidth
+  const navHeight = isFranceLandscape ? '9%' : scene.navHeight
   const selectedOrbHue = orbItems.find((orb) => orb.id === selectedOrb)?.hue || '#ffffff'
   const allComplete = round.regions.every((region) => filledRegions[region.id])
   const completedRegionCount = round.regions.filter((region) => filledRegions[region.id]).length
@@ -283,12 +331,12 @@ function FlagColorChallengeGame({
   const fillDurationMs = round.fillDurationMs ?? 1400
   const regionBounds = useMemo(() => {
     const bounds: Record<string, { x: number; y: number; w: number; h: number }> = {}
-    for (const region of round.regions) {
+    for (const region of displayRegions) {
       const rect = region.shapes.find((shape) => shape.t === 'rect' && shape.w != null && shape.h != null)
       bounds[region.id] = rect ? { x: rect.x ?? 0, y: rect.y ?? 0, w: rect.w ?? 300, h: rect.h ?? 200 } : { x: 0, y: 0, w: 300, h: 200 }
     }
     return bounds
-  }, [round.regions])
+  }, [displayRegions])
   const lineDrawMs = round.lineDrawMs ?? 1200
   // Region boundary guides for Phase 1: the interior edges of each region's
   // bounding rect (edges not on the flag border), deduped across neighbors.
@@ -296,7 +344,7 @@ function FlagColorChallengeGame({
   const boundaryLines = useMemo(() => {
     const seen = new Set<string>()
     const lines: { x1: number; y1: number; x2: number; y2: number }[] = []
-    for (const region of round.regions) {
+    for (const region of displayRegions) {
       const b = regionBounds[region.id]
       const edges = [
         b.x > 0 ? { x1: b.x, y1: b.y, x2: b.x, y2: b.y + b.h } : null,
@@ -311,7 +359,7 @@ function FlagColorChallengeGame({
       }
     }
     return lines
-  }, [round.regions, regionBounds])
+  }, [displayRegions, regionBounds])
 
   useEffect(() => () => {
     if (sparkTimerRef.current) window.clearTimeout(sparkTimerRef.current)
@@ -587,7 +635,7 @@ function FlagColorChallengeGame({
       onPointerDown={pressPencil}
       onContextMenu={(event) => event.preventDefault()}
     >
-      <img src={scene.image} alt="" aria-hidden="true" draggable={false} className="scene-backdrop" />
+      {!isFranceLandscape && <img src={scene.image} alt="" aria-hidden="true" draggable={false} className="scene-backdrop" />}
       <div className="france-play-shell">
         <div className="france-play-stage-frame">
           <div className="france-play-title-ribbon" aria-hidden="true">
@@ -595,7 +643,7 @@ function FlagColorChallengeGame({
           </div>
           <div className="france-play-image-shell" ref={shellRef}>
             <img
-              src={scene.image}
+              src={sceneImage}
               alt={scene.imageAlt}
               className="france-play-image"
               draggable={false}
@@ -617,7 +665,7 @@ function FlagColorChallengeGame({
             </div>
             <div
               className="challenge-flag-overlay"
-              style={{ left: scene.flagOverlay.left, top: scene.flagOverlay.top, width: scene.flagOverlay.width, height: scene.flagOverlay.height, clipPath: scene.flagOverlay.clipPath }}
+              style={{ left: flagOverlay.left, top: flagOverlay.top, width: flagOverlay.width, height: flagOverlay.height, clipPath: flagOverlay.clipPath }}
             >
               <svg ref={flagSvgRef} viewBox="0 0 300 200" preserveAspectRatio="none" className="challenge-flag-svg" aria-label={`${config.name} flag to color`}>
                 <defs>
@@ -641,14 +689,14 @@ function FlagColorChallengeGame({
                     <stop offset="100%" stopColor="#dfeeff" />
                   </linearGradient>
                 </defs>
-                <rect x="0" y="0" width="300" height="200" rx="10" fill={scene.flagOverlay.preserveBlankArtwork ? 'transparent' : '#e9dcb7'} />
+                <rect x="0" y="0" width="300" height="200" rx="10" fill={flagOverlay.preserveBlankArtwork ? 'transparent' : '#e9dcb7'} />
                 <g clipPath="url(#challenge-flag-clip)">
-                  {round.regions.map((region) => {
+                  {displayRegions.map((region) => {
                     const isFilled = !!filledRegions[region.id]
                     const paletteEntry = round.palette[region.correctColorIndex]
                     const isWhiteRegion = paletteEntry.label.toLowerCase() === 'white'
                     const finalFill = isWhiteRegion ? 'url(#france-white-pearl)' : paletteEntry.color
-                    const fill = isFilled ? finalFill : scene.flagOverlay.preserveBlankArtwork ? 'transparent' : 'rgba(249, 242, 222, 0.92)'
+                    const fill = isFilled ? finalFill : flagOverlay.preserveBlankArtwork ? 'transparent' : 'rgba(249, 242, 222, 0.92)'
                     const feedbackState = regionFeedback?.regionId === region.id ? regionFeedback.state : ''
                     const isFilling = activeFillRegion === region.id
                     const bounds = regionBounds[region.id]
@@ -770,8 +818,8 @@ function FlagColorChallengeGame({
                   aria-label={`${orb.label} orb`}
                   aria-pressed={selectedOrb === orb.id}
                   className={`france-palette-gem ${selectedOrb === orb.id ? 'is-selected' : ''} ${selectedOrb === orb.id && selectedPulse ? 'is-pulsing' : ''}`}
-                  style={{ left: orb.left, top: scene.orbTop, '--gem-color': orb.hue } as CSSProperties}
-                  onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(scene.orbTop), orb.hue)}
+                  style={{ left: orb.left, top: orbTop, '--gem-color': orb.hue } as CSSProperties}
+                  onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(orbTop), orb.hue)}
                 >
                   <span className="france-palette-gem-shine" aria-hidden="true" />
                 </button>
@@ -783,7 +831,7 @@ function FlagColorChallengeGame({
                   aria-label={nav.label}
                   aria-pressed={activeNav === nav.id}
                   className={`france-nav-item is-${nav.id} ${activeNav === nav.id ? 'is-active' : ''}`}
-                  style={{ left: nav.left, top: scene.navTop, width: scene.navWidth, height: scene.navHeight }}
+                  style={{ left: nav.left, top: navTop, width: navWidth, height: navHeight }}
                   onClick={() => setActiveNav(nav.id)}
                 >
                   <span className="france-nav-glyph" aria-hidden="true" />
@@ -1470,6 +1518,7 @@ export default function FlagGamePage() {
           <FlagColorChallengeGame
             config={activeChallengeConfig}
             players={[playerName]}
+            orientation={orientation}
             onBack={() => setScreen('play')}
             onComplete={completeChallengeRound}
           />

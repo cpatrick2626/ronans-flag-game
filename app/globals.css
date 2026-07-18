@@ -2627,6 +2627,57 @@
   -webkit-user-drag: none;
 }
 
+/* The landscape source is itself a full-bleed 2752x1536 composition. Size
+   its coordinate shell like background-size: cover so the art fills both a
+   desktop and a rotated phone while every overlay stays registered to the
+   same source-pixel geometry. The portrait branch above remains unchanged. */
+[data-orientation='landscape'] .france-play-shell {
+  position: absolute;
+  left: calc((100vw - max(calc(100vw - var(--safe-x)), calc((100dvh - var(--safe-y)) * 2752 / 1536))) / 2);
+  bottom: 0;
+  width: max(calc(100vw - var(--safe-x)), calc((100dvh - var(--safe-y)) * 2752 / 1536));
+  max-height: none;
+  aspect-ratio: 2752 / 1536;
+  flex: 0 0 auto;
+}
+
+[data-orientation='landscape'] .france-player-row,
+[data-orientation='landscape'] .france-player-row.is-solo {
+  position: fixed;
+  top: auto;
+  bottom: calc(var(--safe-bottom) + 12px);
+  left: 2%;
+  width: 22%;
+  transform: none;
+}
+
+[data-orientation='landscape'] .france-play-controls {
+  position: fixed;
+  inset: 0;
+}
+
+[data-orientation='landscape'] .france-palette-gem,
+[data-orientation='landscape'] .france-nav-item {
+  top: calc(100% - var(--safe-bottom) - 38px) !important;
+}
+
+[data-orientation='landscape'] .france-palette-gem {
+  width: clamp(38px, 5cqw, 52px);
+  height: clamp(38px, 5cqw, 52px);
+}
+
+[data-orientation='landscape'] .france-nav-item {
+  width: clamp(54px, 6.5cqw, 92px) !important;
+  height: clamp(38px, 9cqh, 52px) !important;
+}
+
+[data-orientation='landscape'] .france-play-back-hitbox {
+  left: 1.5%;
+  bottom: 10%;
+  width: 9%;
+  height: 12%;
+}
+
 .france-player-row {
   position: absolute;
   z-index: 4;
