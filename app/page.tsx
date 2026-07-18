@@ -216,10 +216,12 @@ function sparkleOffsets(assigned: AssignedFillPattern, b: RegionBox) {
 
 function FlagColorChallengeGame({
   config,
+  players,
   onBack,
   onComplete,
 }: {
   config: CountryChallengeConfig
+  players: string[]
   onBack: () => void
   onComplete: () => void
 }) {
@@ -276,6 +278,8 @@ function FlagColorChallengeGame({
   const orbItems = scene.orbs
   const selectedOrbHue = orbItems.find((orb) => orb.id === selectedOrb)?.hue || '#ffffff'
   const allComplete = round.regions.every((region) => filledRegions[region.id])
+  const completedRegionCount = round.regions.filter((region) => filledRegions[region.id]).length
+  const flagProgress = round.regions.length ? (completedRegionCount / round.regions.length) * 100 : 0
   const fillDurationMs = round.fillDurationMs ?? 1400
   const regionBounds = useMemo(() => {
     const bounds: Record<string, { x: number; y: number; w: number; h: number }> = {}
@@ -596,10 +600,20 @@ function FlagColorChallengeGame({
               className="france-play-image"
               draggable={false}
             />
-            <div className="france-play-ui-art" aria-hidden="true">
-              <span className="france-play-ui-slice france-play-ui-players" />
-              <span className={`france-play-ui-slice france-play-ui-palette ${phase === 'color' ? 'is-visible' : ''}`} />
-              <span className="france-play-ui-slice france-play-ui-nav" />
+            <div className={`france-player-row ${players.length === 1 ? 'is-solo' : ''}`} aria-label="Player progress">
+              {players.map((name, index) => (
+                <div className="france-player-pill" key={`${name}-${index}`}>
+                  <span className="france-player-avatar" aria-hidden="true">
+                    {(name.trim()[0] || 'P').toUpperCase()}
+                  </span>
+                  <span className="france-player-details">
+                    <span className="france-player-name">{name}</span>
+                    <span className="france-player-progress" aria-label={`${Math.round(flagProgress)} percent complete`}>
+                      <span style={{ width: `${flagProgress}%` }} />
+                    </span>
+                  </span>
+                </div>
+              ))}
             </div>
             <div
               className="challenge-flag-overlay"
@@ -748,17 +762,19 @@ function FlagColorChallengeGame({
                 </g>
               </svg>
             </div>
-            <div className="france-play-hotspots">
+            <div className="france-play-controls">
               {phase === 'color' && orbItems.map((orb) => (
                 <button
                   key={`${orb.id}-${selectedOrb === orb.id ? selectedPulse : 0}`}
                   type="button"
                   aria-label={`${orb.label} orb`}
                   aria-pressed={selectedOrb === orb.id}
-                  className={`france-hotspot orb invisible-hotspot ${selectedOrb === orb.id ? 'is-selected' : ''} ${selectedOrb === orb.id && selectedPulse ? 'is-pulsing' : ''}`}
-                  style={{ left: orb.left, top: scene.orbTop, width: scene.orbSize, height: scene.orbSize }}
+                  className={`france-palette-gem ${selectedOrb === orb.id ? 'is-selected' : ''} ${selectedOrb === orb.id && selectedPulse ? 'is-pulsing' : ''}`}
+                  style={{ left: orb.left, top: scene.orbTop, '--gem-color': orb.hue } as CSSProperties}
                   onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(scene.orbTop), orb.hue)}
-                />
+                >
+                  <span className="france-palette-gem-shine" aria-hidden="true" />
+                </button>
               ))}
               {navItems.map((nav) => (
                 <button
@@ -766,10 +782,13 @@ function FlagColorChallengeGame({
                   type="button"
                   aria-label={nav.label}
                   aria-pressed={activeNav === nav.id}
-                  className={`france-hotspot nav invisible-hotspot ${activeNav === nav.id ? 'is-active' : ''}`}
+                  className={`france-nav-item is-${nav.id} ${activeNav === nav.id ? 'is-active' : ''}`}
                   style={{ left: nav.left, top: scene.navTop, width: scene.navWidth, height: scene.navHeight }}
                   onClick={() => setActiveNav(nav.id)}
-                />
+                >
+                  <span className="france-nav-glyph" aria-hidden="true" />
+                  <span className="france-nav-label">{nav.label}</span>
+                </button>
               ))}
             </div>
             <div className="france-play-ambient" aria-hidden="true">
@@ -1450,6 +1469,7 @@ export default function FlagGamePage() {
         {screen === 'flag-color-challenge' && (
           <FlagColorChallengeGame
             config={activeChallengeConfig}
+            players={[playerName]}
             onBack={() => setScreen('play')}
             onComplete={completeChallengeRound}
           />

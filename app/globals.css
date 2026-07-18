@@ -2627,126 +2627,243 @@
   -webkit-user-drag: none;
 }
 
-.france-play-ui-art {
+.france-player-row {
   position: absolute;
-  inset: 0;
-  z-index: 3;
+  z-index: 4;
+  top: 72.5%;
+  left: 50%;
+  width: 72%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 2.4cqw;
+  transform: translateX(-50%);
   pointer-events: none;
 }
 
-.france-play-ui-slice {
-  position: absolute;
-  left: 50%;
-  display: block;
-  transform: translateX(-50%);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
+.france-player-row.is-solo {
+  width: 54%;
 }
 
-.france-play-ui-players {
-  top: 72%;
-  width: 70%;
-  height: 6.5%;
+.france-player-pill {
+  min-width: 0;
+  height: clamp(38px, 11cqw, 48px);
+  display: flex;
+  align-items: center;
+  gap: clamp(7px, 2cqw, 10px);
+  padding: clamp(4px, 1.1cqw, 6px) clamp(9px, 2.7cqw, 13px) clamp(4px, 1.1cqw, 6px) clamp(5px, 1.3cqw, 7px);
   border-radius: 9999px;
-  box-shadow: 0 8px 20px rgba(82, 47, 20, 0.18);
+  border: 1px solid rgba(197, 137, 43, 0.48);
+  background: linear-gradient(90deg, rgba(255, 250, 224, 0.78), rgba(255, 246, 207, 0.52) 72%, rgba(255, 246, 207, 0.2));
+  box-shadow: 0 4px 12px rgba(91, 57, 17, 0.13), inset 0 1px rgba(255, 255, 255, 0.48);
+  backdrop-filter: blur(2px);
+}
+
+.france-player-avatar {
+  flex: 0 0 auto;
+  width: clamp(28px, 8.2cqw, 36px);
+  height: clamp(28px, 8.2cqw, 36px);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 244, 202, 0.88);
+  background: radial-gradient(circle at 35% 28%, #fff8ca 0 12%, #f4c354 34%, #c87927 100%);
+  box-shadow: inset 0 1px 4px rgba(255, 255, 255, 0.58), 0 2px 6px rgba(62, 38, 12, 0.2);
+  color: #52330d;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(12px, 3.5cqw, 16px);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.france-player-details {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: clamp(3px, 0.8cqw, 4px);
+}
+
+.france-player-name {
   overflow: hidden;
-  background-image: url('/assets/france-portrait/chips.png');
+  color: #29466d;
+  font-size: clamp(10px, 2.8cqw, 13px);
+  font-weight: 900;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px rgba(255, 255, 255, 0.62);
+  white-space: nowrap;
 }
 
-.france-play-ui-palette {
-  top: 80%;
-  width: 84%;
-  height: 8.5%;
-  opacity: 0;
-  border-radius: 18px;
-  box-shadow: 0 10px 24px rgba(82, 47, 20, 0.2);
+.france-player-progress {
+  height: clamp(4px, 1.1cqw, 6px);
   overflow: hidden;
-  background-image: url('/assets/france-portrait/tray.png');
-  transition: opacity 420ms ease;
+  border-radius: 9999px;
+  background: rgba(33, 67, 105, 0.2);
+  box-shadow: inset 0 1px 2px rgba(63, 48, 26, 0.16);
 }
 
-.france-play-ui-palette.is-visible {
-  opacity: 1;
-}
-
-.france-play-ui-nav {
-  top: 92.5%;
-  width: 96%;
-  height: 5%;
-  background-image: url('/assets/france-portrait/nav.png');
-  background-position: center bottom;
-  background-size: 100% auto;
+.france-player-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffcf55, #fff0a8);
+  box-shadow: 0 0 6px rgba(255, 217, 105, 0.46);
+  transition: width 280ms ease;
 }
 
 .france-play-title-ribbon {
   display: none;
 }
 
-.france-play-hotspots,
+.france-play-controls,
 .france-play-ambient {
   position: absolute;
   inset: 0;
 }
 
-.france-play-hotspots {
+.france-play-controls {
   z-index: 4;
   pointer-events: none;
 }
 
-.france-hotspot {
+.france-palette-gem,
+.france-nav-item {
   position: absolute;
   pointer-events: auto;
   transform: translate(-50%, -50%);
-  border: 0;
-  padding: 0;
   cursor: none;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.france-hotspot.stripe {
-  border-radius: 10px;
-}
-
-.france-hotspot.orb {
+.france-palette-gem {
+  width: max(11cqw, 44px);
+  height: max(11cqw, 44px);
+  padding: 0;
   border-radius: 9999px;
+  border: clamp(2px, 0.55cqw, 3px) solid rgba(240, 195, 82, 0.92);
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255,255,255,0.94) 0 5%, rgba(255,255,255,0.4) 8%, transparent 22%),
+    radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--gem-color) 90%, white) 0 46%, var(--gem-color) 72%, color-mix(in srgb, var(--gem-color) 72%, #1b1834) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 250, 218, 0.55),
+    inset 0 -5px 8px rgba(27, 20, 47, 0.18),
+    0 4px 9px rgba(82, 48, 15, 0.22);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-.france-hotspot.nav {
-  border-radius: 9999px;
+.france-palette-gem-shine {
+  position: absolute;
+  inset: 14%;
+  border-radius: inherit;
+  border-top: 1px solid rgba(255, 255, 255, 0.72);
+  transform: rotate(-22deg);
+  pointer-events: none;
 }
 
-.france-hotspot:focus-visible {
+.france-palette-gem:focus-visible,
+.france-nav-item:focus-visible {
   outline: 2px solid rgba(255, 226, 128, 0.96);
   outline-offset: 3px;
 }
 
-.france-hotspot.orb.is-selected::after {
-  content: '';
-  position: absolute;
-  inset: 8%;
-  border-radius: inherit;
-  border: 2px solid rgba(255, 246, 205, 0.94);
+.france-palette-gem.is-selected {
+  border-color: #fff1a6;
   box-shadow:
-    inset 0 0 12px rgba(255, 246, 210, 0.26),
-    0 0 0 1px rgba(255, 214, 102, 0.18),
-    0 0 16px color-mix(in srgb, var(--palette-color, #fff) 34%, transparent);
-  pointer-events: none;
-  animation: france-orb-rim 1.8s cubic-bezier(0.33, 0.72, 0.24, 1) infinite alternate;
+    inset 0 0 0 2px rgba(255, 250, 219, 0.72),
+    inset 0 0 10px rgba(255, 240, 168, 0.34),
+    0 0 0 2px rgba(202, 139, 39, 0.42),
+    0 4px 11px rgba(82, 48, 15, 0.24);
 }
 
-.france-hotspot.orb.is-selected::before {
+.france-palette-gem.is-pulsing {
+  animation: france-gem-select 220ms ease-out;
+}
+
+.france-nav-item {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: clamp(1px, 0.5cqw, 3px);
+  padding: 0;
+  border: 0;
+  border-radius: clamp(8px, 2.4cqw, 12px);
+  background: transparent;
+  color: rgba(70, 48, 28, 0.82);
+  text-shadow: 0 1px rgba(255, 247, 213, 0.64);
+  transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.france-nav-item.is-active {
+  background: transparent;
+  color: #173a72;
+  box-shadow: none;
+}
+
+.france-nav-item.is-active .france-nav-glyph {
+  border-radius: 50%;
+  background: rgba(255, 246, 205, 0.42);
+  box-shadow: 0 0 0 3px rgba(208, 148, 45, 0.2), 0 2px 5px rgba(91, 57, 17, 0.12);
+}
+
+.france-nav-glyph {
+  width: clamp(15px, 4.2cqw, 19px);
+  height: clamp(15px, 4.2cqw, 19px);
+  position: relative;
+  display: block;
+}
+
+.france-nav-item.is-home .france-nav-glyph::before {
+  content: '⌂';
+  position: absolute;
+  inset: 0;
+  font-size: clamp(18px, 5cqw, 22px);
+  font-weight: 900;
+  line-height: 0.78;
+}
+
+.france-nav-item.is-passport .france-nav-glyph {
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+
+.france-nav-item.is-passport .france-nav-glyph::after {
   content: '';
   position: absolute;
-  inset: 2%;
-  border-radius: inherit;
-  border: 1px dotted rgba(255, 239, 182, 0.68);
-  pointer-events: none;
-  animation: france-orb-spark-orbit 3.4s cubic-bezier(0.33, 0.72, 0.24, 1) infinite;
+  inset: 3px 4px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
 }
 
-.france-hotspot.orb.is-pulsing {
-  animation: france-orb-select-bounce 360ms cubic-bezier(0.22, 1.3, 0.34, 1);
+.france-nav-item.is-collections .france-nav-glyph::before,
+.france-nav-item.is-collections .france-nav-glyph::after {
+  content: '';
+  position: absolute;
+  inset: 2px 4px 4px 2px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+
+.france-nav-item.is-collections .france-nav-glyph::after {
+  inset: 5px 1px 1px 5px;
+}
+
+.france-nav-item.is-settings .france-nav-glyph::before {
+  content: '⚙';
+  position: absolute;
+  inset: 0;
+  font-size: clamp(15px, 4.2cqw, 19px);
+  line-height: 1;
+}
+
+.france-nav-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(7px, 2cqw, 9px);
+  font-weight: 900;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .france-spark-burst {
@@ -2953,20 +3070,9 @@
   z-index: 6;
 }
 
-@keyframes france-orb-rim {
-  from { opacity: 0.72; box-shadow: inset 0 0 8px rgba(255, 236, 170, 0.22), 0 0 0 1px rgba(255, 214, 102, 0.06); }
-  to { opacity: 1; box-shadow: inset 0 0 12px rgba(255, 236, 170, 0.34), 0 0 0 1px rgba(255, 214, 102, 0.12); }
-}
-
-@keyframes france-orb-spark-orbit {
-  0% { transform: rotate(0deg) scale(0.98); opacity: 0.5; }
-  50% { opacity: 0.86; }
-  100% { transform: rotate(360deg) scale(1.02); opacity: 0.5; }
-}
-
-@keyframes france-orb-select-bounce {
+@keyframes france-gem-select {
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  46% { transform: translate(-50%, -50%) scale(1.055); }
+  48% { transform: translate(-50%, -50%) scale(1.04); }
 }
 
 @keyframes france-fill-sparkle-twinkle {
@@ -3127,9 +3233,9 @@
   .france-paint-finish,
   .colored-pencil.is-scribbling .colored-pencil-tip,
   .france-fill-sparkle-dot,
-  .france-hotspot.orb.is-selected::before,
-  .france-hotspot.orb.is-selected::after,
-  .france-hotspot.orb.is-pulsing,
+  .france-palette-gem,
+  .france-nav-item,
+  .france-player-progress > span,
   .france-spark-burst,
   .france-ray,
   .france-cloud,
@@ -3291,7 +3397,7 @@ body {
     filter: none;
   }
 
-  .france-play-ui-palette {
-    transition: none;
-  }
+  .france-palette-gem,
+  .france-nav-item,
+  .france-player-progress > span { transition: none; }
 }
