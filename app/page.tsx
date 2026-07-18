@@ -448,12 +448,12 @@ function FlagColorChallengeGame({
     }))
   }
 
-  function enterFlagSurface(event: React.PointerEvent) {
+  function enterPlayStage(event: React.PointerEvent) {
     updatePointer(event)
     setPointer((current) => ({ ...current, active: event.pointerType !== 'touch' }))
   }
 
-  function leaveFlagSurface(event: React.PointerEvent) {
+  function leavePlayStage(event: React.PointerEvent) {
     if (event.pointerType === 'touch') return
     setPointer((current) => ({ ...current, active: false, pressing: false }))
   }
@@ -641,13 +641,15 @@ function FlagColorChallengeGame({
   }
 
   const pencilVisible = !allComplete && (
-    activeFillRegion !== null || (phase === 'color' && pointer.active && !pointer.touch)
+    activeFillRegion !== null || (pointer.active && !pointer.touch)
   )
 
   return (
     <section
       ref={stageRef}
-      className="france-play-stage"
+      className={`france-play-stage ${pointer.active && !pointer.touch ? 'has-pencil-cursor' : ''}`}
+      onPointerEnter={enterPlayStage}
+      onPointerLeave={leavePlayStage}
       onPointerMove={updatePointer}
       onPointerDown={pressPencil}
       onContextMenu={(event) => event.preventDefault()}
@@ -690,8 +692,6 @@ function FlagColorChallengeGame({
                 preserveAspectRatio="none"
                 className="challenge-flag-svg"
                 aria-label={`${config.name} flag to color`}
-                onPointerEnter={enterFlagSurface}
-                onPointerLeave={leaveFlagSurface}
               >
                 <defs>
                   <clipPath id="challenge-flag-clip">

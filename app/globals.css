@@ -2582,7 +2582,7 @@
   overflow: hidden;
   background: #08060f;
   color: #fff7ea;
-  cursor: none;
+  cursor: default;
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
   /* Hold gestures belong to the game here: no scroll/zoom, no iOS long-press
      callout, no text/element selection popup. Scoped to the play stage only. */
@@ -2781,9 +2781,21 @@
   position: absolute;
   pointer-events: auto;
   transform: translate(-50%, -50%);
-  cursor: none;
+  cursor: default;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+.france-play-stage.has-pencil-cursor,
+.france-play-stage.has-pencil-cursor * {
+  cursor: none;
+}
+
+.france-play-stage:not(.has-pencil-cursor) .interactive-region,
+.france-play-stage:not(.has-pencil-cursor) .france-palette-gem,
+.france-play-stage:not(.has-pencil-cursor) .france-nav-item,
+.france-play-stage:not(.has-pencil-cursor) .flag-line-hold-target {
+  cursor: default;
 }
 
 .france-palette-gem {

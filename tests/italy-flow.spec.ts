@@ -85,8 +85,8 @@ test.describe('Italy challenge', () => {
     await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
     await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
     await page.mouse.move(0, 0);
-    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
-    await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
+    await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
+    await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
 
     expect(errors).toEqual([]);
   });
@@ -144,7 +144,7 @@ test.describe('Italy challenge', () => {
     await expect(page.getByAltText('Italy Flag Color Challenge')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Hold to draw the flag lines' })).toBeAttached();
     await expect(page.getByRole('button', { name: 'Green orb' })).toHaveCount(0);
-    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
+    await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
 
     expect(errors).toEqual([]);
   });
@@ -155,7 +155,7 @@ test.describe('Italy challenge', () => {
     await playThroughToChallenge(page, errors, 'Italy Flag Color Challenge');
     await expect(page.getByAltText('Italy Flag Color Challenge')).toHaveAttribute('src', '/assets/italy-scene-landscape-v1.png');
     await expect(page.locator('.flag-line-guide')).toHaveCount(2);
-    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
+    await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
     await drawTheLines(page, 'Green orb');
 
     const greenStripe = page.getByRole('button', { name: 'Italy green stripe' });
@@ -165,8 +165,8 @@ test.describe('Italy challenge', () => {
     await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
     await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
     await page.mouse.move(0, 0);
-    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
-    await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
+    await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
+    await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
     expect(errors).toEqual([]);
   });
 });

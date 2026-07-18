@@ -89,10 +89,10 @@ test('France draw-the-lines phase: palette hidden, hold pauses and resumes, reve
   const box = await holdTarget.boundingBox();
   if (!box) throw new Error('line hold target is not visible');
 
-  // Pointer movement alone never reveals the coloring pencil in Phase 1.
+  // The pencil is the mouse cursor across the whole play stage in Phase 1 too.
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
-  await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
+  await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
+  await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
 
   // A short hold advances the draw part-way; releasing pauses it
   const readProgress = () => page.locator('.flag-line-draw').evaluate((el) => Number.parseFloat((el as SVGGElement).style.getPropertyValue('--line-progress') || '0'));
@@ -218,7 +218,7 @@ test('France gameplay: wrong feedback, correct fills, completion, reset', async 
   // Full reset of both phases: back to the blank dotted-line state, palette hidden
   await expect(page.getByRole('button', { name: 'Hold to draw the flag lines' })).toBeAttached();
   await expect(page.getByRole('button', { name: 'Blue orb' })).toHaveCount(0);
-  await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
+  await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
 
   // Back navigation still works after a completed round
   await page.getByRole('button', { name: 'Back', exact: true }).first().click();
@@ -237,23 +237,27 @@ test('France magical motion layer: scoped cursor, pencil, ambient, and reduced m
 
   const stage = page.locator('.france-play-stage');
   await expect(stage).toBeVisible();
-  await expect(stage).toHaveCSS('cursor', 'none');
   await expect(page.locator('.france-play-ambient .france-cloud')).toHaveCount(2);
   await expect(page.locator('.france-play-ambient .france-aurora')).toHaveCount(2);
 
+  const pencil = page.locator('.colored-pencil');
   await page.mouse.move(0, 0);
-  await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
-  await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
+  await expect(pencil).toHaveClass(/is-visible/);
+  await expect(pencil).toHaveCSS('opacity', '1');
+  await expect(stage).toHaveCSS('cursor', 'none');
+  const backgroundPosition = await pencil.evaluate((el) => el.style.getPropertyValue('--pencil-x'));
 
   const blueStripe = page.getByRole('button', { name: 'France blue stripe' });
   const blueBox = await blueStripe.boundingBox();
   if (!blueBox) throw new Error('blue stripe is not visible');
   await page.mouse.move(blueBox.x + blueBox.width / 2, blueBox.y + blueBox.height / 2);
-  await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
-  await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '1');
-  await page.mouse.move(0, 0);
-  await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-visible/);
-  await expect(page.locator('.colored-pencil')).toHaveCSS('opacity', '0');
+  await expect(pencil).toHaveClass(/is-visible/);
+  await expect(pencil).toHaveCSS('opacity', '1');
+  await expect.poll(() => pencil.evaluate((el) => el.style.getPropertyValue('--pencil-x'))).not.toBe(backgroundPosition);
+  await page.mouse.move(-10, -10);
+  await expect(pencil).not.toHaveClass(/is-visible/);
+  await expect(pencil).toHaveCSS('opacity', '0');
+  await expect(stage).toHaveCSS('cursor', 'default');
 
   const touchPoint = { x: blueBox.x + blueBox.width / 2, y: blueBox.y + blueBox.height / 2 };
   const cdp = await page.context().newCDPSession(page);
@@ -279,13 +283,13 @@ test('France magical motion layer: scoped cursor, pencil, ambient, and reduced m
   expect(errors).toEqual([]);
 });
 
-test('France desktop landscape keeps the aiming pencil scoped to the flag', async ({ page }) => {
+test('France desktop landscape keeps the aiming pencil scoped to the play stage', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   const errors: string[] = [];
   await playThroughToFrance(page, errors);
 
   const pencil = page.locator('.colored-pencil');
-  await expect(pencil).not.toHaveClass(/is-visible/);
+  await expect(pencil).toHaveClass(/is-visible/);
   await drawTheLines(page);
 
   const blueStripe = page.getByRole('button', { name: 'France blue stripe' });
@@ -295,8 +299,8 @@ test('France desktop landscape keeps the aiming pencil scoped to the flag', asyn
   await expect(pencil).toHaveClass(/is-visible/);
   await expect(pencil).toHaveCSS('opacity', '1');
   await page.mouse.move(0, 0);
-  await expect(pencil).not.toHaveClass(/is-visible/);
-  await expect(pencil).toHaveCSS('opacity', '0');
+  await expect(pencil).toHaveClass(/is-visible/);
+  await expect(pencil).toHaveCSS('opacity', '1');
 
   expect(errors).toEqual([]);
 });
@@ -337,10 +341,10 @@ test('France fill choreography: random pattern class and stroking pencil during 
   await expect(pencil).toHaveCSS('opacity', '1');
   await expect(blueStripe).not.toHaveClass(/is-filled/);
 
-  // Leaving the flag surface removes the aiming pencil, so it never rests in-scene.
+  // Moving off the flag but remaining on-stage keeps the live aiming pencil.
   await page.mouse.move(0, 0);
-  await expect(pencil).not.toHaveClass(/is-visible/);
-  await expect(pencil).toHaveCSS('opacity', '0');
+  await expect(pencil).toHaveClass(/is-visible/);
+  await expect(pencil).toHaveCSS('opacity', '1');
 
   expect(errors).toEqual([]);
 });
