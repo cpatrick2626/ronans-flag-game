@@ -74,8 +74,10 @@ async function expectCenteredGemTarget(page: import('@playwright/test').Page, la
   expect(geometry.centerDeltaX).toBeLessThanOrEqual(0.5);
   expect(geometry.centerDeltaY).toBeLessThanOrEqual(0.5);
   expect(geometry.fullVisualAreaHitsTarget).toBe(true);
-  expect(geometry.marginX).toBeGreaterThanOrEqual(3);
-  expect(geometry.marginY).toBeGreaterThanOrEqual(3);
+  // The pointer target must be the rendered gem box, not a larger invisible
+  // ring that can feel offset during real mouse/touch targeting.
+  expect(geometry.marginX).toBeLessThanOrEqual(0.5);
+  expect(geometry.marginY).toBeLessThanOrEqual(0.5);
 }
 
 test.describe('Italy challenge', () => {
@@ -268,8 +270,12 @@ test('saved completed countries can be replayed and Next Flag wraps without chan
   expect(storedProgress.completedCountries).toBe(2);
   expect(storedProgress.xp).toBe(50);
 
-  await page.getByRole('button', { name: 'Next Flag' }).click({ force: true });
+  // Keep the mouse over the play stage while the keyed country challenge
+  // remounts; the pencil must reattach without a fresh pointerenter.
+  await page.mouse.move(24, 24);
+  await page.getByRole('button', { name: 'Next Flag' }).evaluate((button) => (button as HTMLButtonElement).click());
   await expect(page.getByAltText('France Flag Color Challenge')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Hold to draw the flag lines' })).toBeAttached();
+  await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
   expect(errors).toEqual([]);
 });

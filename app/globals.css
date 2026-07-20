@@ -2662,8 +2662,8 @@
 }
 
 [data-orientation='landscape'] .france-palette-gem-hitbox {
-  width: clamp(44px, 5.8cqw, 58px);
-  height: clamp(44px, 5.8cqw, 58px);
+  width: clamp(38px, 5cqw, 52px);
+  height: clamp(38px, 5cqw, 52px);
 }
 
 [data-orientation='landscape'] .france-palette-gem-visual {
@@ -2804,8 +2804,8 @@
 }
 
 .france-palette-gem-hitbox {
-  width: max(15cqw, 60px);
-  height: max(15cqw, 60px);
+  width: max(11cqw, 44px);
+  height: max(11cqw, 44px);
   display: grid;
   place-items: center;
   padding: 0;

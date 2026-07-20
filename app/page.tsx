@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { COUNTRIES, COUNTRY_BY_ISO2 } from '../public/countries.js'
 import { completeCountry, getCountryProgress, loadFlagProgress } from '../public/flag-progress.js'
 import { createCompletionReward } from '../public/logic.js'
@@ -10,6 +10,8 @@ type Screen = 'loading' | 'home' | 'country-arrival' | 'play' | 'flag-color-chal
 type Mode = 'solo' | 'coop' | 'versus'
 type ChallengeDifficulty = 'easy' | 'medium' | 'hard' | 'expert'
 type RewardStage = 'stamp' | 'souvenir' | 'stars' | 'xp' | 'done'
+
+const lastKnownPointer = { x: null as number | null, y: null as number | null, rotation: -14, pointerType: '' }
 type RoomStatus = 'waiting' | 'ready' | 'active'
 type PaintFeedback = { state: 'correct' | 'wrong'; at: number }
 type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: number; y: number }; raf: number | null; lastTs: number | null; metrics: { svgRect: DOMRect; stageRect: DOMRect } | null }
@@ -136,6 +138,7 @@ function useViewportOrientation() {
     query.addEventListener('change', apply)
     return () => query.removeEventListener('change', apply)
   }, [])
+
   return orientation
 }
 
@@ -331,6 +334,26 @@ function FlagColorChallengeGame({
     return () => query.removeEventListener('change', onChange)
   }, [])
 
+  // The keyed country switch remounts this component while the mouse can stay
+  // over the same physical stage point. Reattach only when the last real
+  // pointer position is still inside the new stage; this avoids a parked
+  // pencil while preserving immediate tracking across Next Flag.
+  useLayoutEffect(() => {
+    const stage = stageRef.current
+    const { x, y, rotation, pointerType } = lastKnownPointer
+    if (!stage || x === null || y === null || pointerType === 'touch') return
+    const rect = stage.getBoundingClientRect()
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return
+    setPointer((current) => ({
+      ...current,
+      x: ((x - rect.left) / rect.width) * 100,
+      y: ((y - rect.top) / rect.height) * 100,
+      rotation,
+      active: true,
+      touch: false,
+    }))
+  }, [])
+
   const displayRegions = useMemo(() => landscape?.regions ?? round.regions, [landscape, round.regions])
   const navItems = landscape
     ? scene.nav.map((nav, index) => ({ ...nav, left: landscape.navLefts[index] ?? nav.left }))
@@ -447,6 +470,9 @@ function FlagColorChallengeGame({
   }
 
   function updatePointer(event: React.PointerEvent) {
+    lastKnownPointer.x = event.clientX
+    lastKnownPointer.y = event.clientY
+    lastKnownPointer.pointerType = event.pointerType
     const stage = stageRef.current
     if (!stage) return
     const rect = stage.getBoundingClientRect()
@@ -473,6 +499,9 @@ function FlagColorChallengeGame({
   }
 
   function leavePlayStage(event: React.PointerEvent) {
+    lastKnownPointer.x = event.clientX
+    lastKnownPointer.y = event.clientY
+    lastKnownPointer.pointerType = event.pointerType
     if (event.pointerType === 'touch') return
     setPointer((current) => ({ ...current, active: false, pressing: false }))
   }
