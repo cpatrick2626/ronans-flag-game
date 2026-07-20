@@ -26,6 +26,24 @@ const ROOM_CHANNEL = 'ronan-flag-room-sync'
 
 function safeStorageGet(key: string) { if (typeof window === 'undefined') return null; return window.localStorage.getItem(key) }
 function safeStorageSet(key: string, value: string) { if (typeof window === 'undefined') return; window.localStorage.setItem(key, value) }
+function preloadImage(src: string) {
+  return new Promise<void>((resolve) => {
+    const image = new Image()
+    let settled = false
+    const finish = () => {
+      if (settled) return
+      settled = true
+      resolve()
+    }
+    image.onload = () => {
+      if ('decode' in image) image.decode().catch(() => undefined).finally(finish)
+      else finish()
+    }
+    image.onerror = finish
+    image.src = src
+    if (image.complete) image.onload?.(new Event('load'))
+  })
+}
 function isValidCountryCode(code?: string | null) { return !!code && !!COUNTRY_BY_ISO2[code] }
 function getInitialCountry() { const saved = safeStorageGet(ACTIVE_COUNTRY_KEY); return isValidCountryCode(saved) ? (saved as string) : DEFAULT_CHALLENGE_ISO2 }
 function getCountryLanguage(country: (typeof COUNTRIES)[number]) { return country.languages?.[0] || 'Unknown' }
@@ -842,11 +860,13 @@ function FlagColorChallengeGame({
                   type="button"
                   aria-label={`${orb.label} orb`}
                   aria-pressed={selectedOrb === orb.id}
-                  className={`france-palette-gem ${selectedOrb === orb.id ? 'is-selected' : ''} ${selectedOrb === orb.id && selectedPulse ? 'is-pulsing' : ''}`}
+                  className="france-palette-gem france-palette-gem-hitbox"
                   style={{ left: orb.left, top: orbTop, '--gem-color': orb.hue } as CSSProperties}
                   onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(orbTop), orb.hue)}
                 >
-                  <span className="france-palette-gem-shine" aria-hidden="true" />
+                  <span className={`france-palette-gem-visual ${selectedOrb === orb.id ? 'is-selected' : ''} ${selectedOrb === orb.id && selectedPulse ? 'is-pulsing' : ''}`}>
+                    <span className="france-palette-gem-shine" aria-hidden="true" />
+                  </span>
                 </button>
               ))}
               {navItems.map((nav) => (
@@ -1462,7 +1482,7 @@ export default function FlagGamePage() {
   // Next Flag advances through the playable challenge registry (not the raw
   // COUNTRIES list) and lands on the same config-driven challenge screen as
   // PLAY SOLO, so every playable country gets the identical gameplay path.
-  function nextCountry() { const playable = Object.values(CHALLENGE_COUNTRIES).filter((config) => config.playable); const index = playable.findIndex((config) => config.iso2 === activeCountryCode); const next = playable[(index + 1) % playable.length] ?? playable[0]; setActiveCountryCode(next.iso2); setReward(null); setScreen('flag-color-challenge') }
+  async function nextCountry() { const playable = Object.values(CHALLENGE_COUNTRIES).filter((config) => config.playable); const index = playable.findIndex((config) => config.iso2 === activeCountryCode); const next = playable[(index + 1) % playable.length] ?? playable[0]; await Promise.all([preloadImage(next.scene.image), next.landscape?.image ? preloadImage(next.landscape.image) : Promise.resolve()]); setActiveCountryCode(next.iso2); setReward(null); setScreen('flag-color-challenge') }
   function createRoom(modeChoice: Exclude<Mode, 'solo'>) { const next = makeRoom(modeChoice, playerName, activeCountryCode); updateRoom(next, 'created', 'waiting-room'); setMode(modeChoice) }
   function joinRoom() { const existing = loadRoom(); if (!existing || existing.code !== roomCodeInput.trim().toUpperCase()) return; const joined: RoomState = { ...existing, guestName: playerName, status: 'active', updatedAt: new Date().toISOString() }; updateRoom(joined, 'joined'); setMode(joined.mode); setScreen(joined.mode === 'coop' ? 'coop' : 'versus') }
   function promoteRoom(modeChoice: Exclude<Mode, 'solo'>) { if (!room) return; updateRoom({ ...room, mode: modeChoice, status: room.guestName ? 'active' : 'waiting', updatedAt: new Date().toISOString() }, 'updated') }
