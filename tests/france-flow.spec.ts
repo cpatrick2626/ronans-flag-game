@@ -151,6 +151,43 @@ test('France challenge flow: entry, orbs, stripes, back navigation', async ({ pa
   expect(errors).toEqual([]);
 });
 
+test('France palette presses select a gem without starting a flag fill', async ({ page }) => {
+  await page.setViewportSize(viewports[0]);
+  const errors: string[] = [];
+  await playThroughToFrance(page, errors);
+  await drawTheLines(page);
+
+  const geometry = await page.evaluate(() => {
+    const rect = (selector: string) => {
+      const element = document.querySelector(selector);
+      if (!element) throw new Error(`${selector} is not rendered`);
+      const box = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height, zIndex: style.zIndex, pointerEvents: style.pointerEvents };
+    };
+    const gems = [...document.querySelectorAll('.france-palette-gem')].map((element) => {
+      const box = element.getBoundingClientRect();
+      return { label: element.getAttribute('aria-label'), left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height, zIndex: getComputedStyle(element).zIndex, pointerEvents: getComputedStyle(element).pointerEvents };
+    });
+    return { stage: rect('.france-play-stage'), flagSurface: rect('.challenge-flag-overlay'), gems };
+  });
+  console.log(`PALETTE_OVERLAP_AUDIT ${JSON.stringify(geometry)}`);
+
+  const redOrb = page.getByRole('button', { name: 'Red orb' });
+  const redBox = await redOrb.boundingBox();
+  if (!redBox) throw new Error('Red gem is not visible');
+  await page.mouse.move(redBox.x + redBox.width / 2, redBox.y + redBox.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(250);
+  await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-pressing/);
+  await expect(page.locator('.france-fill-layer')).toHaveCount(3);
+  const fillProgress = await page.locator('.france-fill-layer').evaluateAll((layers) => layers.map((layer) => layer.style.getPropertyValue('--fill-progress')));
+  expect(fillProgress).toEqual(['0%', '0%', '0%']);
+  await page.mouse.up();
+  await expect(redOrb).toHaveAttribute('aria-pressed', 'true');
+  expect(errors).toEqual([]);
+});
+
 test('France gameplay: wrong feedback, correct fills, completion, reset', async ({ page }) => {
   await page.setViewportSize(viewports[0]);
   const errors: string[] = [];

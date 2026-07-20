@@ -110,6 +110,18 @@ test.describe('Italy challenge', () => {
     await expectCenteredGemTarget(page, 'White orb');
     await expectCenteredGemTarget(page, 'Red orb');
 
+    const whiteOrb = page.getByRole('button', { name: 'White orb' });
+    const whiteBox = await whiteOrb.boundingBox();
+    if (!whiteBox) throw new Error('White gem is not visible');
+    await page.mouse.move(whiteBox.x + whiteBox.width / 2, whiteBox.y + whiteBox.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(250);
+    await expect(page.locator('.colored-pencil')).not.toHaveClass(/is-pressing/);
+    await page.mouse.up();
+    await expect(whiteOrb).toHaveAttribute('aria-pressed', 'true');
+    const fillProgress = await page.locator('.france-fill-layer').evaluateAll((layers) => layers.map((layer) => layer.style.getPropertyValue('--fill-progress')));
+    expect(fillProgress).toEqual(['0%', '0%', '0%']);
+
     const greenStripe = page.getByRole('button', { name: 'Italy green stripe' });
     const greenBox = await greenStripe.boundingBox();
     if (!greenBox) throw new Error('green stripe is not visible');

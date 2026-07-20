@@ -699,7 +699,6 @@ function FlagColorChallengeGame({
       onPointerEnter={enterPlayStage}
       onPointerLeave={leavePlayStage}
       onPointerMove={updatePointer}
-      onPointerDown={pressPencil}
       onContextMenu={(event) => event.preventDefault()}
     >
       {!landscape && <img src={scene.image} alt="" aria-hidden="true" draggable={false} className="scene-backdrop" />}
@@ -733,6 +732,7 @@ function FlagColorChallengeGame({
             <div
               className="challenge-flag-overlay"
               style={{ left: flagOverlay.left, top: flagOverlay.top, width: flagOverlay.width, height: flagOverlay.height, clipPath: flagOverlay.clipPath }}
+              onPointerDown={pressPencil}
             >
               <svg
                 ref={flagSvgRef}

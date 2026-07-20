@@ -2804,6 +2804,7 @@
 }
 
 .france-palette-gem-hitbox {
+  z-index: 1;
   width: max(11cqw, 44px);
   height: max(11cqw, 44px);
   display: grid;
