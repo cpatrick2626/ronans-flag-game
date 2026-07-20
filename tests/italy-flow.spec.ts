@@ -51,6 +51,33 @@ async function drawTheLines(page: import('@playwright/test').Page, firstOrb: str
   await page.mouse.up();
 }
 
+async function expectCenteredGemTarget(page: import('@playwright/test').Page, label: string) {
+  const gem = page.getByRole('button', { name: label });
+  const geometry = await gem.evaluate((button) => {
+    const target = button.getBoundingClientRect();
+    const visual = button.querySelector('.france-palette-gem-visual')?.getBoundingClientRect();
+    if (!visual) throw new Error(`${button.getAttribute('aria-label')} has no visible gem`);
+    const points = [
+      [visual.left + 1, visual.top + visual.height / 2],
+      [visual.right - 1, visual.top + visual.height / 2],
+      [visual.left + visual.width / 2, visual.top + 1],
+      [visual.left + visual.width / 2, visual.bottom - 1],
+    ];
+    return {
+      centerDeltaX: Math.abs((target.left + target.width / 2) - (visual.left + visual.width / 2)),
+      centerDeltaY: Math.abs((target.top + target.height / 2) - (visual.top + visual.height / 2)),
+      fullVisualAreaHitsTarget: points.every(([x, y]) => document.elementFromPoint(x, y)?.closest('button') === button),
+      marginX: (target.width - visual.width) / 2,
+      marginY: (target.height - visual.height) / 2,
+    };
+  });
+  expect(geometry.centerDeltaX).toBeLessThanOrEqual(0.5);
+  expect(geometry.centerDeltaY).toBeLessThanOrEqual(0.5);
+  expect(geometry.fullVisualAreaHitsTarget).toBe(true);
+  expect(geometry.marginX).toBeGreaterThanOrEqual(3);
+  expect(geometry.marginY).toBeGreaterThanOrEqual(3);
+}
+
 test.describe('Italy challenge', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -77,6 +104,9 @@ test.describe('Italy challenge', () => {
     await expect(page.getByRole('button', { name: 'Yellow orb' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Blue orb' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Green orb' })).toHaveAttribute('aria-pressed', 'true');
+    await expectCenteredGemTarget(page, 'Green orb');
+    await expectCenteredGemTarget(page, 'White orb');
+    await expectCenteredGemTarget(page, 'Red orb');
 
     const greenStripe = page.getByRole('button', { name: 'Italy green stripe' });
     const greenBox = await greenStripe.boundingBox();
@@ -157,6 +187,9 @@ test.describe('Italy challenge', () => {
     await expect(page.locator('.flag-line-guide')).toHaveCount(2);
     await expect(page.locator('.colored-pencil')).toHaveClass(/is-visible/);
     await drawTheLines(page, 'Green orb');
+    await expectCenteredGemTarget(page, 'Green orb');
+    await expectCenteredGemTarget(page, 'White orb');
+    await expectCenteredGemTarget(page, 'Red orb');
 
     const greenStripe = page.getByRole('button', { name: 'Italy green stripe' });
     const box = await greenStripe.boundingBox();
@@ -196,5 +229,47 @@ test('Next Flag routes from a completed France to Italy', async ({ page }) => {
   await expect(page.locator('.flag-line-guide')).toHaveCount(2);
   await expect(page.getByRole('button', { name: 'Green orb' })).toHaveCount(0);
 
+  expect(errors).toEqual([]);
+});
+
+test('saved completed countries can be replayed and Next Flag wraps without changing progress', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    window.localStorage.setItem('flag_game_v1_active_country', 'IT');
+    window.localStorage.setItem('flag_progression_v1', JSON.stringify({
+      playerName: 'Ronan',
+      xp: 50,
+      explorerLevel: 3,
+      levelTitle: 'Junior Explorer',
+      completedCountries: 2,
+      perfectFlags: 2,
+      unlockedSouvenirs: ['eiffel_tower', 'colosseum'],
+      passportStamps: [],
+      countries: {
+        FR: { countryCode: 'FR', status: 'perfect', stars: 3, completedAt: '2026-07-18T12:00:00.000Z' },
+        IT: { countryCode: 'IT', status: 'perfect', stars: 3, completedAt: '2026-07-19T12:00:00.000Z' },
+      },
+    }));
+  });
+  const errors: string[] = [];
+  await playThroughToChallenge(page, errors, 'Italy Flag Color Challenge');
+  await drawTheLines(page, 'Green orb');
+
+  await page.getByRole('button', { name: 'Green orb' }).click();
+  await holdRegion(page, page.getByRole('button', { name: 'Italy green stripe' }), 2500);
+  await page.getByRole('button', { name: 'White orb' }).click();
+  await holdRegion(page, page.getByRole('button', { name: 'Italy white stripe' }), 2500);
+  await page.getByRole('button', { name: 'Red orb' }).click();
+  await holdRegion(page, page.getByRole('button', { name: 'Italy red stripe' }), 2500);
+
+  await expect(page.getByText('COUNTRY DISCOVERED')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('You colored Italy again!')).toBeVisible();
+  const storedProgress = await page.evaluate(() => JSON.parse(window.localStorage.getItem('flag_progression_v1') || '{}'));
+  expect(storedProgress.completedCountries).toBe(2);
+  expect(storedProgress.xp).toBe(50);
+
+  await page.getByRole('button', { name: 'Next Flag' }).click({ force: true });
+  await expect(page.getByAltText('France Flag Color Challenge')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Hold to draw the flag lines' })).toBeAttached();
   expect(errors).toEqual([]);
 });

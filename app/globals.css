@@ -2806,6 +2806,8 @@
 .france-palette-gem-hitbox {
   width: max(15cqw, 60px);
   height: max(15cqw, 60px);
+  display: grid;
+  place-items: center;
   padding: 0;
   border: 0;
   border-radius: 9999px;
@@ -2816,10 +2818,7 @@
   width: max(11cqw, 44px);
   height: max(11cqw, 44px);
   display: block;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   padding: 0;
   border-radius: 9999px;
   border: clamp(2px, 0.55cqw, 3px) solid rgba(240, 195, 82, 0.92);
@@ -3153,8 +3152,8 @@
 }
 
 @keyframes france-gem-select {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  48% { transform: translate(-50%, -50%) scale(1.04); }
+  0%, 100% { transform: scale(1); }
+  48% { transform: scale(1.04); }
 }
 
 @keyframes france-fill-sparkle-twinkle {

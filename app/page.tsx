@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { COUNTRIES, COUNTRY_BY_ISO2 } from '../public/countries.js'
 import { completeCountry, getCountryProgress, loadFlagProgress } from '../public/flag-progress.js'
+import { createCompletionReward } from '../public/logic.js'
 import { CHALLENGE_COUNTRIES, DEFAULT_CHALLENGE_ISO2, MAP_PINS, getCelebrationProfile, resolvePlayableChallenge, type CompletionSoundHook, type CountryChallengeConfig, type FillPatternId, type FlagRegionConfig } from '../lib/countries'
 
 type Screen = 'loading' | 'home' | 'country-arrival' | 'play' | 'flag-color-challenge' | 'create-room' | 'join-room' | 'waiting-room' | 'coop' | 'versus'
@@ -1478,7 +1479,23 @@ export default function FlagGamePage() {
   function startSolo() { playSound('arrival_theme'); setActiveCountryCode(resolvePlayableChallenge(activeCountryCode).iso2); setScreen('flag-color-challenge') }
   function colorRegion(regionId: string) { if (!palette.length) return; const region = country.flag_regions.find((item: any) => item.id === regionId); const isCorrect = region ? selectedColorIndex === region.color : false; setPaintFeedback((current) => ({ ...current, [regionId]: { state: isCorrect ? 'correct' : 'wrong', at: Date.now() } })); setColorState((current) => ({ ...current, [activeCountryCode]: { ...(current[activeCountryCode] || {}), [regionId]: selectedColorIndex } })) }
   function completeFlag() { if (!allRegionsFilled || completed) return; const result = completeCountry(activeCountryCode, progress, { stars: perfectFlag ? 3 : 2, completedAt: new Date().toISOString() }); setProgress(result.progress); setReward(result.reward) }
-  function completeChallengeRound() { if (completed) return; const result = completeCountry(activeCountryCode, progress, { stars: 3, completedAt: new Date().toISOString() }); setProgress(result.progress); setReward(result.reward) }
+  function completeChallengeRound() {
+    const completedAt = new Date().toISOString()
+    if (completed) {
+      // Replaying a country that is already complete must still reach the
+      // reward navigation, but must not award or persist duplicate progress.
+      const replayReward = createCompletionReward(country, { stars: 3, completedAt })
+      setReward({
+        ...replayReward,
+        message: `You colored ${country.name} again!`,
+        xp: { flagComplete: 0, perfectBonus: 0, souvenirBonus: 0, total: 0 },
+      })
+      return
+    }
+    const result = completeCountry(activeCountryCode, progress, { stars: 3, completedAt })
+    setProgress(result.progress)
+    setReward(result.reward)
+  }
   // Next Flag advances through the playable challenge registry (not the raw
   // COUNTRIES list) and lands on the same config-driven challenge screen as
   // PLAY SOLO, so every playable country gets the identical gameplay path.
