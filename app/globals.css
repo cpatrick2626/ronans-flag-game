@@ -2674,6 +2674,23 @@
   height: clamp(38px, 9cqh, 52px) !important;
 }
 
+/* Landscape pointer coordinates are viewport coordinates, while the pencil
+   artwork's default transform was anchored 20px right and below that point.
+   Put the pencil tip's center on the actual pointer registration point. */
+[data-orientation='landscape'] .colored-pencil {
+  transform-origin: 0 50%;
+  transform: translate(var(--pencil-x, 50vw), calc(var(--pencil-y, 50vh) - 12px)) rotate(var(--pencil-rotation, -14deg)) scale(0.98);
+}
+
+.colored-pencil-anchor {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
 [data-orientation='landscape'] .france-play-back-hitbox {
   left: 1.5%;
   bottom: 10%;

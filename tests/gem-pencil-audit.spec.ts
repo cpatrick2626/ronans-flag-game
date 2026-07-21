@@ -61,6 +61,28 @@ test('wide-desktop landscape: banner not clipped, gems aligned to artwork', asyn
   }
 });
 
+for (const country of ['France', 'Italy'] as const) {
+  test(`wide-desktop ${country}: click at visible gem center selects that gem and anchors pencil there`, async ({ page }) => {
+    await page.setViewportSize({ width: 1900, height: 1000 });
+    await enterChallenge(page, country);
+
+    const whiteGem = page.getByRole('button', { name: 'White orb' });
+    const geometry = await whiteGem.locator('.france-palette-gem-visual').evaluate((visual) => {
+      const rect = visual.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    });
+    await page.mouse.move(geometry.x, geometry.y);
+    await page.mouse.click(geometry.x, geometry.y);
+
+    await expect(whiteGem).toHaveAttribute('aria-pressed', 'true');
+    await page.waitForTimeout(1000);
+    const anchor = await page.locator('.colored-pencil-anchor').boundingBox();
+    if (!anchor) throw new Error('pencil anchor missing');
+    expect(Math.abs(anchor.x - geometry.x), 'pencil X must match visible gem center').toBeLessThanOrEqual(1);
+    expect(Math.abs(anchor.y - geometry.y), 'pencil Y must match visible gem center').toBeLessThanOrEqual(1);
+  });
+}
+
 for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
   for (const country of ['France', 'Italy'] as const) {
     test(`audit ${country} ${viewport.width}x${viewport.height}`, async ({ page }) => {
