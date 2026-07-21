@@ -266,6 +266,56 @@ test('no-override: all gems share default orbTop from config', async ({ page }) 
   expect(redTop).toBe('84.25%')
 })
 
+test('per-nav navTops override: one nav item moved does not affect others', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        FR: {
+          portrait: {
+            navTops: { home: '10%' },
+          },
+        },
+      }),
+    })
+  )
+  await reachFranceGems(page)
+  const homeNav = page.getByRole('button', { name: 'Home' })
+  const passportNav = page.getByRole('button', { name: 'Passport' })
+  await expect(homeNav).toBeVisible()
+  await expect(passportNav).toBeVisible()
+  const homeTop = await homeNav.evaluate((el) => (el as HTMLElement).style.top)
+  expect(homeTop).toBe('10%')
+  const passportTop = await passportNav.evaluate((el) => (el as HTMLElement).style.top)
+  expect(passportTop).not.toBe('10%')
+})
+
+test('legacy navTop override applies to all nav items when no navTops present', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        FR: {
+          portrait: {
+            navTop: '50%',
+          },
+        },
+      }),
+    })
+  )
+  await reachFranceGems(page)
+  const homeNav = page.getByRole('button', { name: 'Home' })
+  const passportNav = page.getByRole('button', { name: 'Passport' })
+  await expect(homeNav).toBeVisible()
+  await expect(passportNav).toBeVisible()
+  const homeTop = await homeNav.evaluate((el) => (el as HTMLElement).style.top)
+  const passportTop = await passportNav.evaluate((el) => (el as HTMLElement).style.top)
+  expect(homeTop).toBe('50%')
+  expect(passportTop).toBe('50%')
+})
+
 test('legacy orbTop override applies to all gems when no orbTops present', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.route('/hitedit-overrides.json', (route) =>

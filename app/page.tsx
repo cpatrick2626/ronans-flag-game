@@ -18,7 +18,7 @@ type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: n
 type FranceSpark = { key: number; x: number; y: number; hue: string; kind: 'orb' | 'correct' | 'wrong' | 'complete' }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
 type RoomSnapshot = { room: RoomState; note: string }
-type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; orbTops?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string>; boxes?: Record<string, { left: string; top: string; width: string; height: string }> }
+type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; orbTops?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string>; navTops?: Record<string, string>; navWidths?: Record<string, string>; navHeights?: Record<string, string>; boxes?: Record<string, { left: string; top: string; width: string; height: string }> }
 type HitEditOverrides = Record<string, { portrait?: HitEditOrientationOverrides; landscape?: HitEditOrientationOverrides }>
 
 const PLAYER_NAME_KEY = 'ronan_flag_player_name'
@@ -474,9 +474,18 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
         }
       }
       const navLefts: Record<string, string> = { ...(existingOrient.navLefts ?? {}) }
-      let navTopVal: string | undefined = existingOrient.navTop
-      let navWidthVal: string | undefined = existingOrient.navWidth
-      let navHeightVal: string | undefined = existingOrient.navHeight
+      const navTops: Record<string, string> = { ...(existingOrient.navTops ?? {}) }
+      if (!existingOrient.navTops && existingOrient.navTop) {
+        for (const navItem of challengeConfig.scene.nav) navTops[navItem.id] = existingOrient.navTop!
+      }
+      const navWidths: Record<string, string> = { ...(existingOrient.navWidths ?? {}) }
+      if (!existingOrient.navWidths && existingOrient.navWidth) {
+        for (const navItem of challengeConfig.scene.nav) navWidths[navItem.id] = existingOrient.navWidth!
+      }
+      const navHeights: Record<string, string> = { ...(existingOrient.navHeights ?? {}) }
+      if (!existingOrient.navHeights && existingOrient.navHeight) {
+        for (const navItem of challengeConfig.scene.nav) navHeights[navItem.id] = existingOrient.navHeight!
+      }
       for (const region of regions) {
         const ov = overrides[region.id]
         if (!ov || region.pL === null || region.pT === null || !region.pW || !region.pH) continue
@@ -489,14 +498,14 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
         const gemMatch = region.label.match(/^(.+) orb$/i)
         if (gemMatch) { orbLefts[gemMatch[1].toLowerCase()] = left; orbTops[gemMatch[1].toLowerCase()] = top }
         const navMatch = challengeConfig.scene.nav.find((n) => n.label === region.label)
-        if (navMatch) { navLefts[navMatch.id] = left; navTopVal = top; navWidthVal = width; navHeightVal = height }
+        if (navMatch) { navLefts[navMatch.id] = left; navTops[navMatch.id] = top; navWidths[navMatch.id] = width; navHeights[navMatch.id] = height }
       }
       orientData = {}
       if (Object.keys(orbTops).length) orientData.orbTops = orbTops
       if (Object.keys(orbLefts).length) orientData.orbLefts = orbLefts
-      if (navTopVal !== undefined) orientData.navTop = navTopVal
-      if (navWidthVal !== undefined) orientData.navWidth = navWidthVal
-      if (navHeightVal !== undefined) orientData.navHeight = navHeightVal
+      if (Object.keys(navTops).length) orientData.navTops = navTops
+      if (Object.keys(navWidths).length) orientData.navWidths = navWidths
+      if (Object.keys(navHeights).length) orientData.navHeights = navHeights
       if (Object.keys(navLefts).length) orientData.navLefts = navLefts
     } else {
       const boxes: Record<string, { left: string; top: string; width: string; height: string }> = { ...(existingOrient.boxes ?? {}) }
@@ -853,6 +862,9 @@ function FlagColorChallengeGame({
   const navItems = scene.nav.map((nav, index) => ({
     ...nav,
     left: or?.navLefts?.[nav.id] ?? (landscape ? landscape.navLefts[index] ?? nav.left : nav.left),
+    top: or?.navTops?.[nav.id] ?? or?.navTop ?? landscape?.navTop ?? scene.navTop,
+    width: or?.navWidths?.[nav.id] ?? or?.navWidth ?? landscape?.navWidth ?? scene.navWidth,
+    height: or?.navHeights?.[nav.id] ?? or?.navHeight ?? landscape?.navHeight ?? scene.navHeight,
   }))
   const orbSlotIndexes = paletteSlotIndexes(scene.orbs.length, roundPalette.length)
   const defaultOrbTop = or?.orbTop ?? landscape?.orbTop ?? scene.orbTop
@@ -864,9 +876,6 @@ function FlagColorChallengeGame({
   })
   const sceneImage = landscape?.image ?? scene.image
   const flagOverlay = landscape?.flagOverlay ?? scene.flagOverlay
-  const navTop = or?.navTop ?? landscape?.navTop ?? scene.navTop
-  const navWidth = or?.navWidth ?? landscape?.navWidth ?? scene.navWidth
-  const navHeight = or?.navHeight ?? landscape?.navHeight ?? scene.navHeight
   const selectedOrbHue = orbItems.find((orb) => orb.id === selectedOrb)?.hue || '#ffffff'
   const allComplete = round.regions.every((region) => filledRegions[region.id])
   const completedRegionCount = round.regions.filter((region) => filledRegions[region.id]).length
@@ -1404,7 +1413,7 @@ function FlagColorChallengeGame({
                   aria-label={nav.label}
                   aria-pressed={activeNav === nav.id}
                   className={`france-nav-item is-${nav.id} ${activeNav === nav.id ? 'is-active' : ''}`}
-                  style={{ left: nav.left, top: navTop, width: navWidth, height: navHeight }}
+                  style={{ left: nav.left, top: nav.top, width: nav.width, height: nav.height }}
                   onClick={() => setActiveNav(nav.id)}
                 >
                   <span className="france-nav-glyph" aria-hidden="true" />
