@@ -1426,6 +1426,7 @@ function FlagColorSelectScreen({
   onSelectDifficulty,
   onBack,
   onPlaySolo,
+  screenOverrides,
 }: {
   selectedMode: Mode
   selectedDifficulty: ChallengeDifficulty
@@ -1433,6 +1434,7 @@ function FlagColorSelectScreen({
   onSelectDifficulty: (difficulty: ChallengeDifficulty) => void
   onBack: () => void
   onPlaySolo: () => void
+  screenOverrides?: HitEditOrientationOverrides | null
 }) {
   const sparkleTimerRef = useRef<number | null>(null)
   const [sparkle, setSparkle] = useState<{ key: string; x: number; y: number } | null>(null)
@@ -1455,6 +1457,12 @@ function FlagColorSelectScreen({
     if (sparkleTimerRef.current) window.clearTimeout(sparkleTimerRef.current)
     if (lockedNoticeTimerRef.current) window.clearTimeout(lockedNoticeTimerRef.current)
   }, [])
+
+  const selectBoxes = screenOverrides?.boxes ?? null
+  const selectHitboxStyle = (label: string, x: number, y: number, w: number, h: number): React.CSSProperties => {
+    const b = selectBoxes?.[label]
+    return b ? { left: b.left, top: b.top, width: b.width, height: b.height, transform: 'none' } : { left: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` }
+  }
 
   const modeHitboxes = [
     { label: 'PLAY SOLO', x: 50, y: 54, w: 66, h: 10, mode: 'solo' as const, action: onPlaySolo },
@@ -1525,6 +1533,7 @@ function FlagColorSelectScreen({
             aria-label="Back"
             onPointerDown={() => triggerSparkle('back', 50, 12)}
             onClick={onBack}
+            style={(() => { const b = selectBoxes?.['Back']; return b ? { left: b.left, top: b.top, width: b.width, height: b.height, transform: 'none' } : undefined })()}
           />
           {modeHitboxes.map((hitbox) => {
             const active = selectedMode === hitbox.mode
@@ -1535,7 +1544,7 @@ function FlagColorSelectScreen({
                 aria-label={hitbox.label}
                 aria-pressed={active}
                 className={`flag-select-hitbox invisible-hotspot ${active ? 'is-active' : ''}`}
-                style={{ left: `${hitbox.x}%`, top: `${hitbox.y}%`, width: `${hitbox.w}%`, height: `${hitbox.h}%` } as React.CSSProperties}
+                style={selectHitboxStyle(hitbox.label, hitbox.x, hitbox.y, hitbox.w, hitbox.h)}
                 onPointerDown={() => triggerSparkle(hitbox.label, hitbox.x, hitbox.y)}
                 onClick={() => {
                   hitbox.action()
@@ -1552,7 +1561,7 @@ function FlagColorSelectScreen({
                 aria-label={hitbox.label}
                 aria-pressed={active}
                 className={`flag-select-hitbox flag-select-difficulty-hitbox invisible-hotspot ${active ? 'is-active' : ''}`}
-                style={{ left: `${hitbox.x}%`, top: `${hitbox.y}%`, width: `${hitbox.w}%`, height: `${hitbox.h}%` } as React.CSSProperties}
+                style={selectHitboxStyle(hitbox.label, hitbox.x, hitbox.y, hitbox.w, hitbox.h)}
                 onPointerDown={() => triggerSparkle(hitbox.label, hitbox.x, hitbox.y)}
                 onClick={() => {
                   onSelectDifficulty(hitbox.difficulty)
@@ -1581,7 +1590,7 @@ function FlagColorSelectScreen({
   )
 }
 
-function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean }) {
+function IntroScreen({ onPlay, exiting, screenOverrides }: { onPlay: () => void; exiting: boolean; screenOverrides?: HitEditOrientationOverrides | null }) {
   const playLockRef = useRef(false)
   const videoARef = useRef<HTMLVideoElement | null>(null)
   const videoBRef = useRef<HTMLVideoElement | null>(null)
@@ -1660,6 +1669,7 @@ function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean
   useEffect(() => () => {
     if (restartDelayRef.current) window.clearTimeout(restartDelayRef.current)
   }, [])
+  const playBox = screenOverrides?.boxes?.["Play Ronan's Flag Game"]
 
   return (
     <div className={`intro-screen-container ${exiting ? 'intro-screen-exiting' : ''}`}>
@@ -1711,6 +1721,7 @@ function IntroScreen({ onPlay, exiting }: { onPlay: () => void; exiting: boolean
             onClick={handlePlayTrigger}
             className="intro-play-hitbox invisible-hotspot"
             aria-label="Play Ronan's Flag Game"
+            style={playBox ? { left: playBox.left, top: playBox.top, width: playBox.width, height: playBox.height, transform: 'none' } : undefined}
           />
         </div>
       </div>
@@ -1725,11 +1736,15 @@ function PlayerNameModal({
   playerName,
   onPlayerNameChange,
   onContinue,
+  screenOverrides,
 }: {
   playerName: string
   onPlayerNameChange: (value: string) => void
   onContinue: () => void
+  screenOverrides?: HitEditOrientationOverrides | null
 }) {
+  const inputBox = screenOverrides?.boxes?.['Player name']
+  const continueBox = screenOverrides?.boxes?.['Continue']
   return (
     <div className="player-name-modal-backdrop" role="presentation">
       <section className="player-name-modal" role="dialog" aria-modal="true" aria-labelledby="player-name-title">
@@ -1751,6 +1766,7 @@ function PlayerNameModal({
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onContinue() } }}
           autoFocus
           aria-label="Player name"
+          style={inputBox ? { position: 'absolute', left: inputBox.left, top: inputBox.top, width: inputBox.width, height: inputBox.height } : undefined}
         />
         <div className="player-name-helper">You can change this later.</div>
         <button
@@ -1758,6 +1774,7 @@ function PlayerNameModal({
           onClick={onContinue}
           className="player-name-continue"
           aria-label="Continue"
+          style={continueBox ? { position: 'absolute', left: continueBox.left, top: continueBox.top, width: continueBox.width, height: continueBox.height } : undefined}
         >
           <span className="continue-label">Continue</span>
         </button>
@@ -1983,13 +2000,18 @@ export default function FlagGamePage() {
   function promoteRoom(modeChoice: Exclude<Mode, 'solo'>) { if (!room) return; updateRoom({ ...room, mode: modeChoice, status: room.guestName ? 'active' : 'waiting', updatedAt: new Date().toISOString() }, 'updated') }
   function beginRoom() { if (!room) return; updateRoom({ ...room, status: 'active', updatedAt: new Date().toISOString() }, 'started', room.mode === 'coop' ? 'coop' : 'versus') }
   function paintClass(regionId: string) { const feedback = paintFeedback[regionId]; return feedback ? (feedback.state === 'correct' ? 'paint-correct correct-glow' : 'paint-wrong wrong-shake') : '' }
+  const homeBoxes = hitEditOverrides?.['home']?.[orientation]?.boxes ?? null
+  const homeBoxStyle = (label: string, left: string, top: string, width: string, height: string): React.CSSProperties => {
+    const b = homeBoxes?.[label]
+    return b ? { left: b.left, top: b.top, width: b.width, height: b.height, transform: 'none' } : { left, top, width, height }
+  }
 
   return (
     <main data-orientation={orientation} className="app-shell relative overflow-hidden text-[#fdf6ea]">
       <AtmosphereBackdrop />
       <div className="absolute inset-x-0 bottom-0 h-[30vh] bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,rgba(94,144,82,0.18)_40%,rgba(53,100,55,0.82)_100%)]" />
       <div className="absolute inset-x-0 bottom-[10%] flex justify-center"><div className="h-40 w-[92vw] max-w-6xl rounded-full bg-[radial-gradient(circle,_rgba(92,59,27,0.26)_0%,_rgba(92,59,27,0.20)_42%,_rgba(92,59,27,0)_72%)] blur-3xl" /></div>
-      {screen === 'loading' && <IntroScreen onPlay={beginIntroExit} exiting={introExiting} />}
+      {screen === 'loading' && <IntroScreen onPlay={beginIntroExit} exiting={introExiting} screenOverrides={hitEditOverrides?.['loading']?.[orientation]} />}
       <div className="app-playfield relative mx-auto flex w-full flex-col px-4 py-4 md:px-6 md:py-6">
         {screen === 'home' && (
           <section className="relative flex min-h-0 flex-1 items-center justify-center">
@@ -2000,28 +2022,29 @@ export default function FlagGamePage() {
 
                 {/* Invisible / faint hitboxes over the image for interactivity */}
                 {MAP_PINS.map((pin) => pin.selectable ? (
-                  <button key={pin.label} aria-label={pin.label} className="reference-hitbox" style={{ left: pin.x, top: pin.y, width: '8%', height: '8%' } as React.CSSProperties} onClick={() => setActiveCountryCode(pin.code)} onPointerEnter={() => handlePinEnter(pin.code)} onPointerLeave={handlePinLeave} />
+                  <button key={pin.label} aria-label={pin.label} className="reference-hitbox" style={homeBoxStyle(pin.label, pin.x, pin.y, '8%', '8%')} onClick={() => setActiveCountryCode(pin.code)} onPointerEnter={() => handlePinEnter(pin.code)} onPointerLeave={handlePinLeave} />
                 ) : (
-                  <button key={pin.label} aria-label={pin.label} className="reference-hitbox" style={{ left: pin.x, top: pin.y, width: '8%', height: '8%' } as React.CSSProperties} onClick={() => { /* not yet unlocked */ }} />
+                  <button key={pin.label} aria-label={pin.label} className="reference-hitbox" style={homeBoxStyle(pin.label, pin.x, pin.y, '8%', '8%')} onClick={() => { /* not yet unlocked */ }} />
                 ))}
 
                 {/* Card + nav hitboxes */}
-                <button aria-label="Next Destination (France)" className="reference-hitbox" style={{ left: '18%', top: '16%', width: '24%', height: '12%' } as React.CSSProperties} onClick={() => setActiveCountryCode('FR')} />
-                <button aria-label="Europe Progress" className="reference-hitbox" style={{ left: '78%', top: '16%', width: '14%', height: '12%' } as React.CSSProperties} />
-                <button aria-label="Flags Collected" className="reference-hitbox" style={{ left: '22%', top: '64%', width: '22%', height: '12%' } as React.CSSProperties} />
-                <button aria-label="Eiffel Tower" className="reference-hitbox" style={{ left: '78%', top: '64%', width: '20%', height: '12%' } as React.CSSProperties} />
+                <button aria-label="Next Destination (France)" className="reference-hitbox" style={homeBoxStyle('Next Destination (France)', '18%', '16%', '24%', '12%')} onClick={() => setActiveCountryCode('FR')} />
+                <button aria-label="Europe Progress" className="reference-hitbox" style={homeBoxStyle('Europe Progress', '78%', '16%', '14%', '12%')} />
+                <button aria-label="Flags Collected" className="reference-hitbox" style={homeBoxStyle('Flags Collected', '22%', '64%', '22%', '12%')} />
+                <button aria-label="Eiffel Tower" className="reference-hitbox" style={homeBoxStyle('Eiffel Tower', '78%', '64%', '20%', '12%')} />
 
                 {/* Bottom nav hitboxes */}
-                <button aria-label="Home nav" className="reference-hitbox" style={{ left: '10%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} onClick={() => setScreen('home')} />
-                <button aria-label="Map nav" className="reference-hitbox is-active" style={{ left: '30%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} />
-                <button aria-label="Passport nav" className="reference-hitbox" style={{ left: '50%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} onClick={() => setShowExplorerLog(true)} />
-                <button aria-label="Collections nav" className="reference-hitbox" style={{ left: '70%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} />
-                <button aria-label="Settings nav" className="reference-hitbox" style={{ left: '90%', top: '92%', width: '16%', height: '8%' } as React.CSSProperties} />
+                <button aria-label="Home nav" className="reference-hitbox" style={homeBoxStyle('Home nav', '10%', '92%', '16%', '8%')} onClick={() => setScreen('home')} />
+                <button aria-label="Map nav" className="reference-hitbox is-active" style={homeBoxStyle('Map nav', '30%', '92%', '16%', '8%')} />
+                <button aria-label="Passport nav" className="reference-hitbox" style={homeBoxStyle('Passport nav', '50%', '92%', '16%', '8%')} onClick={() => setShowExplorerLog(true)} />
+                <button aria-label="Collections nav" className="reference-hitbox" style={homeBoxStyle('Collections nav', '70%', '92%', '16%', '8%')} />
+                <button aria-label="Settings nav" className="reference-hitbox" style={homeBoxStyle('Settings nav', '90%', '92%', '16%', '8%')} />
                 <button
                   type="button"
                   aria-label="Flag Color Challenge"
                   className="launch-challenge-btn launch-challenge-pin absolute left-[58%] top-[52%] z-10 flex -translate-x-1/2 -translate-y-full items-center gap-2 rounded-full border border-[#fff0bf]/28 bg-[linear-gradient(180deg,rgba(255,239,180,0.96),rgba(214,167,70,0.92))] px-3 py-2 text-left shadow-[0_12px_28px_rgba(112,76,18,0.2)]"
                   onClick={() => setScreen('play')}
+                  style={(() => { const b = homeBoxes?.['Flag Color Challenge']; return b ? { left: b.left, top: b.top, width: b.width, height: b.height, transform: 'none' } : undefined })()}
                 >
                   <span className="launch-challenge-pin-icon flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,247,214,0.68))] text-[1rem] shadow-inner">🏳️</span>
                   <span className="pointer-events-none hidden min-w-0 sm:block">
@@ -2031,7 +2054,7 @@ export default function FlagGamePage() {
                 </button>
 
                 {/* Star / profile */}
-                <button aria-label="Star button" className="reference-hitbox" style={{ left: '88%', top: '10%', width: '8%', height: '8%' } as React.CSSProperties} />
+                <button aria-label="Star button" className="reference-hitbox" style={homeBoxStyle('Star button', '88%', '10%', '8%', '8%')} />
               </div>
             </div>
           </section>
@@ -2056,6 +2079,7 @@ export default function FlagGamePage() {
               safeStorageSet(CHALLENGE_DIFFICULTY_KEY, challengeDifficulty)
               startSolo()
             }}
+            screenOverrides={hitEditOverrides?.['play']?.[orientation]}
           />
         )}
 
@@ -2127,6 +2151,7 @@ export default function FlagGamePage() {
             playerName={playerName}
             onPlayerNameChange={setPlayerName}
             onContinue={enterGame}
+            screenOverrides={hitEditOverrides?.['home']?.[orientation]}
           />
         )}
 

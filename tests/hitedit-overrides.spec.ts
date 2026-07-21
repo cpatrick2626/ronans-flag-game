@@ -84,3 +84,135 @@ test('malformed overrides file falls back to config defaults', async ({ page }) 
   // Must be a valid config-derived slot left, never a garbage or overridden value
   expect(FRANCE_VALID_DEFAULT_GEM_LEFTS.has(blueLeft)).toBe(true)
 })
+
+// ── Non-challenge screen override tests ───────────────────────────────────────
+
+test('loading screen: no override → play button has no inline position style', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: '{}' })
+  )
+  page.on('pageerror', (err) => { throw err })
+  await page.goto('/')
+  const playBtn = page.getByRole('button', { name: "Play Ronan's Flag Game" })
+  await expect(playBtn).toBeVisible()
+  const inlineStyle = await playBtn.evaluate((el) => el.getAttribute('style'))
+  expect(inlineStyle).toBeNull()
+})
+
+test('loading screen: saved override repositions play button on reload', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        loading: { portrait: { boxes: { "Play Ronan's Flag Game": { left: '5%', top: '20%', width: '40%', height: '8%' } } } },
+      }),
+    })
+  )
+  page.on('pageerror', (err) => { throw err })
+  await page.goto('/')
+  const playBtn = page.getByRole('button', { name: "Play Ronan's Flag Game" })
+  await expect(playBtn).toBeVisible()
+  const left = await playBtn.evaluate((el) => (el as HTMLElement).style.left)
+  const top = await playBtn.evaluate((el) => (el as HTMLElement).style.top)
+  expect(left).toBe('5%')
+  expect(top).toBe('20%')
+})
+
+test('home screen: no override → Next Destination button has no inline transform override', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: '{}' })
+  )
+  page.on('pageerror', (err) => { throw err })
+  await page.goto('/')
+  const continueBtn = page.getByRole('button', { name: 'Continue' })
+  await expect(async () => {
+    await page.getByRole('button', { name: "Play Ronan's Flag Game" }).click()
+    await expect(continueBtn).toBeVisible({ timeout: 2000 })
+  }).toPass({ timeout: 15000 })
+  await continueBtn.click()
+  const nextDest = page.getByRole('button', { name: 'Next Destination (France)' })
+  await expect(nextDest).toBeVisible()
+  const transform = await nextDest.evaluate((el) => (el as HTMLElement).style.transform)
+  // Without override, transform comes from CSS class only, not inline style
+  expect(transform).toBe('')
+})
+
+test('home screen: saved override repositions Next Destination button', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        home: { portrait: { boxes: { 'Next Destination (France)': { left: '5%', top: '5%', width: '20%', height: '10%' } } } },
+      }),
+    })
+  )
+  page.on('pageerror', (err) => { throw err })
+  await page.goto('/')
+  const continueBtn = page.getByRole('button', { name: 'Continue' })
+  await expect(async () => {
+    await page.getByRole('button', { name: "Play Ronan's Flag Game" }).click()
+    await expect(continueBtn).toBeVisible({ timeout: 2000 })
+  }).toPass({ timeout: 15000 })
+  await continueBtn.click()
+  const nextDest = page.getByRole('button', { name: 'Next Destination (France)' })
+  await expect(nextDest).toBeVisible()
+  const left = await nextDest.evaluate((el) => (el as HTMLElement).style.left)
+  const transform = await nextDest.evaluate((el) => (el as HTMLElement).style.transform)
+  expect(left).toBe('5%')
+  expect(transform).toBe('none')
+})
+
+test('play screen: no override → PLAY SOLO button uses default inline position', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: '{}' })
+  )
+  page.on('pageerror', (err) => { throw err })
+  await page.goto('/')
+  const continueBtn = page.getByRole('button', { name: 'Continue' })
+  await expect(async () => {
+    await page.getByRole('button', { name: "Play Ronan's Flag Game" }).click()
+    await expect(continueBtn).toBeVisible({ timeout: 2000 })
+  }).toPass({ timeout: 15000 })
+  await continueBtn.click()
+  await page.getByRole('button', { name: 'Flag Color Challenge' }).click()
+  const playSolo = page.getByRole('button', { name: 'PLAY SOLO' })
+  await expect(playSolo).toBeVisible()
+  const left = await playSolo.evaluate((el) => (el as HTMLElement).style.left)
+  // Default: x=50 → left: '50%' from the hitbox definition
+  expect(left).toBe('50%')
+  const transform = await playSolo.evaluate((el) => (el as HTMLElement).style.transform)
+  // No override means no inline transform override (CSS class handles it)
+  expect(transform).toBe('')
+})
+
+test('play screen: saved override repositions PLAY SOLO button', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        play: { portrait: { boxes: { 'PLAY SOLO': { left: '10%', top: '30%', width: '50%', height: '8%' } } } },
+      }),
+    })
+  )
+  page.on('pageerror', (err) => { throw err })
+  await page.goto('/')
+  const continueBtn = page.getByRole('button', { name: 'Continue' })
+  await expect(async () => {
+    await page.getByRole('button', { name: "Play Ronan's Flag Game" }).click()
+    await expect(continueBtn).toBeVisible({ timeout: 2000 })
+  }).toPass({ timeout: 15000 })
+  await continueBtn.click()
+  await page.getByRole('button', { name: 'Flag Color Challenge' }).click()
+  const playSolo = page.getByRole('button', { name: 'PLAY SOLO' })
+  await expect(playSolo).toBeVisible()
+  const left = await playSolo.evaluate((el) => (el as HTMLElement).style.left)
+  const transform = await playSolo.evaluate((el) => (el as HTMLElement).style.transform)
+  expect(left).toBe('10%')
+  expect(transform).toBe('none')
+})
