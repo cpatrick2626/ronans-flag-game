@@ -267,181 +267,349 @@ function sparkleOffsets(assigned: AssignedFillPattern, b: RegionBox) {
   return [-0.24, 0.04, 0.28].map((s) => ({ dx: perpX * s * span, dy: perpY * s * span }))
 }
 
-// ── Debug: ?placehit=1 gem hit-placement tool ─────────────────────────────
-function usePlaceHitMode() {
+// ── Dev: ?hitedit=1 app-wide hit-region editor ───────────────────────────
+function useHitEditMode() {
   const [active, setActive] = useState(false)
-  useEffect(() => {
-    setActive(new URLSearchParams(window.location.search).has('placehit'))
-  }, [])
+  useEffect(() => { setActive(new URLSearchParams(window.location.search).has('hitedit')) }, [])
   return active
 }
 
-type GemOverride = { left: number; top: number }
+type HERect = { vpLeft: number; vpTop: number; vpWidth: number; vpHeight: number }
+type HERegion = {
+  id: string; label: string
+  vpLeft: number; vpTop: number; vpWidth: number; vpHeight: number
+  pL: number | null; pT: number | null; pW: number | null; pH: number | null
+}
+type HEDrag = {
+  type: 'move' | 'resize-tl' | 'resize-tr' | 'resize-bl' | 'resize-br'
+  id: string; custom: boolean; startPX: number; startPY: number; startRect: HERect
+}
 
-function GemPlaceHitOverlay({
-  controlsDivRef,
-  gemButtonEls,
-  orbItems,
-  orbTop,
-  overrides,
-  onOverride,
-}: {
-  controlsDivRef: React.RefObject<HTMLDivElement | null>
-  gemButtonEls: React.RefObject<Map<string, HTMLButtonElement>>
-  orbItems: Array<{ id: string; label: string; hue: string; left: string }>
-  orbTop: string
-  overrides: Record<string, GemOverride>
-  onOverride: (id: string, left: number, top: number) => void
-}) {
-  type MeasuredEntry = { btn: DOMRect; vis: DOMRect; ctrlRect: DOMRect }
-  const [measured, setMeasured] = useState<Record<string, MeasuredEntry>>({})
-  const dragRef = useRef<{ id: string; startX: number; startY: number; origLeft: number; origTop: number } | null>(null)
-  const measureRafRef = useRef<number | null>(null)
+const HE_COLORS = ['#4a9eff', '#33cc77', '#ff6b4a', '#ff9a00', '#cc44ff', '#ff6699', '#00cccc', '#ffd700']
+function heBtn(bg: string): React.CSSProperties {
+  return { background: bg, color: '#fff', border: 'none', borderRadius: 4, padding: '3px 8px', cursor: 'pointer', fontSize: 10, fontFamily: 'monospace', lineHeight: 1.5 }
+}
 
-  function doMeasure() {
-    const ctrl = controlsDivRef.current
-    const els = gemButtonEls.current
-    if (!ctrl || !els) return
-    const ctrlRect = ctrl.getBoundingClientRect()
-    const next: Record<string, MeasuredEntry> = {}
-    for (const [id, btn] of els) {
-      const vis = btn.querySelector('.france-palette-gem-visual') as Element | null
-      next[id] = {
-        btn: btn.getBoundingClientRect(),
-        vis: vis ? vis.getBoundingClientRect() : btn.getBoundingClientRect(),
-        ctrlRect,
-      }
+function HitRegionEditor({ screen, orientation }: { screen: Screen; orientation: 'portrait' | 'landscape' }) {
+  const [regions, setRegions] = useState<HERegion[]>([])
+  const [overrides, setOverrides] = useState<Record<string, HERect>>({})
+  const [customBoxes, setCustomBoxes] = useState<Array<{ id: string; label: string }>>([])
+  const [customRects, setCustomRects] = useState<Record<string, HERect>>({})
+  const [markers, setMarkers] = useState<Array<{ id: number; vx: number; vy: number }>>([])
+  const [visible, setVisible] = useState(true)
+  const [editMode, setEditMode] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(true)
+  const [copied, setCopied] = useState<string | null>(null)
+  const dragRef = useRef<HEDrag | null>(null)
+  const scanRafRef = useRef<number | null>(null)
+  const isDraggingRef = useRef(false)
+  const markerIdRef = useRef(0)
+  const boxIdRef = useRef(0)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  function scanDom() {
+    if (isDraggingRef.current) return
+    const els = document.querySelectorAll<HTMLElement>('button, [role="button"], input:not([type="hidden"])')
+    const next: HERegion[] = []
+    for (const el of els) {
+      if (el.closest('#he-overlay')) continue
+      const rect = el.getBoundingClientRect()
+      if (rect.width < 4 || rect.height < 4) continue
+      if (rect.right < 0 || rect.bottom < 0 || rect.left > window.innerWidth || rect.top > window.innerHeight) continue
+      const op = el.offsetParent as HTMLElement | null
+      const pr = op?.getBoundingClientRect() ?? null
+      const rawLabel = (
+        el.getAttribute('aria-label')
+        || el.textContent?.trim().replace(/\s+/g, ' ').slice(0, 40)
+        || el.id
+        || el.tagName.toLowerCase()
+      )
+      next.push({
+        id: `${Math.round(rect.left)}-${Math.round(rect.top)}-${Math.round(rect.width)}-${Math.round(rect.height)}-${rawLabel}`,
+        label: rawLabel || 'button',
+        vpLeft: rect.left, vpTop: rect.top, vpWidth: rect.width, vpHeight: rect.height,
+        pL: pr?.left ?? null, pT: pr?.top ?? null, pW: pr?.width ?? null, pH: pr?.height ?? null,
+      })
     }
-    setMeasured(next)
+    setRegions(next)
   }
 
   useEffect(() => {
-    function onResize() {
-      if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current)
-      measureRafRef.current = requestAnimationFrame(() => { doMeasure(); measureRafRef.current = null })
-    }
-    onResize()
-    window.addEventListener('resize', onResize)
-    return () => {
-      if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current)
-      window.removeEventListener('resize', onResize)
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Re-measure after overrides change (buttons may have repositioned)
-  useEffect(() => {
-    if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current)
-    measureRafRef.current = requestAnimationFrame(() => { doMeasure(); measureRafRef.current = null })
-  }, [overrides]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  function startDrag(id: string, e: React.PointerEvent<HTMLDivElement>) {
-    e.stopPropagation()
-    e.preventDefault()
-    e.currentTarget.setPointerCapture(e.pointerId)
-    const ov = overrides[id]
-    const configLeft = parseFloat(orbItems.find((o) => o.id === id)?.left ?? '50')
-    dragRef.current = {
-      id,
-      startX: e.clientX,
-      startY: e.clientY,
-      origLeft: ov?.left ?? configLeft,
-      origTop: ov?.top ?? parseFloat(orbTop),
-    }
-  }
-
-  function moveDrag(e: React.PointerEvent<HTMLDivElement>) {
-    const d = dragRef.current
-    const ctrl = controlsDivRef.current
-    if (!d || !ctrl) return
-    const rect = ctrl.getBoundingClientRect()
-    const newLeft = d.origLeft + ((e.clientX - d.startX) / rect.width) * 100
-    const newTop = d.origTop + ((e.clientY - d.startY) / rect.height) * 100
-    onOverride(d.id, Math.round(newLeft * 10) / 10, Math.round(newTop * 10) / 10)
-  }
-
-  function endDrag() { dragRef.current = null }
-
-  function copyValues() {
-    const configTop = parseFloat(orbTop)
-    const lefts = orbItems.map((o) => {
-      const ov = overrides[o.id]
-      return `'${ov ? `${ov.left}%` : o.left}'`
+    scanDom()
+    const mo = new MutationObserver(() => {
+      if (scanRafRef.current) cancelAnimationFrame(scanRafRef.current)
+      scanRafRef.current = requestAnimationFrame(() => { scanDom(); scanRafRef.current = null })
     })
-    const allTops = orbItems.map((o) => overrides[o.id]?.top ?? configTop)
-    navigator.clipboard.writeText([
-      `orbLefts: [${lefts.join(', ')}],`,
-      `orbTop: '${allTops[0] ?? configTop}%',`,
-    ].join('\n')).catch(() => void 0)
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] })
+    window.addEventListener('resize', scanDom)
+    window.addEventListener('scroll', scanDom, true)
+    return () => {
+      mo.disconnect()
+      window.removeEventListener('resize', scanDom)
+      window.removeEventListener('scroll', scanDom, true)
+      if (scanRafRef.current) cancelAnimationFrame(scanRafRef.current)
+    }
+  }, [screen]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (editMode) return
+    function onDocClick(e: MouseEvent) {
+      if ((e.target as HTMLElement).closest('#he-overlay')) return
+      setMarkers((prev) => [...prev.slice(-14), { id: ++markerIdRef.current, vx: e.clientX, vy: e.clientY }])
+    }
+    document.addEventListener('click', onDocClick, true)
+    return () => document.removeEventListener('click', onDocClick, true)
+  }, [editMode])
+
+  useEffect(() => {
+    function onMove(e: PointerEvent) {
+      const d = dragRef.current
+      if (!d) return
+      const dx = e.clientX - d.startPX, dy = e.clientY - d.startPY
+      let { vpLeft: vL, vpTop: vT, vpWidth: vW, vpHeight: vH } = d.startRect
+      if (d.type === 'move') { vL += dx; vT += dy }
+      else if (d.type === 'resize-br') { vW = Math.max(20, vW + dx); vH = Math.max(20, vH + dy) }
+      else if (d.type === 'resize-bl') { vL += dx; vW = Math.max(20, vW - dx); vH = Math.max(20, vH + dy) }
+      else if (d.type === 'resize-tr') { vT += dy; vW = Math.max(20, vW + dx); vH = Math.max(20, vH - dy) }
+      else { vL += dx; vT += dy; vW = Math.max(20, vW - dx); vH = Math.max(20, vH - dy) }
+      const nr: HERect = { vpLeft: vL, vpTop: vT, vpWidth: vW, vpHeight: vH }
+      if (d.custom) setCustomRects((prev) => ({ ...prev, [d.id]: nr }))
+      else setOverrides((prev) => ({ ...prev, [d.id]: nr }))
+    }
+    function onUp() { dragRef.current = null; isDraggingRef.current = false }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+    }
+  }, [])
+
+  function startDrag(type: HEDrag['type'], id: string, custom: boolean, e: React.PointerEvent, rect: HERect) {
+    e.preventDefault(); e.stopPropagation(); e.currentTarget.setPointerCapture(e.pointerId)
+    isDraggingRef.current = true
+    dragRef.current = { type, id, custom, startPX: e.clientX, startPY: e.clientY, startRect: rect }
   }
 
-  const firstCtrlRect = Object.values(measured)[0]?.ctrlRect
+  function pctStr(v: number, parent: number) { return `${(v / parent * 100).toFixed(1)}%` }
+
+  function parentPct(vL: number, vT: number, vW: number, vH: number, pL: number | null, pT: number | null, pW: number | null, pH: number | null) {
+    if (pL === null || pT === null || !pW || !pH) return null
+    return {
+      left: pctStr(vL - pL, pW), top: pctStr(vT - pT, pH),
+      width: pctStr(vW, pW), height: pctStr(vH, pH),
+    }
+  }
+
+  function doCopy(id: string, label: string, vL: number, vT: number, vW: number, vH: number, pL: number | null, pT: number | null, pW: number | null, pH: number | null) {
+    const pct = parentPct(vL, vT, vW, vH, pL, pT, pW, pH)
+    const lines = [
+      `/* ${label} — ${screen} ${orientation} ${Math.round(window.innerWidth)}×${Math.round(window.innerHeight)} */`,
+      pct ? `left: '${pct.left}', top: '${pct.top}', width: '${pct.width}', height: '${pct.height}',` : '',
+      `/* viewport: ${Math.round(vL)},${Math.round(vT)} ${Math.round(vW)}×${Math.round(vH)}px */`,
+    ].filter(Boolean).join('\n')
+    navigator.clipboard.writeText(lines).catch(() => {})
+    setCopied(id); setTimeout(() => setCopied((c) => c === id ? null : c), 1600)
+  }
+
+  function addCustomBox() {
+    const id = `custom-${++boxIdRef.current}`
+    const r: HERect = { vpLeft: window.innerWidth / 2 - 80, vpTop: window.innerHeight / 2 - 40, vpWidth: 160, vpHeight: 80 }
+    setCustomBoxes((prev) => [...prev, { id, label: `Region ${boxIdRef.current}` }])
+    setCustomRects((prev) => ({ ...prev, [id]: r }))
+  }
+
+  const HS = 10
+
+  function renderOverlayBox(id: string, label: string, r: HERect, color: string, alwaysEdit: boolean, pL: number | null, pT: number | null, pW: number | null, pH: number | null) {
+    const isEdit = editMode || alwaysEdit
+    const pct = parentPct(r.vpLeft, r.vpTop, r.vpWidth, r.vpHeight, pL, pT, pW, pH)
+    return (
+      <div key={id} style={{
+        position: 'fixed', left: r.vpLeft, top: r.vpTop, width: r.vpWidth, height: r.vpHeight,
+        border: `2px solid ${color}`, boxSizing: 'border-box', background: `${color}1a`,
+        pointerEvents: isEdit ? 'auto' : 'none', zIndex: 99998,
+      }}>
+        <div style={{
+          position: 'absolute', bottom: '100%', left: 0,
+          background: color, color: '#000', fontSize: 9, fontFamily: 'monospace', fontWeight: 'bold',
+          padding: '1px 5px', borderRadius: '3px 3px 0 0', whiteSpace: 'nowrap',
+          maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.5,
+          pointerEvents: 'none',
+        }}>
+          {label}
+        </div>
+        <div style={{
+          position: 'absolute', top: 2, right: 4, fontSize: 8, fontFamily: 'monospace',
+          color, pointerEvents: 'none', lineHeight: 1.4,
+        }}>
+          {Math.round(r.vpWidth)}×{Math.round(r.vpHeight)}{pct ? ` · ${pct.width}×${pct.height}` : ''}
+        </div>
+        {isEdit && (
+          <>
+            <div style={{ position: 'absolute', inset: HS, cursor: 'move' }} onPointerDown={(e) => startDrag('move', id, alwaysEdit, e, r)} />
+            <div style={{ position: 'absolute', top: 0, left: 0, width: HS, height: HS, background: color, cursor: 'nwse-resize' }} onPointerDown={(e) => startDrag('resize-tl', id, alwaysEdit, e, r)} />
+            <div style={{ position: 'absolute', top: 0, right: 0, width: HS, height: HS, background: color, cursor: 'nesw-resize' }} onPointerDown={(e) => startDrag('resize-tr', id, alwaysEdit, e, r)} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, width: HS, height: HS, background: color, cursor: 'nesw-resize' }} onPointerDown={(e) => startDrag('resize-bl', id, alwaysEdit, e, r)} />
+            <div style={{ position: 'absolute', bottom: 0, right: 0, width: HS, height: HS, background: color, cursor: 'nwse-resize' }} onPointerDown={(e) => startDrag('resize-br', id, alwaysEdit, e, r)} />
+          </>
+        )}
+      </div>
+    )
+  }
+
+  if (!visible) {
+    return (
+      <div id="he-overlay" style={{ position: 'fixed', top: 8, right: 8, zIndex: 99999, pointerEvents: 'auto' }}>
+        <button type="button" onClick={() => setVisible(true)} style={heBtn('#111827')}>▶ HitEdit</button>
+      </div>
+    )
+  }
 
   return (
-    <>
-      {Object.entries(measured).map(([id, { btn, vis }]) => (
-        <div key={id}>
+    <div id="he-overlay" style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 99999 }}>
+      {/* Instruction bar */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: panelOpen ? 320 : 32,
+        background: 'rgba(0,0,0,0.9)', color: '#fff', fontFamily: 'monospace', fontSize: 10,
+        padding: '5px 10px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8,
+        pointerEvents: 'auto', zIndex: 99999, borderBottom: '1px solid #333', minHeight: 34,
+      }}>
+        <span style={{ color: '#ffd', fontWeight: 'bold' }}>?hitedit=1</span>
+        <span style={{ color: '#888' }}>
+          {editMode
+            ? '✋ Edit mode: drag box center to move · drag corners to resize'
+            : '👆 Inspect mode: click anywhere → red dot marks exact click point'}
+        </span>
+        <button type="button" onClick={() => setEditMode((v) => !v)} style={heBtn(editMode ? '#4a9eff' : '#444')}>
+          {editMode ? 'Edit ON' : 'Inspect'}
+        </button>
+        <button type="button" onClick={() => setMarkers([])} style={heBtn('#444')}>Clear Markers</button>
+        <button type="button" onClick={() => setOverrides({})} style={heBtn('#444')}>Reset Boxes</button>
+        <button type="button" onClick={addCustomBox} style={heBtn('#1a5c1a')}>+ Add Region</button>
+        <span style={{ flex: 1 }} />
+        <button type="button" onClick={() => setVisible(false)} style={heBtn('#444')}>Hide ×</button>
+      </div>
+
+      {/* Overlay boxes — scanned elements */}
+      {regions.map((r, i) => {
+        const ov = overrides[r.id]
+        const rect: HERect = ov ?? { vpLeft: r.vpLeft, vpTop: r.vpTop, vpWidth: r.vpWidth, vpHeight: r.vpHeight }
+        return renderOverlayBox(r.id, r.label, rect, HE_COLORS[i % HE_COLORS.length], false, r.pL, r.pT, r.pW, r.pH)
+      })}
+
+      {/* Custom draggable boxes */}
+      {customBoxes.map((b) => {
+        const r = customRects[b.id] ?? { vpLeft: window.innerWidth / 2 - 80, vpTop: window.innerHeight / 2 - 40, vpWidth: 160, vpHeight: 80 }
+        return renderOverlayBox(b.id, b.label, r, '#ffcc00', true, null, null, null, null)
+      })}
+
+      {/* Click markers */}
+      {markers.map((m) => (
+        <div key={m.id} style={{
+          position: 'fixed', left: m.vx - 8, top: m.vy - 8, width: 16, height: 16,
+          border: '2.5px solid #ff3333', borderRadius: '50%', background: 'rgba(255,50,50,0.2)',
+          pointerEvents: 'none', zIndex: 99998,
+        }}>
           <div style={{
-            position: 'fixed', left: vis.left, top: vis.top, width: vis.width, height: vis.height,
-            outline: '2.5px solid rgba(60,120,255,0.9)', borderRadius: '50%',
-            pointerEvents: 'none', zIndex: 9998, boxSizing: 'border-box',
-          } as CSSProperties} />
-          <div
-            style={{
-              position: 'fixed', left: btn.left, top: btn.top, width: btn.width, height: btn.height,
-              outline: '2.5px dashed rgba(255,50,50,0.9)', borderRadius: '50%',
-              cursor: 'move', zIndex: 9999, boxSizing: 'border-box', touchAction: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 8, color: 'rgba(255,120,120,0.9)', fontFamily: 'monospace',
-              userSelect: 'none',
-            } as CSSProperties}
-            onPointerDown={(e) => startDrag(id, e)}
-            onPointerMove={moveDrag}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-          >drag</div>
+            position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)',
+            fontSize: 9, fontFamily: 'monospace', color: '#ff5555',
+            background: 'rgba(0,0,0,0.85)', padding: '1px 4px', borderRadius: 3, whiteSpace: 'nowrap',
+          }}>{Math.round(m.vx)},{Math.round(m.vy)}</div>
         </div>
       ))}
-      <div
-        style={{
-          position: 'fixed', bottom: 16, right: 16, zIndex: 10000,
-          background: 'rgba(0,0,0,0.88)', color: '#fff',
-          fontFamily: 'monospace', fontSize: 11, padding: '10px 14px',
-          borderRadius: 10, maxWidth: 340, lineHeight: 1.5, pointerEvents: 'auto',
-        } as CSSProperties}
-        onPointerDown={(e) => e.stopPropagation()}
-      >
-        <div style={{ fontWeight: 'bold', color: '#ffd', marginBottom: 4 }}>?placehit=1 — Gem Align Tool</div>
-        <div style={{ color: '#99f', fontSize: 10, marginBottom: 2 }}>Blue solid = gem visual · Red dashed = hit area · Drag red to reposition</div>
-        {firstCtrlRect && (
-          <div style={{ color: '#666', fontSize: 10, marginBottom: 6 }}>
-            controls: {Math.round(firstCtrlRect.width)}×{Math.round(firstCtrlRect.height)}px @({Math.round(firstCtrlRect.left)},{Math.round(firstCtrlRect.top)})
+
+      {/* Side panel */}
+      <div style={{
+        position: 'fixed', right: 0, top: 0, bottom: 0, width: panelOpen ? 320 : 32,
+        background: 'rgba(0,0,0,0.92)', color: '#fff', fontFamily: 'monospace', fontSize: 10,
+        borderLeft: '1px solid #333', pointerEvents: 'auto', zIndex: 99999,
+        display: 'flex', flexDirection: 'column',
+      }}>
+        <button type="button" onClick={() => setPanelOpen((v) => !v)} style={{
+          background: '#111', border: 'none', borderBottom: '1px solid #333',
+          color: '#aaa', padding: '8px', cursor: 'pointer', textAlign: 'left',
+          fontSize: 10, fontFamily: 'monospace', flexShrink: 0,
+        }}>
+          {panelOpen ? '▶ Panel' : '◀'}
+        </button>
+
+        {panelOpen && (
+          <div style={{ flex: 1, overflowY: 'auto', padding: 10 }}>
+            <div style={{ color: '#ffd', fontWeight: 'bold', marginBottom: 4, fontSize: 11 }}>
+              {regions.length} regions · {screen} · {orientation}
+            </div>
+            <div style={{ color: '#666', fontSize: 9, marginBottom: 10 }}>
+              {typeof window !== 'undefined' ? `Viewport: ${Math.round(window.innerWidth)}×${Math.round(window.innerHeight)}px` : ''}
+            </div>
+
+            {regions.map((r, i) => {
+              const ov = overrides[r.id]
+              const vL = ov?.vpLeft ?? r.vpLeft, vT = ov?.vpTop ?? r.vpTop
+              const vW = ov?.vpWidth ?? r.vpWidth, vH = ov?.vpHeight ?? r.vpHeight
+              const pct = parentPct(vL, vT, vW, vH, r.pL, r.pT, r.pW, r.pH)
+              const color = HE_COLORS[i % HE_COLORS.length]
+              return (
+                <div key={r.id} style={{ borderTop: '1px solid #222', paddingTop: 5, marginTop: 5 }}>
+                  <div style={{ color, fontWeight: 'bold', fontSize: 11 }}>
+                    {r.label}{ov ? <span style={{ color: '#ff9a00' }}> ✏</span> : null}
+                  </div>
+                  {pct ? (
+                    <div style={{ color: '#7bf', lineHeight: 1.6 }}>
+                      left:{pct.left} top:{pct.top}<br />w:{pct.width} h:{pct.height}
+                    </div>
+                  ) : null}
+                  <div style={{ color: '#555', fontSize: 9 }}>
+                    vp {Math.round(vL)},{Math.round(vT)} {Math.round(vW)}×{Math.round(vH)}px
+                  </div>
+                  <button type="button" style={{ ...heBtn(copied === r.id ? '#1a5c1a' : '#1e1e2e'), marginTop: 3 }}
+                    onClick={() => doCopy(r.id, r.label, vL, vT, vW, vH, r.pL, r.pT, r.pW, r.pH)}>
+                    {copied === r.id ? '✓ Copied' : 'Copy'}
+                  </button>
+                </div>
+              )
+            })}
+
+            {customBoxes.length > 0 && (
+              <div style={{ borderTop: '2px solid #333', paddingTop: 8, marginTop: 8 }}>
+                <div style={{ color: '#ffcc00', fontWeight: 'bold', marginBottom: 4 }}>Custom Boxes</div>
+                {customBoxes.map((b) => {
+                  const r = customRects[b.id] ?? { vpLeft: 0, vpTop: 0, vpWidth: 0, vpHeight: 0 }
+                  return (
+                    <div key={b.id} style={{ borderTop: '1px solid #222', paddingTop: 5, marginTop: 5 }}>
+                      <div style={{ color: '#ffcc00', fontWeight: 'bold', fontSize: 11 }}>{b.label}</div>
+                      <div style={{ color: '#7bf', lineHeight: 1.6 }}>
+                        left:{pctStr(r.vpLeft, window.innerWidth)} top:{pctStr(r.vpTop, window.innerHeight)}<br />
+                        w:{pctStr(r.vpWidth, window.innerWidth)} h:{pctStr(r.vpHeight, window.innerHeight)}
+                      </div>
+                      <div style={{ color: '#555', fontSize: 9 }}>
+                        vp {Math.round(r.vpLeft)},{Math.round(r.vpTop)} {Math.round(r.vpWidth)}×{Math.round(r.vpHeight)}px
+                      </div>
+                      <button type="button" style={{ ...heBtn(copied === b.id ? '#1a5c1a' : '#1e1e2e'), marginTop: 3 }}
+                        onClick={() => doCopy(b.id, b.label, r.vpLeft, r.vpTop, r.vpWidth, r.vpHeight, 0, 0, window.innerWidth, window.innerHeight)}>
+                        {copied === b.id ? '✓ Copied' : 'Copy'}
+                      </button>
+                      <button type="button" style={{ ...heBtn('#3a1010'), marginTop: 3, marginLeft: 6 }}
+                        onClick={() => {
+                          setCustomBoxes((prev) => prev.filter((x) => x.id !== b.id))
+                          setCustomRects((prev) => { const n = { ...prev }; delete n[b.id]; return n })
+                        }}>
+                        Remove
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         )}
-        {orbItems.map((o) => {
-          const ov = overrides[o.id]
-          const m = measured[o.id]
-          return (
-            <div key={o.id} style={{ borderTop: '1px solid #2a2a2a', paddingTop: 3, marginTop: 3 }}>
-              <span style={{ color: o.hue === '#ffffff' ? '#ccc' : o.hue, fontWeight: 'bold' }}>{o.id}</span>
-              {' '}left={ov ? `${ov.left.toFixed(1)}%` : o.left} top={ov ? `${ov.top.toFixed(1)}%` : orbTop}
-              {m && (
-                <>
-                  <div style={{ color: '#f88', fontSize: 10 }}>btn px:({Math.round(m.btn.left)},{Math.round(m.btn.top)}) {Math.round(m.btn.width)}×{Math.round(m.btn.height)}</div>
-                  <div style={{ color: '#88f', fontSize: 10 }}>vis px:({Math.round(m.vis.left)},{Math.round(m.vis.top)}) {Math.round(m.vis.width)}×{Math.round(m.vis.height)}</div>
-                </>
-              )}
-            </div>
-          )
-        })}
-        <button
-          type="button" onClick={copyValues}
-          style={{ marginTop: 8, background: '#2a2a2a', border: '1px solid #555', color: '#fff', borderRadius: 4, padding: '3px 10px', cursor: 'pointer', fontSize: 11 }}
-        >Copy orbLefts / orbTop</button>
       </div>
-    </>
+    </div>
   )
 }
-// ────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 
 function FlagColorChallengeGame({
   config,
@@ -449,14 +617,12 @@ function FlagColorChallengeGame({
   orientation,
   onBack,
   onComplete,
-  debugHit,
 }: {
   config: CountryChallengeConfig
   players: string[]
   orientation: 'portrait' | 'landscape'
   onBack: () => void
   onComplete: () => void
-  debugHit?: boolean
 }) {
   const scene = config.scene
   const round = config.round
@@ -499,8 +665,6 @@ function FlagColorChallengeGame({
   const flagSvgRef = useRef<SVGSVGElement | null>(null)
   const reducedMotionRef = useRef(false)
   const controlsDivRef = useRef<HTMLDivElement | null>(null)
-  const gemButtonEls = useRef(new Map<string, HTMLButtonElement>())
-  const [debugPositions, setDebugPositions] = useState<Record<string, GemOverride>>({})
   const [regionPatterns] = useState(() => assignFillPatterns(
     round.regions,
     round.fillPatterns ?? ALL_FILL_PATTERNS,
@@ -1072,10 +1236,9 @@ function FlagColorChallengeGame({
                   aria-label={`${orb.label} orb`}
                   aria-pressed={selectedOrb === orb.id}
                   className="france-palette-gem france-palette-gem-hitbox"
-                  ref={debugHit ? (el) => { if (el) gemButtonEls.current.set(orb.id, el); else gemButtonEls.current.delete(orb.id) } : undefined}
                   style={{
-                    left: debugHit && debugPositions[orb.id] ? `${debugPositions[orb.id].left}%` : orb.left,
-                    top: debugHit && debugPositions[orb.id] ? `${debugPositions[orb.id].top}%` : orbTop,
+                    left: orb.left,
+                    top: orbTop,
                     '--gem-color': orb.hue,
                   } as CSSProperties}
                   onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(orbTop), orb.hue)}
@@ -1099,16 +1262,7 @@ function FlagColorChallengeGame({
                   <span className="france-nav-label">{nav.label}</span>
                 </button>
               ))}
-              {debugHit && (
-                <GemPlaceHitOverlay
-                  controlsDivRef={controlsDivRef}
-                  gemButtonEls={gemButtonEls}
-                  orbItems={orbItems}
-                  orbTop={orbTop}
-                  overrides={debugPositions}
-                  onOverride={(id, left, top) => setDebugPositions((prev) => ({ ...prev, [id]: { left, top } }))}
-                />
-              )}
+
             </div>
             <div className="france-play-ambient" aria-hidden="true">
               <span className="france-ray france-ray-a" />
@@ -1634,7 +1788,7 @@ export default function FlagGamePage() {
   const channelRef = useRoomChannel((nextRoom) => setRoom((current) => (current && current.updatedAt > nextRoom.updatedAt ? current : nextRoom)))
   const { playSound } = useSoundHooks()
   const orientation = useViewportOrientation()
-  const debugHit = usePlaceHitMode()
+  const hitEdit = useHitEditMode()
 
   const country = COUNTRY_BY_ISO2[activeCountryCode] || COUNTRIES[0]
   const palette = countryPalette(country)
@@ -1816,7 +1970,6 @@ export default function FlagGamePage() {
             orientation={orientation}
             onBack={() => setScreen('play')}
             onComplete={completeChallengeRound}
-            debugHit={debugHit}
           />
         )}
 
@@ -1900,6 +2053,7 @@ export default function FlagGamePage() {
           </div>
         )}
       </div>
+      {hitEdit && <HitRegionEditor screen={screen} orientation={orientation} />}
     </main>
   )
 }
