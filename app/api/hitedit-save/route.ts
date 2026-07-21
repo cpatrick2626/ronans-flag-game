@@ -5,6 +5,9 @@ import path from 'path'
 const OVERRIDES_PATH = path.join(process.cwd(), 'public', 'hitedit-overrides.json')
 
 export async function POST(req: Request) {
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json({ error: 'Only available in development' }, { status: 403 })
+  }
   try {
     const body: unknown = await req.json()
     if (!body || typeof body !== 'object' || Array.isArray(body)) {

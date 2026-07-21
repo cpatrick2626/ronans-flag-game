@@ -18,7 +18,7 @@ type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: n
 type FranceSpark = { key: number; x: number; y: number; hue: string; kind: 'orb' | 'correct' | 'wrong' | 'complete' }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
 type RoomSnapshot = { room: RoomState; note: string }
-type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string> }
+type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string>; boxes?: Record<string, { left: string; top: string; width: string; height: string }> }
 type HitEditOverrides = Record<string, { portrait?: HitEditOrientationOverrides; landscape?: HitEditOrientationOverrides }>
 
 const PLAYER_NAME_KEY = 'ronan_flag_player_name'
@@ -425,37 +425,54 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
   }
 
   function doSave() {
-    if (!challengeConfig) { setSaveStatus('error'); return }
-    const iso2 = challengeConfig.iso2
-    const existingOrient = allOverrides?.[iso2]?.[orientation] ?? {}
-    const orbLefts: Record<string, string> = { ...(existingOrient.orbLefts ?? {}) }
-    const navLefts: Record<string, string> = { ...(existingOrient.navLefts ?? {}) }
-    let orbTopVal: string | undefined = existingOrient.orbTop
-    let navTopVal: string | undefined = existingOrient.navTop
-    let navWidthVal: string | undefined = existingOrient.navWidth
-    let navHeightVal: string | undefined = existingOrient.navHeight
-    for (const region of regions) {
-      const ov = overrides[region.id]
-      if (!ov || region.pL === null || region.pT === null || !region.pW || !region.pH) continue
-      const { pL, pT, pW, pH } = region
-      const { vpLeft: vL, vpTop: vT, vpWidth: vW, vpHeight: vH } = ov
-      const left = `${((vL - pL) / pW * 100).toFixed(1)}%`
-      const top = `${((vT - pT) / pH * 100).toFixed(1)}%`
-      const width = `${(vW / pW * 100).toFixed(1)}%`
-      const height = `${(vH / pH * 100).toFixed(1)}%`
-      const gemMatch = region.label.match(/^(.+) orb$/i)
-      if (gemMatch) { orbLefts[gemMatch[1].toLowerCase()] = left; orbTopVal = top }
-      const navMatch = challengeConfig.scene.nav.find((n) => n.label === region.label)
-      if (navMatch) { navLefts[navMatch.id] = left; navTopVal = top; navWidthVal = width; navHeightVal = height }
+    const saveKey = challengeConfig ? challengeConfig.iso2 : screen
+    const existingOrient = allOverrides?.[saveKey]?.[orientation] ?? {}
+    let orientData: HitEditOrientationOverrides
+    if (challengeConfig) {
+      const orbLefts: Record<string, string> = { ...(existingOrient.orbLefts ?? {}) }
+      const navLefts: Record<string, string> = { ...(existingOrient.navLefts ?? {}) }
+      let orbTopVal: string | undefined = existingOrient.orbTop
+      let navTopVal: string | undefined = existingOrient.navTop
+      let navWidthVal: string | undefined = existingOrient.navWidth
+      let navHeightVal: string | undefined = existingOrient.navHeight
+      for (const region of regions) {
+        const ov = overrides[region.id]
+        if (!ov || region.pL === null || region.pT === null || !region.pW || !region.pH) continue
+        const { pL, pT, pW, pH } = region
+        const { vpLeft: vL, vpTop: vT, vpWidth: vW, vpHeight: vH } = ov
+        const left = `${((vL - pL) / pW * 100).toFixed(1)}%`
+        const top = `${((vT - pT) / pH * 100).toFixed(1)}%`
+        const width = `${(vW / pW * 100).toFixed(1)}%`
+        const height = `${(vH / pH * 100).toFixed(1)}%`
+        const gemMatch = region.label.match(/^(.+) orb$/i)
+        if (gemMatch) { orbLefts[gemMatch[1].toLowerCase()] = left; orbTopVal = top }
+        const navMatch = challengeConfig.scene.nav.find((n) => n.label === region.label)
+        if (navMatch) { navLefts[navMatch.id] = left; navTopVal = top; navWidthVal = width; navHeightVal = height }
+      }
+      orientData = {}
+      if (orbTopVal !== undefined) orientData.orbTop = orbTopVal
+      if (Object.keys(orbLefts).length) orientData.orbLefts = orbLefts
+      if (navTopVal !== undefined) orientData.navTop = navTopVal
+      if (navWidthVal !== undefined) orientData.navWidth = navWidthVal
+      if (navHeightVal !== undefined) orientData.navHeight = navHeightVal
+      if (Object.keys(navLefts).length) orientData.navLefts = navLefts
+    } else {
+      const boxes: Record<string, { left: string; top: string; width: string; height: string }> = { ...(existingOrient.boxes ?? {}) }
+      for (const region of regions) {
+        const ov = overrides[region.id]
+        if (!ov || region.pL === null || region.pT === null || !region.pW || !region.pH) continue
+        const { pL, pT, pW, pH } = region
+        const { vpLeft: vL, vpTop: vT, vpWidth: vW, vpHeight: vH } = ov
+        boxes[region.label] = {
+          left: `${((vL - pL) / pW * 100).toFixed(1)}%`,
+          top: `${((vT - pT) / pH * 100).toFixed(1)}%`,
+          width: `${(vW / pW * 100).toFixed(1)}%`,
+          height: `${(vH / pH * 100).toFixed(1)}%`,
+        }
+      }
+      orientData = { ...existingOrient, boxes }
     }
-    const orientData: HitEditOrientationOverrides = {}
-    if (orbTopVal !== undefined) orientData.orbTop = orbTopVal
-    if (Object.keys(orbLefts).length) orientData.orbLefts = orbLefts
-    if (navTopVal !== undefined) orientData.navTop = navTopVal
-    if (navWidthVal !== undefined) orientData.navWidth = navWidthVal
-    if (navHeightVal !== undefined) orientData.navHeight = navHeightVal
-    if (Object.keys(navLefts).length) orientData.navLefts = navLefts
-    const next: HitEditOverrides = { ...(allOverrides ?? {}), [iso2]: { ...(allOverrides?.[iso2] ?? {}), [orientation]: orientData } }
+    const next: HitEditOverrides = { ...(allOverrides ?? {}), [saveKey]: { ...(allOverrides?.[saveKey] ?? {}), [orientation]: orientData } }
     setSaveStatus('saving')
     fetch('/api/hitedit-save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) })
       .then((r) => r.ok ? r.json() : Promise.reject(r.status))
@@ -474,13 +491,12 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
   }
 
   function doRevert() {
-    if (!challengeConfig) return
-    const iso2 = challengeConfig.iso2
+    const saveKey = challengeConfig ? challengeConfig.iso2 : screen
     const next: HitEditOverrides = { ...(allOverrides ?? {}) }
-    if (next[iso2]) {
-      const rest: { portrait?: HitEditOrientationOverrides; landscape?: HitEditOrientationOverrides } = { ...next[iso2] }
+    if (next[saveKey]) {
+      const rest: { portrait?: HitEditOrientationOverrides; landscape?: HitEditOrientationOverrides } = { ...next[saveKey] }
       delete rest[orientation]
-      if (Object.keys(rest).length) next[iso2] = rest; else delete next[iso2]
+      if (Object.keys(rest).length) next[saveKey] = rest; else delete next[saveKey]
     }
     fetch('/api/hitedit-save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) }).catch(() => {})
     onSaveOverrides?.(next)
@@ -554,14 +570,10 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
         </button>
         <button type="button" onClick={() => setMarkers([])} style={heBtn('#444')}>Clear Markers</button>
         <button type="button" onClick={() => setOverrides({})} style={heBtn('#444')}>Reset Boxes</button>
-        {challengeConfig && (
-          <button type="button" onClick={doSave} style={heBtn(saveStatus === 'saved' ? '#1a5c1a' : saveStatus === 'error' ? '#6b1a1a' : saveStatus === 'saving' ? '#444' : '#1a3a5c')}>
-            {saveStatus === 'saved' ? `✓ Saved ${challengeConfig.iso2}` : saveStatus === 'saving' ? 'Saving…' : saveStatus === 'error' ? '⚠ File err · applied' : `Save ${challengeConfig.iso2} ${orientation}`}
-          </button>
-        )}
-        {challengeConfig && (
-          <button type="button" onClick={doRevert} style={heBtn('#5c1a1a')}>Revert {orientation}</button>
-        )}
+        <button type="button" onClick={doSave} style={heBtn(saveStatus === 'saved' ? '#1a5c1a' : saveStatus === 'error' ? '#6b1a1a' : saveStatus === 'saving' ? '#444' : '#1a3a5c')}>
+          {saveStatus === 'saved' ? `✓ Saved ${challengeConfig?.iso2 ?? screen}` : saveStatus === 'saving' ? 'Saving…' : saveStatus === 'error' ? '⚠ File err · applied' : `Save ${challengeConfig?.iso2 ?? screen} ${orientation}`}
+        </button>
+        <button type="button" onClick={doRevert} style={heBtn('#5c1a1a')}>Revert {orientation}</button>
         <button type="button" onClick={addCustomBox} style={heBtn('#1a5c1a')}>+ Add Region</button>
         <span style={{ flex: 1 }} />
         <button type="button" onClick={() => setVisible(false)} style={heBtn('#444')}>Hide ×</button>
