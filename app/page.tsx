@@ -267,18 +267,196 @@ function sparkleOffsets(assigned: AssignedFillPattern, b: RegionBox) {
   return [-0.24, 0.04, 0.28].map((s) => ({ dx: perpX * s * span, dy: perpY * s * span }))
 }
 
+// ── Debug: ?placehit=1 gem hit-placement tool ─────────────────────────────
+function usePlaceHitMode() {
+  const [active, setActive] = useState(false)
+  useEffect(() => {
+    setActive(new URLSearchParams(window.location.search).has('placehit'))
+  }, [])
+  return active
+}
+
+type GemOverride = { left: number; top: number }
+
+function GemPlaceHitOverlay({
+  controlsDivRef,
+  gemButtonEls,
+  orbItems,
+  orbTop,
+  overrides,
+  onOverride,
+}: {
+  controlsDivRef: React.RefObject<HTMLDivElement | null>
+  gemButtonEls: React.RefObject<Map<string, HTMLButtonElement>>
+  orbItems: Array<{ id: string; label: string; hue: string; left: string }>
+  orbTop: string
+  overrides: Record<string, GemOverride>
+  onOverride: (id: string, left: number, top: number) => void
+}) {
+  type MeasuredEntry = { btn: DOMRect; vis: DOMRect; ctrlRect: DOMRect }
+  const [measured, setMeasured] = useState<Record<string, MeasuredEntry>>({})
+  const dragRef = useRef<{ id: string; startX: number; startY: number; origLeft: number; origTop: number } | null>(null)
+  const measureRafRef = useRef<number | null>(null)
+
+  function doMeasure() {
+    const ctrl = controlsDivRef.current
+    const els = gemButtonEls.current
+    if (!ctrl || !els) return
+    const ctrlRect = ctrl.getBoundingClientRect()
+    const next: Record<string, MeasuredEntry> = {}
+    for (const [id, btn] of els) {
+      const vis = btn.querySelector('.france-palette-gem-visual') as Element | null
+      next[id] = {
+        btn: btn.getBoundingClientRect(),
+        vis: vis ? vis.getBoundingClientRect() : btn.getBoundingClientRect(),
+        ctrlRect,
+      }
+    }
+    setMeasured(next)
+  }
+
+  useEffect(() => {
+    function onResize() {
+      if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current)
+      measureRafRef.current = requestAnimationFrame(() => { doMeasure(); measureRafRef.current = null })
+    }
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => {
+      if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current)
+      window.removeEventListener('resize', onResize)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-measure after overrides change (buttons may have repositioned)
+  useEffect(() => {
+    if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current)
+    measureRafRef.current = requestAnimationFrame(() => { doMeasure(); measureRafRef.current = null })
+  }, [overrides]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function startDrag(id: string, e: React.PointerEvent<HTMLDivElement>) {
+    e.stopPropagation()
+    e.preventDefault()
+    e.currentTarget.setPointerCapture(e.pointerId)
+    const ov = overrides[id]
+    const configLeft = parseFloat(orbItems.find((o) => o.id === id)?.left ?? '50')
+    dragRef.current = {
+      id,
+      startX: e.clientX,
+      startY: e.clientY,
+      origLeft: ov?.left ?? configLeft,
+      origTop: ov?.top ?? parseFloat(orbTop),
+    }
+  }
+
+  function moveDrag(e: React.PointerEvent<HTMLDivElement>) {
+    const d = dragRef.current
+    const ctrl = controlsDivRef.current
+    if (!d || !ctrl) return
+    const rect = ctrl.getBoundingClientRect()
+    const newLeft = d.origLeft + ((e.clientX - d.startX) / rect.width) * 100
+    const newTop = d.origTop + ((e.clientY - d.startY) / rect.height) * 100
+    onOverride(d.id, Math.round(newLeft * 10) / 10, Math.round(newTop * 10) / 10)
+  }
+
+  function endDrag() { dragRef.current = null }
+
+  function copyValues() {
+    const configTop = parseFloat(orbTop)
+    const lefts = orbItems.map((o) => {
+      const ov = overrides[o.id]
+      return `'${ov ? `${ov.left}%` : o.left}'`
+    })
+    const allTops = orbItems.map((o) => overrides[o.id]?.top ?? configTop)
+    navigator.clipboard.writeText([
+      `orbLefts: [${lefts.join(', ')}],`,
+      `orbTop: '${allTops[0] ?? configTop}%',`,
+    ].join('\n')).catch(() => void 0)
+  }
+
+  const firstCtrlRect = Object.values(measured)[0]?.ctrlRect
+
+  return (
+    <>
+      {Object.entries(measured).map(([id, { btn, vis }]) => (
+        <div key={id}>
+          <div style={{
+            position: 'fixed', left: vis.left, top: vis.top, width: vis.width, height: vis.height,
+            outline: '2.5px solid rgba(60,120,255,0.9)', borderRadius: '50%',
+            pointerEvents: 'none', zIndex: 9998, boxSizing: 'border-box',
+          } as CSSProperties} />
+          <div
+            style={{
+              position: 'fixed', left: btn.left, top: btn.top, width: btn.width, height: btn.height,
+              outline: '2.5px dashed rgba(255,50,50,0.9)', borderRadius: '50%',
+              cursor: 'move', zIndex: 9999, boxSizing: 'border-box', touchAction: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 8, color: 'rgba(255,120,120,0.9)', fontFamily: 'monospace',
+              userSelect: 'none',
+            } as CSSProperties}
+            onPointerDown={(e) => startDrag(id, e)}
+            onPointerMove={moveDrag}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+          >drag</div>
+        </div>
+      ))}
+      <div
+        style={{
+          position: 'fixed', bottom: 16, right: 16, zIndex: 10000,
+          background: 'rgba(0,0,0,0.88)', color: '#fff',
+          fontFamily: 'monospace', fontSize: 11, padding: '10px 14px',
+          borderRadius: 10, maxWidth: 340, lineHeight: 1.5, pointerEvents: 'auto',
+        } as CSSProperties}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <div style={{ fontWeight: 'bold', color: '#ffd', marginBottom: 4 }}>?placehit=1 — Gem Align Tool</div>
+        <div style={{ color: '#99f', fontSize: 10, marginBottom: 2 }}>Blue solid = gem visual · Red dashed = hit area · Drag red to reposition</div>
+        {firstCtrlRect && (
+          <div style={{ color: '#666', fontSize: 10, marginBottom: 6 }}>
+            controls: {Math.round(firstCtrlRect.width)}×{Math.round(firstCtrlRect.height)}px @({Math.round(firstCtrlRect.left)},{Math.round(firstCtrlRect.top)})
+          </div>
+        )}
+        {orbItems.map((o) => {
+          const ov = overrides[o.id]
+          const m = measured[o.id]
+          return (
+            <div key={o.id} style={{ borderTop: '1px solid #2a2a2a', paddingTop: 3, marginTop: 3 }}>
+              <span style={{ color: o.hue === '#ffffff' ? '#ccc' : o.hue, fontWeight: 'bold' }}>{o.id}</span>
+              {' '}left={ov ? `${ov.left.toFixed(1)}%` : o.left} top={ov ? `${ov.top.toFixed(1)}%` : orbTop}
+              {m && (
+                <>
+                  <div style={{ color: '#f88', fontSize: 10 }}>btn px:({Math.round(m.btn.left)},{Math.round(m.btn.top)}) {Math.round(m.btn.width)}×{Math.round(m.btn.height)}</div>
+                  <div style={{ color: '#88f', fontSize: 10 }}>vis px:({Math.round(m.vis.left)},{Math.round(m.vis.top)}) {Math.round(m.vis.width)}×{Math.round(m.vis.height)}</div>
+                </>
+              )}
+            </div>
+          )
+        })}
+        <button
+          type="button" onClick={copyValues}
+          style={{ marginTop: 8, background: '#2a2a2a', border: '1px solid #555', color: '#fff', borderRadius: 4, padding: '3px 10px', cursor: 'pointer', fontSize: 11 }}
+        >Copy orbLefts / orbTop</button>
+      </div>
+    </>
+  )
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 function FlagColorChallengeGame({
   config,
   players,
   orientation,
   onBack,
   onComplete,
+  debugHit,
 }: {
   config: CountryChallengeConfig
   players: string[]
   orientation: 'portrait' | 'landscape'
   onBack: () => void
   onComplete: () => void
+  debugHit?: boolean
 }) {
   const scene = config.scene
   const round = config.round
@@ -320,6 +498,9 @@ function FlagColorChallengeGame({
   const pencilRef = useRef<HTMLDivElement | null>(null)
   const flagSvgRef = useRef<SVGSVGElement | null>(null)
   const reducedMotionRef = useRef(false)
+  const controlsDivRef = useRef<HTMLDivElement | null>(null)
+  const gemButtonEls = useRef(new Map<string, HTMLButtonElement>())
+  const [debugPositions, setDebugPositions] = useState<Record<string, GemOverride>>({})
   const [regionPatterns] = useState(() => assignFillPatterns(
     round.regions,
     round.fillPatterns ?? ALL_FILL_PATTERNS,
@@ -883,7 +1064,7 @@ function FlagColorChallengeGame({
                 </g>
               </svg>
             </div>
-            <div className="france-play-controls">
+            <div className="france-play-controls" ref={controlsDivRef}>
               {phase === 'color' && orbItems.map((orb) => (
                 <button
                   key={`${orb.id}-${selectedOrb === orb.id ? selectedPulse : 0}`}
@@ -891,7 +1072,12 @@ function FlagColorChallengeGame({
                   aria-label={`${orb.label} orb`}
                   aria-pressed={selectedOrb === orb.id}
                   className="france-palette-gem france-palette-gem-hitbox"
-                  style={{ left: orb.left, top: orbTop, '--gem-color': orb.hue } as CSSProperties}
+                  ref={debugHit ? (el) => { if (el) gemButtonEls.current.set(orb.id, el); else gemButtonEls.current.delete(orb.id) } : undefined}
+                  style={{
+                    left: debugHit && debugPositions[orb.id] ? `${debugPositions[orb.id].left}%` : orb.left,
+                    top: debugHit && debugPositions[orb.id] ? `${debugPositions[orb.id].top}%` : orbTop,
+                    '--gem-color': orb.hue,
+                  } as CSSProperties}
                   onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(orbTop), orb.hue)}
                 >
                   <span className={`france-palette-gem-visual ${selectedOrb === orb.id ? 'is-selected' : ''} ${selectedOrb === orb.id && selectedPulse ? 'is-pulsing' : ''}`}>
@@ -913,6 +1099,16 @@ function FlagColorChallengeGame({
                   <span className="france-nav-label">{nav.label}</span>
                 </button>
               ))}
+              {debugHit && (
+                <GemPlaceHitOverlay
+                  controlsDivRef={controlsDivRef}
+                  gemButtonEls={gemButtonEls}
+                  orbItems={orbItems}
+                  orbTop={orbTop}
+                  overrides={debugPositions}
+                  onOverride={(id, left, top) => setDebugPositions((prev) => ({ ...prev, [id]: { left, top } }))}
+                />
+              )}
             </div>
             <div className="france-play-ambient" aria-hidden="true">
               <span className="france-ray france-ray-a" />
@@ -973,6 +1169,7 @@ function FlagColorChallengeGame({
         <span className="colored-pencil-trail colored-pencil-trail-b" />
         <span className="colored-pencil-star colored-pencil-star-a" />
         <span className="colored-pencil-star colored-pencil-star-b" />
+        <span className="colored-pencil-anchor" aria-hidden="true" />
         <span className="colored-pencil-tip" />
         <span className="colored-pencil-body" />
       </div>
@@ -1437,6 +1634,7 @@ export default function FlagGamePage() {
   const channelRef = useRoomChannel((nextRoom) => setRoom((current) => (current && current.updatedAt > nextRoom.updatedAt ? current : nextRoom)))
   const { playSound } = useSoundHooks()
   const orientation = useViewportOrientation()
+  const debugHit = usePlaceHitMode()
 
   const country = COUNTRY_BY_ISO2[activeCountryCode] || COUNTRIES[0]
   const palette = countryPalette(country)
@@ -1618,6 +1816,7 @@ export default function FlagGamePage() {
             orientation={orientation}
             onBack={() => setScreen('play')}
             onComplete={completeChallengeRound}
+            debugHit={debugHit}
           />
         )}
 
