@@ -18,6 +18,8 @@ type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: n
 type FranceSpark = { key: number; x: number; y: number; hue: string; kind: 'orb' | 'correct' | 'wrong' | 'complete' }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
 type RoomSnapshot = { room: RoomState; note: string }
+type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string> }
+type HitEditOverrides = Record<string, { portrait?: HitEditOrientationOverrides; landscape?: HitEditOrientationOverrides }>
 
 const PLAYER_NAME_KEY = 'ronan_flag_player_name'
 const PLAYER_NAME_CONFIRMED_KEY = 'ronan_flag_player_name_confirmed'
@@ -290,7 +292,7 @@ function heBtn(bg: string): React.CSSProperties {
   return { background: bg, color: '#fff', border: 'none', borderRadius: 4, padding: '3px 8px', cursor: 'pointer', fontSize: 10, fontFamily: 'monospace', lineHeight: 1.5 }
 }
 
-function HitRegionEditor({ screen, orientation }: { screen: Screen; orientation: 'portrait' | 'landscape' }) {
+function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, onSaveOverrides }: { screen: Screen; orientation: 'portrait' | 'landscape'; challengeConfig?: CountryChallengeConfig; allOverrides?: HitEditOverrides | null; onSaveOverrides?: (next: HitEditOverrides) => void }) {
   const [regions, setRegions] = useState<HERegion[]>([])
   const [overrides, setOverrides] = useState<Record<string, HERect>>({})
   const [customBoxes, setCustomBoxes] = useState<Array<{ id: string; label: string }>>([])
@@ -305,6 +307,7 @@ function HitRegionEditor({ screen, orientation }: { screen: Screen; orientation:
   const isDraggingRef = useRef(false)
   const markerIdRef = useRef(0)
   const boxIdRef = useRef(0)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function scanDom() {
@@ -421,6 +424,69 @@ function HitRegionEditor({ screen, orientation }: { screen: Screen; orientation:
     setCustomRects((prev) => ({ ...prev, [id]: r }))
   }
 
+  function doSave() {
+    if (!challengeConfig) { setSaveStatus('error'); return }
+    const iso2 = challengeConfig.iso2
+    const existingOrient = allOverrides?.[iso2]?.[orientation] ?? {}
+    const orbLefts: Record<string, string> = { ...(existingOrient.orbLefts ?? {}) }
+    const navLefts: Record<string, string> = { ...(existingOrient.navLefts ?? {}) }
+    let orbTopVal: string | undefined = existingOrient.orbTop
+    let navTopVal: string | undefined = existingOrient.navTop
+    let navWidthVal: string | undefined = existingOrient.navWidth
+    let navHeightVal: string | undefined = existingOrient.navHeight
+    for (const region of regions) {
+      const ov = overrides[region.id]
+      if (!ov || region.pL === null || region.pT === null || !region.pW || !region.pH) continue
+      const { pL, pT, pW, pH } = region
+      const { vpLeft: vL, vpTop: vT, vpWidth: vW, vpHeight: vH } = ov
+      const left = `${((vL - pL) / pW * 100).toFixed(1)}%`
+      const top = `${((vT - pT) / pH * 100).toFixed(1)}%`
+      const width = `${(vW / pW * 100).toFixed(1)}%`
+      const height = `${(vH / pH * 100).toFixed(1)}%`
+      const gemMatch = region.label.match(/^(.+) orb$/i)
+      if (gemMatch) { orbLefts[gemMatch[1].toLowerCase()] = left; orbTopVal = top }
+      const navMatch = challengeConfig.scene.nav.find((n) => n.label === region.label)
+      if (navMatch) { navLefts[navMatch.id] = left; navTopVal = top; navWidthVal = width; navHeightVal = height }
+    }
+    const orientData: HitEditOrientationOverrides = {}
+    if (orbTopVal !== undefined) orientData.orbTop = orbTopVal
+    if (Object.keys(orbLefts).length) orientData.orbLefts = orbLefts
+    if (navTopVal !== undefined) orientData.navTop = navTopVal
+    if (navWidthVal !== undefined) orientData.navWidth = navWidthVal
+    if (navHeightVal !== undefined) orientData.navHeight = navHeightVal
+    if (Object.keys(navLefts).length) orientData.navLefts = navLefts
+    const next: HitEditOverrides = { ...(allOverrides ?? {}), [iso2]: { ...(allOverrides?.[iso2] ?? {}), [orientation]: orientData } }
+    setSaveStatus('saving')
+    fetch('/api/hitedit-save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) })
+      .then((r) => r.ok ? r.json() : Promise.reject(r.status))
+      .then(() => {
+        onSaveOverrides?.(next)
+        try { localStorage.setItem('hitedit_overrides_cache', JSON.stringify(next)) } catch {}
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus((s) => s === 'saved' ? 'idle' : s), 2500)
+      })
+      .catch(() => {
+        onSaveOverrides?.(next)
+        try { localStorage.setItem('hitedit_overrides_cache', JSON.stringify(next)) } catch {}
+        setSaveStatus('error')
+        setTimeout(() => setSaveStatus((s) => s === 'error' ? 'idle' : s), 3000)
+      })
+  }
+
+  function doRevert() {
+    if (!challengeConfig) return
+    const iso2 = challengeConfig.iso2
+    const next: HitEditOverrides = { ...(allOverrides ?? {}) }
+    if (next[iso2]) {
+      const rest: { portrait?: HitEditOrientationOverrides; landscape?: HitEditOrientationOverrides } = { ...next[iso2] }
+      delete rest[orientation]
+      if (Object.keys(rest).length) next[iso2] = rest; else delete next[iso2]
+    }
+    fetch('/api/hitedit-save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) }).catch(() => {})
+    onSaveOverrides?.(next)
+    try { localStorage.setItem('hitedit_overrides_cache', JSON.stringify(next)) } catch {}
+  }
+
   const HS = 10
 
   function renderOverlayBox(id: string, label: string, r: HERect, color: string, alwaysEdit: boolean, pL: number | null, pT: number | null, pW: number | null, pH: number | null) {
@@ -488,6 +554,14 @@ function HitRegionEditor({ screen, orientation }: { screen: Screen; orientation:
         </button>
         <button type="button" onClick={() => setMarkers([])} style={heBtn('#444')}>Clear Markers</button>
         <button type="button" onClick={() => setOverrides({})} style={heBtn('#444')}>Reset Boxes</button>
+        {challengeConfig && (
+          <button type="button" onClick={doSave} style={heBtn(saveStatus === 'saved' ? '#1a5c1a' : saveStatus === 'error' ? '#6b1a1a' : saveStatus === 'saving' ? '#444' : '#1a3a5c')}>
+            {saveStatus === 'saved' ? `✓ Saved ${challengeConfig.iso2}` : saveStatus === 'saving' ? 'Saving…' : saveStatus === 'error' ? '⚠ File err · applied' : `Save ${challengeConfig.iso2} ${orientation}`}
+          </button>
+        )}
+        {challengeConfig && (
+          <button type="button" onClick={doRevert} style={heBtn('#5c1a1a')}>Revert {orientation}</button>
+        )}
         <button type="button" onClick={addCustomBox} style={heBtn('#1a5c1a')}>+ Add Region</button>
         <span style={{ flex: 1 }} />
         <button type="button" onClick={() => setVisible(false)} style={heBtn('#444')}>Hide ×</button>
@@ -615,12 +689,14 @@ function FlagColorChallengeGame({
   config,
   players,
   orientation,
+  overrides,
   onBack,
   onComplete,
 }: {
   config: CountryChallengeConfig
   players: string[]
   orientation: 'portrait' | 'landscape'
+  overrides?: HitEditOverrides | null
   onBack: () => void
   onComplete: () => void
 }) {
@@ -629,6 +705,7 @@ function FlagColorChallengeGame({
   // Countries with dedicated landscape art swap in its measured geometry;
   // the rest keep the calibrated portrait scene in both orientations.
   const landscape = orientation === 'landscape' ? config.landscape : undefined
+  const or = overrides?.[config.iso2]?.[orientation] ?? null
   const [roundPalette] = useState(() => buildRoundPalette(config))
   // Phase 1 draws the region boundary lines; the palette and coloring only
   // exist once phase reaches 'color'. Re-entry remounts this component, so
@@ -700,24 +777,23 @@ function FlagColorChallengeGame({
   }, [])
 
   const displayRegions = useMemo(() => landscape?.regions ?? round.regions, [landscape, round.regions])
-  const navItems = landscape
-    ? scene.nav.map((nav, index) => ({ ...nav, left: landscape.navLefts[index] ?? nav.left }))
-    : scene.nav
+  const navItems = scene.nav.map((nav, index) => ({
+    ...nav,
+    left: or?.navLefts?.[nav.id] ?? (landscape ? landscape.navLefts[index] ?? nav.left : nav.left),
+  }))
   const orbSlotIndexes = paletteSlotIndexes(scene.orbs.length, roundPalette.length)
   const orbItems = roundPalette.map((orb, index) => {
     const slotIndex = orbSlotIndexes[index]
     const portraitLeft = scene.orbs[slotIndex]?.left ?? '50%'
-    return {
-      ...orb,
-      left: landscape ? landscape.orbLefts[slotIndex] ?? portraitLeft : portraitLeft,
-    }
+    const configLeft = landscape ? landscape.orbLefts[slotIndex] ?? portraitLeft : portraitLeft
+    return { ...orb, left: or?.orbLefts?.[orb.id] ?? configLeft }
   })
   const sceneImage = landscape?.image ?? scene.image
   const flagOverlay = landscape?.flagOverlay ?? scene.flagOverlay
-  const orbTop = landscape?.orbTop ?? scene.orbTop
-  const navTop = landscape?.navTop ?? scene.navTop
-  const navWidth = landscape?.navWidth ?? scene.navWidth
-  const navHeight = landscape?.navHeight ?? scene.navHeight
+  const orbTop = or?.orbTop ?? landscape?.orbTop ?? scene.orbTop
+  const navTop = or?.navTop ?? landscape?.navTop ?? scene.navTop
+  const navWidth = or?.navWidth ?? landscape?.navWidth ?? scene.navWidth
+  const navHeight = or?.navHeight ?? landscape?.navHeight ?? scene.navHeight
   const selectedOrbHue = orbItems.find((orb) => orb.id === selectedOrb)?.hue || '#ffffff'
   const allComplete = round.regions.every((region) => filledRegions[region.id])
   const completedRegionCount = round.regions.filter((region) => filledRegions[region.id]).length
@@ -1789,6 +1865,15 @@ export default function FlagGamePage() {
   const { playSound } = useSoundHooks()
   const orientation = useViewportOrientation()
   const hitEdit = useHitEditMode()
+  const [hitEditOverrides, setHitEditOverrides] = useState<HitEditOverrides | null>(null)
+  useEffect(() => {
+    fetch('/hitedit-overrides.json')
+      .then((r) => r.ok ? r.json() as Promise<unknown> : {})
+      .then((data) => setHitEditOverrides(data && typeof data === 'object' && !Array.isArray(data) ? data as HitEditOverrides : {}))
+      .catch(() => {
+        try { const c = localStorage.getItem('hitedit_overrides_cache'); if (c) setHitEditOverrides(JSON.parse(c) as HitEditOverrides) } catch {}
+      })
+  }, [])
 
   const country = COUNTRY_BY_ISO2[activeCountryCode] || COUNTRIES[0]
   const palette = countryPalette(country)
@@ -1968,6 +2053,7 @@ export default function FlagGamePage() {
             config={activeChallengeConfig}
             players={[playerName]}
             orientation={orientation}
+            overrides={hitEditOverrides}
             onBack={() => setScreen('play')}
             onComplete={completeChallengeRound}
           />
@@ -2053,7 +2139,7 @@ export default function FlagGamePage() {
           </div>
         )}
       </div>
-      {hitEdit && <HitRegionEditor screen={screen} orientation={orientation} />}
+      {hitEdit && <HitRegionEditor screen={screen} orientation={orientation} challengeConfig={screen === 'flag-color-challenge' ? activeChallengeConfig : undefined} allOverrides={hitEditOverrides} onSaveOverrides={setHitEditOverrides} />}
     </main>
   )
 }
