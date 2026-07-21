@@ -1,19 +1,23 @@
 {
   "FR": {
     "landscape": {
-      "orbTop": "8.6%",
-      "orbLefts": {
-        "red": "20.0%",
-        "blue": "49.0%",
-        "white": "58.6%"
+      "orbTops": {
+        "white": "78.9%",
+        "red": "76.4%",
+        "blue": "79.1%"
       },
-      "navTop": "70.6%",
-      "navWidth": "5.6%",
-      "navHeight": "5.7%",
+      "orbLefts": {
+        "red": "39.5%",
+        "blue": "50.9%",
+        "white": "62.2%"
+      },
+      "navTop": "70.2%",
+      "navWidth": "5.0%",
+      "navHeight": "5.0%",
       "navLefts": {
-        "home": "71.4%",
+        "home": "67.4%",
         "passport": "81.3%",
-        "collections": "73.9%",
+        "collections": "21.2%",
         "settings": "81.5%"
       }
     }
