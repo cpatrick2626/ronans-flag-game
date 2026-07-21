@@ -216,3 +216,77 @@ test('play screen: saved override repositions PLAY SOLO button', async ({ page }
   expect(left).toBe('10%')
   expect(transform).toBe('none')
 })
+
+// ── Task 2 tests ──────────────────────────────────────────────────────────────
+
+test('per-gem orbTops override: one gem moved does not affect others', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        FR: {
+          portrait: {
+            orbTops: { blue: '20%' },
+          },
+        },
+      }),
+    })
+  )
+  await reachFranceGems(page)
+  const blueOrb = page.getByRole('button', { name: 'Blue orb' })
+  const redOrb = page.getByRole('button', { name: 'Red orb' })
+  const whiteOrb = page.getByRole('button', { name: 'White orb' })
+  await expect(blueOrb).toBeVisible()
+  await expect(redOrb).toBeAttached()
+  await expect(whiteOrb).toBeAttached()
+  const blueTop = await blueOrb.evaluate((el) => (el as HTMLElement).style.top)
+  expect(blueTop).toBe('20%')
+  // Red and white should not be '20%' — they use config default
+  const redTop = await redOrb.evaluate((el) => (el as HTMLElement).style.top)
+  const whiteTop = await whiteOrb.evaluate((el) => (el as HTMLElement).style.top)
+  expect(redTop).not.toBe('20%')
+  expect(whiteTop).not.toBe('20%')
+})
+
+test('no-override: all gems share default orbTop from config', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: '{}' })
+  )
+  await reachFranceGems(page)
+  const blueOrb = page.getByRole('button', { name: 'Blue orb' })
+  const redOrb = page.getByRole('button', { name: 'Red orb' })
+  await expect(blueOrb).toBeAttached()
+  await expect(redOrb).toBeAttached()
+  const blueTop = await blueOrb.evaluate((el) => (el as HTMLElement).style.top)
+  const redTop = await redOrb.evaluate((el) => (el as HTMLElement).style.top)
+  // Both should match the France config default orbTop
+  expect(blueTop).toBe('84.25%')
+  expect(redTop).toBe('84.25%')
+})
+
+test('legacy orbTop override applies to all gems when no orbTops present', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        FR: {
+          portrait: {
+            orbTop: '30%',
+          },
+        },
+      }),
+    })
+  )
+  await reachFranceGems(page)
+  const blueOrb = page.getByRole('button', { name: 'Blue orb' })
+  const redOrb = page.getByRole('button', { name: 'Red orb' })
+  await expect(blueOrb).toBeAttached()
+  await expect(redOrb).toBeAttached()
+  const blueTop = await blueOrb.evaluate((el) => (el as HTMLElement).style.top)
+  const redTop = await redOrb.evaluate((el) => (el as HTMLElement).style.top)
+  expect(blueTop).toBe('30%')
+  expect(redTop).toBe('30%')
+})

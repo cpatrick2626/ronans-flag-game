@@ -18,7 +18,7 @@ type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: n
 type FranceSpark = { key: number; x: number; y: number; hue: string; kind: 'orb' | 'correct' | 'wrong' | 'complete' }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
 type RoomSnapshot = { room: RoomState; note: string }
-type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string>; boxes?: Record<string, { left: string; top: string; width: string; height: string }> }
+type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; orbTops?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string>; boxes?: Record<string, { left: string; top: string; width: string; height: string }> }
 type HitEditOverrides = Record<string, { portrait?: HitEditOrientationOverrides; landscape?: HitEditOrientationOverrides }>
 
 const PLAYER_NAME_KEY = 'ronan_flag_player_name'
@@ -308,6 +308,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
   const markerIdRef = useRef(0)
   const boxIdRef = useRef(0)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [inputVals, setInputVals] = useState<Record<string, { left: string; top: string; width: string; height: string }>>({})
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function scanDom() {
@@ -424,14 +425,55 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
     setCustomRects((prev) => ({ ...prev, [id]: r }))
   }
 
+  function getRegionPctRaw(r: HERegion): { left: string; top: string; width: string; height: string } | null {
+    const ov = overrides[r.id]
+    const vL = ov?.vpLeft ?? r.vpLeft, vT = ov?.vpTop ?? r.vpTop
+    const vW = ov?.vpWidth ?? r.vpWidth, vH = ov?.vpHeight ?? r.vpHeight
+    const pct = parentPct(vL, vT, vW, vH, r.pL, r.pT, r.pW, r.pH)
+    if (!pct) return null
+    return { left: pct.left.replace('%', ''), top: pct.top.replace('%', ''), width: pct.width.replace('%', ''), height: pct.height.replace('%', '') }
+  }
+
+  function pctInputVal(r: HERegion, field: 'left' | 'top' | 'width' | 'height'): string {
+    return inputVals[r.id]?.[field] ?? getRegionPctRaw(r)?.[field] ?? ''
+  }
+
+  function applyPctInput(r: HERegion, field: 'left' | 'top' | 'width' | 'height', raw: string) {
+    const existing = inputVals[r.id] ?? { left: '', top: '', width: '', height: '' }
+    setInputVals((prev) => ({ ...prev, [r.id]: { ...existing, [field]: raw } }))
+    const num = parseFloat(raw)
+    if (!Number.isFinite(num)) return
+    if (r.pL === null || r.pT === null || !r.pW || !r.pH) return
+    const cur = overrides[r.id] ?? { vpLeft: r.vpLeft, vpTop: r.vpTop, vpWidth: r.vpWidth, vpHeight: r.vpHeight }
+    let { vpLeft, vpTop, vpWidth, vpHeight } = cur
+    if (field === 'left') vpLeft = r.pL + (num / 100) * r.pW
+    else if (field === 'top') vpTop = r.pT + (num / 100) * r.pH
+    else if (field === 'width') vpWidth = Math.max(4, (num / 100) * r.pW)
+    else vpHeight = Math.max(4, (num / 100) * r.pH)
+    setOverrides((prev) => ({ ...prev, [r.id]: { vpLeft, vpTop, vpWidth, vpHeight } }))
+  }
+
+  function syncInputFromRect(r: HERegion) {
+    const raw = getRegionPctRaw(r)
+    if (!raw) return
+    setInputVals((prev) => ({ ...prev, [r.id]: raw }))
+  }
+
   function doSave() {
     const saveKey = challengeConfig ? challengeConfig.iso2 : screen
     const existingOrient = allOverrides?.[saveKey]?.[orientation] ?? {}
     let orientData: HitEditOrientationOverrides
     if (challengeConfig) {
       const orbLefts: Record<string, string> = { ...(existingOrient.orbLefts ?? {}) }
+      // Start from existing per-gem tops; migrate shared orbTop → per-gem if no orbTops yet saved
+      const orbTops: Record<string, string> = { ...(existingOrient.orbTops ?? {}) }
+      if (!existingOrient.orbTops && existingOrient.orbTop) {
+        for (const region of regions) {
+          const gm = region.label.match(/^(.+) orb$/i)
+          if (gm) orbTops[gm[1].toLowerCase()] = existingOrient.orbTop!
+        }
+      }
       const navLefts: Record<string, string> = { ...(existingOrient.navLefts ?? {}) }
-      let orbTopVal: string | undefined = existingOrient.orbTop
       let navTopVal: string | undefined = existingOrient.navTop
       let navWidthVal: string | undefined = existingOrient.navWidth
       let navHeightVal: string | undefined = existingOrient.navHeight
@@ -445,12 +487,12 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
         const width = `${(vW / pW * 100).toFixed(1)}%`
         const height = `${(vH / pH * 100).toFixed(1)}%`
         const gemMatch = region.label.match(/^(.+) orb$/i)
-        if (gemMatch) { orbLefts[gemMatch[1].toLowerCase()] = left; orbTopVal = top }
+        if (gemMatch) { orbLefts[gemMatch[1].toLowerCase()] = left; orbTops[gemMatch[1].toLowerCase()] = top }
         const navMatch = challengeConfig.scene.nav.find((n) => n.label === region.label)
         if (navMatch) { navLefts[navMatch.id] = left; navTopVal = top; navWidthVal = width; navHeightVal = height }
       }
       orientData = {}
-      if (orbTopVal !== undefined) orientData.orbTop = orbTopVal
+      if (Object.keys(orbTops).length) orientData.orbTops = orbTops
       if (Object.keys(orbLefts).length) orientData.orbLefts = orbLefts
       if (navTopVal !== undefined) orientData.navTop = navTopVal
       if (navWidthVal !== undefined) orientData.navWidth = navWidthVal
@@ -569,7 +611,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
           {editMode ? 'Edit ON' : 'Inspect'}
         </button>
         <button type="button" onClick={() => setMarkers([])} style={heBtn('#444')}>Clear Markers</button>
-        <button type="button" onClick={() => setOverrides({})} style={heBtn('#444')}>Reset Boxes</button>
+        <button type="button" onClick={() => { setOverrides({}); setInputVals({}) }} style={heBtn('#444')}>Reset Boxes</button>
         <button type="button" onClick={doSave} style={heBtn(saveStatus === 'saved' ? '#1a5c1a' : saveStatus === 'error' ? '#6b1a1a' : saveStatus === 'saving' ? '#444' : '#1a3a5c')}>
           {saveStatus === 'saved' ? `✓ Saved ${challengeConfig?.iso2 ?? screen}` : saveStatus === 'saving' ? 'Saving…' : saveStatus === 'error' ? '⚠ File err · applied' : `Save ${challengeConfig?.iso2 ?? screen} ${orientation}`}
         </button>
@@ -635,19 +677,38 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
               const ov = overrides[r.id]
               const vL = ov?.vpLeft ?? r.vpLeft, vT = ov?.vpTop ?? r.vpTop
               const vW = ov?.vpWidth ?? r.vpWidth, vH = ov?.vpHeight ?? r.vpHeight
-              const pct = parentPct(vL, vT, vW, vH, r.pL, r.pT, r.pW, r.pH)
               const color = HE_COLORS[i % HE_COLORS.length]
+              const hasPct = r.pL !== null && r.pT !== null && r.pW && r.pH
+              const inputStyle: React.CSSProperties = {
+                width: 46, background: '#111', color: '#7bf', border: '1px solid #333',
+                borderRadius: 3, padding: '1px 3px', fontSize: 9, fontFamily: 'monospace',
+                outline: 'none', MozAppearance: 'textfield',
+              }
               return (
                 <div key={r.id} style={{ borderTop: '1px solid #222', paddingTop: 5, marginTop: 5 }}>
                   <div style={{ color, fontWeight: 'bold', fontSize: 11 }}>
                     {r.label}{ov ? <span style={{ color: '#ff9a00' }}> ✏</span> : null}
                   </div>
-                  {pct ? (
-                    <div style={{ color: '#7bf', lineHeight: 1.6 }}>
-                      left:{pct.left} top:{pct.top}<br />w:{pct.width} h:{pct.height}
+                  {hasPct ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px 6px', marginTop: 4 }}>
+                      {(['left', 'top', 'width', 'height'] as const).map((field) => (
+                        <label key={field} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 9 }}>
+                          <span style={{ color: '#888', minWidth: 14 }}>{field === 'width' ? 'w' : field === 'height' ? 'h' : field[0]}:</span>
+                          <input
+                            type="number"
+                            step="0.1"
+                            aria-label={`${field} for ${r.label}`}
+                            value={pctInputVal(r, field)}
+                            onChange={(e) => applyPctInput(r, field, e.target.value)}
+                            onBlur={() => syncInputFromRect(r)}
+                            style={inputStyle}
+                          />
+                          <span style={{ color: '#555' }}>%</span>
+                        </label>
+                      ))}
                     </div>
                   ) : null}
-                  <div style={{ color: '#555', fontSize: 9 }}>
+                  <div style={{ color: '#555', fontSize: 9, marginTop: 3 }}>
                     vp {Math.round(vL)},{Math.round(vT)} {Math.round(vW)}×{Math.round(vH)}px
                   </div>
                   <button type="button" style={{ ...heBtn(copied === r.id ? '#1a5c1a' : '#1e1e2e'), marginTop: 3 }}
@@ -794,15 +855,15 @@ function FlagColorChallengeGame({
     left: or?.navLefts?.[nav.id] ?? (landscape ? landscape.navLefts[index] ?? nav.left : nav.left),
   }))
   const orbSlotIndexes = paletteSlotIndexes(scene.orbs.length, roundPalette.length)
+  const defaultOrbTop = or?.orbTop ?? landscape?.orbTop ?? scene.orbTop
   const orbItems = roundPalette.map((orb, index) => {
     const slotIndex = orbSlotIndexes[index]
     const portraitLeft = scene.orbs[slotIndex]?.left ?? '50%'
     const configLeft = landscape ? landscape.orbLefts[slotIndex] ?? portraitLeft : portraitLeft
-    return { ...orb, left: or?.orbLefts?.[orb.id] ?? configLeft }
+    return { ...orb, left: or?.orbLefts?.[orb.id] ?? configLeft, top: or?.orbTops?.[orb.id] ?? defaultOrbTop }
   })
   const sceneImage = landscape?.image ?? scene.image
   const flagOverlay = landscape?.flagOverlay ?? scene.flagOverlay
-  const orbTop = or?.orbTop ?? landscape?.orbTop ?? scene.orbTop
   const navTop = or?.navTop ?? landscape?.navTop ?? scene.navTop
   const navWidth = or?.navWidth ?? landscape?.navWidth ?? scene.navWidth
   const navHeight = or?.navHeight ?? landscape?.navHeight ?? scene.navHeight
@@ -1326,10 +1387,10 @@ function FlagColorChallengeGame({
                   className="france-palette-gem france-palette-gem-hitbox"
                   style={{
                     left: orb.left,
-                    top: orbTop,
+                    top: orb.top,
                     '--gem-color': orb.hue,
                   } as CSSProperties}
-                  onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(orbTop), orb.hue)}
+                  onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(orb.top), orb.hue)}
                 >
                   <span className={`france-palette-gem-visual ${selectedOrb === orb.id ? 'is-selected' : ''} ${selectedOrb === orb.id && selectedPulse ? 'is-pulsing' : ''}`}>
                     <span className="france-palette-gem-shine" aria-hidden="true" />

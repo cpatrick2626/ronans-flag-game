@@ -1,14 +1,20 @@
 {
   "FR": {
     "landscape": {
-      "navTop": "80.1%",
+      "orbTop": "8.6%",
+      "orbLefts": {
+        "red": "20.0%",
+        "blue": "49.0%",
+        "white": "58.6%"
+      },
+      "navTop": "70.6%",
       "navWidth": "5.6%",
       "navHeight": "5.7%",
       "navLefts": {
-        "home": "57.6%",
-        "passport": "62.8%",
-        "collections": "69.9%",
-        "settings": "77.7%"
+        "home": "71.4%",
+        "passport": "81.3%",
+        "collections": "73.9%",
+        "settings": "81.5%"
       }
     }
   },
@@ -38,6 +44,18 @@
           "top": "70.0%",
           "width": "22.0%",
           "height": "12.0%"
+        }
+      }
+    }
+  },
+  "loading": {
+    "landscape": {
+      "boxes": {
+        "Play Ronan's Flag Game": {
+          "left": "20.6%",
+          "top": "80.8%",
+          "width": "59.9%",
+          "height": "11.8%"
         }
       }
     }
