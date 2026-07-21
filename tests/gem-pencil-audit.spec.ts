@@ -27,6 +27,40 @@ async function enterChallenge(page: import('@playwright/test').Page, country: 'F
   await page.mouse.up();
 }
 
+// Wide-desktop regression: at any viewport wider than the landscape art's
+// 2752/1536 (≈1.79) aspect ratio the shell must not overflow the viewport
+// vertically (banner stays fully visible) and the gem hitboxes must stay
+// registered to the artwork's gem positions (shell-relative 84.7% down).
+// France landscape orbTop is '84.7%' (lib/countries/france.ts).
+test('wide-desktop landscape: banner not clipped, gems aligned to artwork', async ({ page }) => {
+  // 1900x1000 ratio ≈ 1.9 > 1.79 — the range where cover-sizing clips the top.
+  await page.setViewportSize({ width: 1900, height: 1000 });
+  await enterChallenge(page, 'France');
+  await page.screenshot({ path: 'test-results/audit-france-1900x1000.png' });
+
+  const shellBox = await page.locator('.france-play-shell').first().boundingBox();
+  if (!shellBox) throw new Error('play shell not found');
+
+  // Banner must not be clipped: shell top must be at or below the viewport top.
+  expect(shellBox.y, 'landscape shell top must not be above viewport (banner clipped)').toBeGreaterThanOrEqual(-1);
+
+  // Each gem hitbox centre must lie at roughly orbTop (84.7%) down the shell.
+  // Tolerance ±2% of shell height (≤20px at 1000px shell) to cover subpixel
+  // rounding. With the cover-sizing bug this is off by ≈11% (≈110px).
+  const gems = await page.locator('.france-palette-gem').all();
+  expect(gems.length).toBeGreaterThan(0);
+  for (const gem of gems) {
+    const box = await gem.boundingBox();
+    if (!box) throw new Error('gem bounding box missing');
+    const centerY = box.y + box.height / 2;
+    const shellRelativeY = (centerY - shellBox.y) / shellBox.height;
+    expect(
+      Math.abs(shellRelativeY - 0.847),
+      `gem "${await gem.getAttribute('aria-label')}" Y should be ≈84.7% down the shell (got ${(shellRelativeY * 100).toFixed(1)}%)`
+    ).toBeLessThanOrEqual(0.02);
+  }
+});
+
 for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
   for (const country of ['France', 'Italy'] as const) {
     test(`audit ${country} ${viewport.width}x${viewport.height}`, async ({ page }) => {
@@ -47,9 +81,13 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
           label: button.getAttribute('aria-label'),
           target: { left: target.left, top: target.top, width: target.width, height: target.height },
           visual: { left: visual.left, top: visual.top, width: visual.width, height: visual.height },
-          centerDelta: {
+          offset: {
             x: (target.left + target.width / 2) - (visual.left + visual.width / 2),
             y: (target.top + target.height / 2) - (visual.top + visual.height / 2),
+          },
+          centers: {
+            target: { x: target.left + target.width / 2, y: target.top + target.height / 2 },
+            visual: { x: visual.left + visual.width / 2, y: visual.top + visual.height / 2 },
           },
           edgeOwners: points.map(([x, y]) => document.elementFromPoint(x, y)?.closest('button')?.getAttribute('aria-label') ?? null),
           hitboxStyle: getComputedStyle(button).transform,
@@ -59,6 +97,8 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
       }));
       console.log(JSON.stringify({ country, viewport, measurements }));
       for (const measurement of measurements) {
+        expect(Math.abs(measurement.offset.x), `${measurement.label} clickable X offset`).toBeLessThanOrEqual(3);
+        expect(Math.abs(measurement.offset.y), `${measurement.label} clickable Y offset`).toBeLessThanOrEqual(3);
         expect(Math.abs(measurement.target.left - measurement.visual.left)).toBeLessThanOrEqual(0.5);
         expect(Math.abs(measurement.target.top - measurement.visual.top)).toBeLessThanOrEqual(0.5);
         expect(Math.abs(measurement.target.width - measurement.visual.width)).toBeLessThanOrEqual(0.5);

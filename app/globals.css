@@ -2627,18 +2627,19 @@
   -webkit-user-drag: none;
 }
 
-/* The landscape source is itself a full-bleed 2752x1536 composition. Size
-   its coordinate shell like background-size: cover so the art fills both a
-   desktop and a rotated phone while every overlay stays registered to the
-   same source-pixel geometry. The portrait branch above remains unchanged. */
+/* The landscape shell uses contain (not cover) so the art never overflows the
+   viewport vertically. On viewports wider than 2752/1536 the shell is
+   height-constrained; the stage grid centres it horizontally. On narrower
+   landscape viewports the shell is width-constrained and fits exactly.
+   The portrait branch above remains unchanged. */
 [data-orientation='landscape'] .france-play-shell {
-  position: absolute;
-  left: calc((100vw - max(calc(100vw - var(--safe-x)), calc((100dvh - var(--safe-y)) * 2752 / 1536))) / 2);
-  bottom: 0;
-  width: max(calc(100vw - var(--safe-x)), calc((100dvh - var(--safe-y)) * 2752 / 1536));
-  max-height: none;
+  position: relative;
+  left: auto;
+  bottom: auto;
+  width: min(calc(100vw - var(--safe-x)), calc((100dvh - var(--safe-y)) * 2752 / 1536));
+  max-height: calc(100dvh - var(--safe-y));
   aspect-ratio: 2752 / 1536;
-  flex: 0 0 auto;
+  flex: none;
 }
 
 [data-orientation='landscape'] .france-player-row,
@@ -2652,13 +2653,10 @@
 }
 
 [data-orientation='landscape'] .france-play-controls {
-  position: fixed;
+  /* Keep absolute (not fixed) so left/top percentages on gem buttons are
+     relative to the shell, matching the landscape artwork's gem positions. */
+  position: absolute;
   inset: 0;
-}
-
-[data-orientation='landscape'] .france-palette-gem-hitbox,
-[data-orientation='landscape'] .france-nav-item {
-  top: calc(100% - var(--safe-bottom) - 38px) !important;
 }
 
 [data-orientation='landscape'] .france-palette-gem-hitbox {
