@@ -1,5 +1,45 @@
 {
   "FR": {
-    "landscape": {}
+    "landscape": {
+      "navTop": "80.1%",
+      "navWidth": "5.6%",
+      "navHeight": "5.7%",
+      "navLefts": {
+        "home": "57.6%",
+        "passport": "62.8%",
+        "collections": "69.9%",
+        "settings": "77.7%"
+      }
+    }
+  },
+  "home": {
+    "landscape": {
+      "boxes": {
+        "Canada": {
+          "left": "12.0%",
+          "top": "30.8%",
+          "width": "8.0%",
+          "height": "8.0%"
+        },
+        "Brazil": {
+          "left": "17.6%",
+          "top": "52.7%",
+          "width": "7.3%",
+          "height": "8.1%"
+        },
+        "Next Destination (France)": {
+          "left": "4.8%",
+          "top": "15.9%",
+          "width": "24.0%",
+          "height": "12.0%"
+        },
+        "Flags Collected": {
+          "left": "3.6%",
+          "top": "70.0%",
+          "width": "22.0%",
+          "height": "12.0%"
+        }
+      }
+    }
   }
 }
