@@ -2660,18 +2660,28 @@
 }
 
 [data-orientation='landscape'] .france-palette-gem-hitbox {
-  width: clamp(38px, 5cqw, 52px);
-  height: clamp(38px, 5cqw, 52px);
+  width: clamp(54px, 5cqw, 80px);
+  height: clamp(54px, 5cqw, 80px);
 }
 
 [data-orientation='landscape'] .france-palette-gem-visual {
-  width: clamp(38px, 5cqw, 52px);
-  height: clamp(38px, 5cqw, 52px);
+  width: clamp(54px, 5cqw, 80px);
+  height: clamp(54px, 5cqw, 80px);
 }
 
 [data-orientation='landscape'] .france-nav-item {
-  width: clamp(54px, 6.5cqw, 92px) !important;
-  height: clamp(38px, 9cqh, 52px) !important;
+  width: clamp(64px, 6.5cqw, 96px) !important;
+  height: clamp(60px, 9cqh, 76px) !important;
+}
+
+
+[data-orientation='landscape'] .france-nav-icon {
+  width: clamp(28px, 5.5cqw, 38px);
+  height: clamp(28px, 5.5cqw, 38px);
+}
+
+[data-orientation='landscape'] .france-nav-label {
+  font-size: clamp(10px, 2cqw, 14px);
 }
 
 /* Landscape pointer coordinates are viewport coordinates, while the pencil
@@ -2882,74 +2892,45 @@
   align-content: center;
   gap: clamp(1px, 0.5cqw, 3px);
   padding: 0;
-  border: 0;
-  border-radius: clamp(8px, 2.4cqw, 12px);
-  background: transparent;
-  color: rgba(70, 48, 28, 0.82);
-  text-shadow: 0 1px rgba(255, 247, 213, 0.64);
-  transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+  color: #ffffff;
+  transition: color 160ms ease, transform 160ms ease;
 }
 
 .france-nav-item.is-active {
-  background: transparent;
-  color: #173a72;
-  box-shadow: none;
+  color: #ffd54f;
 }
 
-.france-nav-item.is-active .france-nav-glyph {
-  border-radius: 50%;
-  background: rgba(255, 246, 205, 0.42);
-  box-shadow: 0 0 0 3px rgba(208, 148, 45, 0.2), 0 2px 5px rgba(91, 57, 17, 0.12);
-}
-
-.france-nav-glyph {
-  width: clamp(15px, 4.2cqw, 19px);
-  height: clamp(15px, 4.2cqw, 19px);
+.france-nav-icon {
   position: relative;
   display: block;
+  width: clamp(23px, 6.5cqw, 30px);
+  height: clamp(23px, 6.5cqw, 30px);
 }
 
-.france-nav-item.is-home .france-nav-glyph::before {
-  content: '⌂';
-  position: absolute;
-  inset: 0;
-  font-size: clamp(18px, 5cqw, 22px);
-  font-weight: 900;
-  line-height: 0.78;
+.france-nav-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgba(91, 57, 17, 0.18));
 }
 
-.france-nav-item.is-passport .france-nav-glyph {
-  border: 1.5px solid currentColor;
-  border-radius: 3px;
-}
-
-.france-nav-item.is-passport .france-nav-glyph::after {
+.france-nav-icon::after {
   content: '';
   position: absolute;
-  inset: 3px 4px;
-  border: 1px solid currentColor;
+  inset: -8px;
   border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 210, 80, 0.75) 0%, rgba(255, 180, 30, 0.35) 50%, transparent 72%);
+  opacity: 0;
+  transition: opacity 200ms ease;
 }
 
-.france-nav-item.is-collections .france-nav-glyph::before,
-.france-nav-item.is-collections .france-nav-glyph::after {
-  content: '';
-  position: absolute;
-  inset: 2px 4px 4px 2px;
-  border: 1.5px solid currentColor;
-  border-radius: 3px;
+.france-nav-item.is-active .france-nav-icon img {
+  filter: drop-shadow(0 0 3px rgba(208, 148, 45, 0.55));
 }
 
-.france-nav-item.is-collections .france-nav-glyph::after {
-  inset: 5px 1px 1px 5px;
-}
-
-.france-nav-item.is-settings .france-nav-glyph::before {
-  content: '⚙';
-  position: absolute;
-  inset: 0;
-  font-size: clamp(15px, 4.2cqw, 19px);
-  line-height: 1;
+.france-nav-item.is-active .france-nav-icon::after {
+  opacity: 1;
 }
 
 .france-nav-label {
@@ -2961,6 +2942,7 @@
   line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75), 0 0 6px rgba(0, 0, 0, 0.45);
 }
 
 .france-spark-burst {

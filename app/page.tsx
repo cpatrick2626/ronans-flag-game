@@ -281,6 +281,7 @@ type HERegion = {
   id: string; label: string
   vpLeft: number; vpTop: number; vpWidth: number; vpHeight: number
   pL: number | null; pT: number | null; pW: number | null; pH: number | null
+  elOL: number; elOT: number
 }
 type HEDrag = {
   type: 'move' | 'resize-tl' | 'resize-tr' | 'resize-bl' | 'resize-br'
@@ -333,6 +334,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
         label: rawLabel || 'button',
         vpLeft: rect.left, vpTop: rect.top, vpWidth: rect.width, vpHeight: rect.height,
         pL: pr?.left ?? null, pT: pr?.top ?? null, pW: pr?.width ?? null, pH: pr?.height ?? null,
+        elOL: el.offsetLeft, elOT: el.offsetTop,
       })
     }
     setRegions(next)
@@ -489,10 +491,10 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
       for (const region of regions) {
         const ov = overrides[region.id]
         if (!ov || region.pL === null || region.pT === null || !region.pW || !region.pH) continue
-        const { pL, pT, pW, pH } = region
+        const { pW, pH } = region
         const { vpLeft: vL, vpTop: vT, vpWidth: vW, vpHeight: vH } = ov
-        const left = `${((vL - pL) / pW * 100).toFixed(1)}%`
-        const top = `${((vT - pT) / pH * 100).toFixed(1)}%`
+        const left = `${((region.elOL + (vL - region.vpLeft)) / pW * 100).toFixed(1)}%`
+        const top = `${((region.elOT + (vT - region.vpTop)) / pH * 100).toFixed(1)}%`
         const width = `${(vW / pW * 100).toFixed(1)}%`
         const height = `${(vH / pH * 100).toFixed(1)}%`
         const gemMatch = region.label.match(/^(.+) orb$/i)
@@ -512,11 +514,11 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
       for (const region of regions) {
         const ov = overrides[region.id]
         if (!ov || region.pL === null || region.pT === null || !region.pW || !region.pH) continue
-        const { pL, pT, pW, pH } = region
+        const { pW, pH } = region
         const { vpLeft: vL, vpTop: vT, vpWidth: vW, vpHeight: vH } = ov
         boxes[region.label] = {
-          left: `${((vL - pL) / pW * 100).toFixed(1)}%`,
-          top: `${((vT - pT) / pH * 100).toFixed(1)}%`,
+          left: `${((region.elOL + (vL - region.vpLeft)) / pW * 100).toFixed(1)}%`,
+          top: `${((region.elOT + (vT - region.vpTop)) / pH * 100).toFixed(1)}%`,
           width: `${(vW / pW * 100).toFixed(1)}%`,
           height: `${(vH / pH * 100).toFixed(1)}%`,
         }
@@ -1412,11 +1414,14 @@ function FlagColorChallengeGame({
                   type="button"
                   aria-label={nav.label}
                   aria-pressed={activeNav === nav.id}
+                  data-tab={nav.id}
                   className={`france-nav-item is-${nav.id} ${activeNav === nav.id ? 'is-active' : ''}`}
                   style={{ left: nav.left, top: nav.top, width: nav.width, height: nav.height }}
                   onClick={() => setActiveNav(nav.id)}
                 >
-                  <span className="france-nav-glyph" aria-hidden="true" />
+                  <span className="france-nav-icon" aria-hidden="true">
+                    <img src={`/assets/nav/${nav.id}.png`} alt="" />
+                  </span>
                   <span className="france-nav-label">{nav.label}</span>
                 </button>
               ))}

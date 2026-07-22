@@ -340,3 +340,69 @@ test('legacy orbTop override applies to all gems when no orbTops present', async
   expect(blueTop).toBe('30%')
   expect(redTop).toBe('30%')
 })
+
+// ── Coordinate fix regression tests ───────────────────────────────────────────
+// These guard the doSave coordinate frame fix: elements with transform:translate(-50%,-50%)
+// must have their CSS left/top (= offsetLeft/offsetTop) match the saved % * parentSize.
+// If the buggy formula (vpLeft - parentLeft) were used, these would fail by ~half an element width.
+
+async function checkOrbCoordInvariant(page: import('@playwright/test').Page, knownLeft: string, knownTop: string) {
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ FR: { portrait: { orbLefts: { blue: knownLeft }, orbTops: { blue: knownTop } } } }),
+    })
+  )
+  await reachFranceGems(page)
+  const blueOrb = page.getByRole('button', { name: 'Blue orb' })
+  await expect(blueOrb).toBeAttached()
+  const check = await blueOrb.evaluate((el) => {
+    const e = el as HTMLElement
+    const parent = e.offsetParent as HTMLElement
+    if (!parent) return null
+    return {
+      cssLeftPct: parseFloat(e.style.left),
+      cssTopPct: parseFloat(e.style.top),
+      derivedLeftPct: (e.offsetLeft / parent.offsetWidth) * 100,
+      derivedTopPct: (e.offsetTop / parent.offsetHeight) * 100,
+    }
+  })
+  return check
+}
+
+test('coord fix: portrait gem offsetLeft matches saved CSS left% (invariant for doSave fix)', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  const check = await checkOrbCoordInvariant(page, '40%', '70%')
+  expect(check).toBeTruthy()
+  // offsetLeft / parentWidth * 100 must match the CSS left% within 1%
+  // (the buggy formula would be ~10-15% off due to translate(-50%,-50%) element width)
+  expect(Math.abs(check!.derivedLeftPct - check!.cssLeftPct)).toBeLessThan(1.0)
+  expect(Math.abs(check!.derivedTopPct - check!.cssTopPct)).toBeLessThan(1.0)
+})
+
+test('coord fix: landscape gem offsetLeft matches saved CSS left% (invariant for doSave fix)', async ({ page }) => {
+  await page.setViewportSize({ width: 844, height: 390 })
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ FR: { landscape: { orbLefts: { blue: '35%' }, orbTops: { blue: '55%' } } } }),
+    })
+  )
+  await reachFranceGems(page)
+  const blueOrb = page.getByRole('button', { name: 'Blue orb' })
+  await expect(blueOrb).toBeAttached()
+  const check = await blueOrb.evaluate((el) => {
+    const e = el as HTMLElement
+    const parent = e.offsetParent as HTMLElement
+    if (!parent) return null
+    return {
+      cssLeftPct: parseFloat(e.style.left),
+      cssTopPct: parseFloat(e.style.top),
+      derivedLeftPct: (e.offsetLeft / parent.offsetWidth) * 100,
+      derivedTopPct: (e.offsetTop / parent.offsetHeight) * 100,
+    }
+  })
+  expect(check).toBeTruthy()
+  expect(Math.abs(check!.derivedLeftPct - check!.cssLeftPct)).toBeLessThan(1.0)
+  expect(Math.abs(check!.derivedTopPct - check!.cssTopPct)).toBeLessThan(1.0)
+})
