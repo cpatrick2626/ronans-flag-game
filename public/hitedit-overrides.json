@@ -11,14 +11,29 @@
         "blue": "50.9%",
         "white": "62.2%"
       },
-      "navTop": "70.2%",
-      "navWidth": "5.0%",
-      "navHeight": "5.0%",
+      "navTops": {
+        "home": "87.0%",
+        "passport": "87.0%",
+        "collections": "87.0%",
+        "settings": "87.0%"
+      },
+      "navWidths": {
+        "home": "5.2%",
+        "passport": "5.2%",
+        "collections": "5.2%",
+        "settings": "5.2%"
+      },
+      "navHeights": {
+        "home": "7.4%",
+        "passport": "7.4%",
+        "collections": "7.0%",
+        "settings": "7.0%"
+      },
       "navLefts": {
-        "home": "67.4%",
-        "passport": "81.3%",
-        "collections": "21.2%",
-        "settings": "81.5%"
+        "home": "59.0%",
+        "passport": "64.6%",
+        "collections": "70.1%",
+        "settings": "75.7%"
       }
     }
   },
@@ -38,16 +53,82 @@
           "height": "8.1%"
         },
         "Next Destination (France)": {
-          "left": "4.8%",
+          "left": "3.8%",
           "top": "15.9%",
-          "width": "24.0%",
-          "height": "12.0%"
+          "width": "33.3%",
+          "height": "10.1%"
         },
         "Flags Collected": {
           "left": "3.6%",
           "top": "70.0%",
           "width": "22.0%",
           "height": "12.0%"
+        },
+        "Egypt": {
+          "left": "-45.1%",
+          "top": "10.5%",
+          "width": "8.0%",
+          "height": "8.0%"
+        },
+        "India": {
+          "left": "78.7%",
+          "top": "52.9%",
+          "width": "9.4%",
+          "height": "6.7%"
+        },
+        "Mystery": {
+          "left": "79.1%",
+          "top": "43.7%",
+          "width": "8.0%",
+          "height": "8.0%"
+        },
+        "Europe Progress": {
+          "left": "75.5%",
+          "top": "14.4%",
+          "width": "20.9%",
+          "height": "12.3%"
+        },
+        "Eiffel Tower": {
+          "left": "71.6%",
+          "top": "71.0%",
+          "width": "26.2%",
+          "height": "12.3%"
+        },
+        "Home nav": {
+          "left": "7.5%",
+          "top": "88.5%",
+          "width": "9.8%",
+          "height": "8.4%"
+        },
+        "Map nav": {
+          "left": "27.0%",
+          "top": "86.8%",
+          "width": "19.8%",
+          "height": "10.7%"
+        },
+        "Passport nav": {
+          "left": "49.2%",
+          "top": "87.7%",
+          "width": "11.5%",
+          "height": "8.5%"
+        },
+        "Collections nav": {
+          "left": "63.9%",
+          "top": "87.7%",
+          "width": "12.4%",
+          "height": "8.1%"
+        },
+        "Settings nav": {
+          "left": "80.3%",
+          "top": "87.9%",
+          "width": "11.9%",
+          "height": "8.5%"
+        },
+        "Star button": {
+          "left": "85.7%",
+          "top": "4.4%",
+          "width": "13.3%",
+          "height": "6.0%"
         }
       }
     }
@@ -61,6 +142,44 @@
           "width": "59.9%",
           "height": "11.8%"
         }
+      }
+    }
+  },
+  "IT": {
+    "landscape": {
+      "orbTops": {
+        "red": "79.0%",
+        "green": "79.4%",
+        "white": "80.0%"
+      },
+      "orbLefts": {
+        "red": "40.1%",
+        "green": "51.6%",
+        "white": "61.8%"
+      },
+      "navTops": {
+        "home": "89.5%",
+        "passport": "89.3%",
+        "collections": "89.1%",
+        "settings": "89.3%"
+      },
+      "navWidths": {
+        "home": "5.2%",
+        "passport": "5.2%",
+        "collections": "5.2%",
+        "settings": "5.2%"
+      },
+      "navHeights": {
+        "home": "7.4%",
+        "passport": "7.4%",
+        "collections": "7.4%",
+        "settings": "7.4%"
+      },
+      "navLefts": {
+        "home": "74.6%",
+        "passport": "80.4%",
+        "collections": "86.4%",
+        "settings": "92.2%"
       }
     }
   }
