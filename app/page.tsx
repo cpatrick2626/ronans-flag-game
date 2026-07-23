@@ -2231,8 +2231,8 @@ export default function FlagGamePage() {
         )}
 
         {reward && (
-          <div className="fixed inset-0 z-50 overflow-y-auto bg-[#2a1704]/60">
-            <div className="flex min-h-full items-center justify-center px-4 py-6">
+          <div className="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto bg-[#2a1704]/60">
+            <div className="flex min-h-full items-center justify-center py-6" style={{ paddingLeft: 'max(1rem, var(--safe-left))', paddingRight: 'max(1rem, var(--safe-right))' }}>
               <div className="reward-panel relative w-full min-w-0 max-w-3xl overflow-hidden rounded-[30px] p-5 text-[#5f3a0c] sm:p-6">
                 <div className="reward-burst" aria-hidden="true"><span /><span /><span /><span /><span /><span /><span /><span /></div>
                 <div className="relative min-w-0">
