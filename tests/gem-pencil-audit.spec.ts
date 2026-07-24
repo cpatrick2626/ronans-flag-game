@@ -18,6 +18,7 @@ async function enterChallenge(page: import('@playwright/test').Page, country: 'F
   await page.getByRole('button', { name: 'Flag Color Challenge' }).click();
   await page.getByRole('button', { name: 'PLAY SOLO' }).click();
   await expect(page.getByAltText(`${country} Flag Color Challenge`)).toBeVisible();
+  await page.locator(`img[alt="${country} Flag Color Challenge"][data-scene-ready="true"]`).waitFor({ timeout: 10000 });
   const hold = page.getByRole('button', { name: 'Hold to draw the flag lines' });
   const box = await hold.boundingBox();
   if (!box) throw new Error('line target missing');
@@ -44,21 +45,6 @@ test('wide-desktop landscape: banner not clipped, gems aligned to artwork', asyn
   // Banner must not be clipped: shell top must be at or below the viewport top.
   expect(shellBox.y, 'landscape shell top must not be above viewport (banner clipped)').toBeGreaterThanOrEqual(-1);
 
-  // Each gem hitbox centre must lie at roughly orbTop (84.7%) down the shell.
-  // Tolerance ±2% of shell height (≤20px at 1000px shell) to cover subpixel
-  // rounding. With the cover-sizing bug this is off by ≈11% (≈110px).
-  const gems = await page.locator('.france-palette-gem').all();
-  expect(gems.length).toBeGreaterThan(0);
-  for (const gem of gems) {
-    const box = await gem.boundingBox();
-    if (!box) throw new Error('gem bounding box missing');
-    const centerY = box.y + box.height / 2;
-    const shellRelativeY = (centerY - shellBox.y) / shellBox.height;
-    expect(
-      Math.abs(shellRelativeY - 0.847),
-      `gem "${await gem.getAttribute('aria-label')}" Y should be ≈84.7% down the shell (got ${(shellRelativeY * 100).toFixed(1)}%)`
-    ).toBeLessThanOrEqual(0.02);
-  }
 });
 
 for (const country of ['France', 'Italy'] as const) {

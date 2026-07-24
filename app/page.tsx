@@ -18,7 +18,7 @@ type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: n
 type FranceSpark = { key: number; x: number; y: number; hue: string; kind: 'orb' | 'correct' | 'wrong' | 'complete' }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
 type RoomSnapshot = { room: RoomState; note: string }
-type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; orbTops?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string>; navTops?: Record<string, string>; navWidths?: Record<string, string>; navHeights?: Record<string, string>; boxes?: Record<string, { left: string; top: string; width: string; height: string }> }
+type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; orbTops?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string>; navTops?: Record<string, string>; navWidths?: Record<string, string>; navHeights?: Record<string, string>; playerLeft?: string; playerTop?: string; boxes?: Record<string, { left: string; top: string; width: string; height: string }> }
 type HitEditOverrides = Record<string, { portrait?: HitEditOrientationOverrides; landscape?: HitEditOrientationOverrides }>
 
 const PLAYER_NAME_KEY = 'ronan_flag_player_name'
@@ -314,7 +314,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function scanDom() {
     if (isDraggingRef.current) return
-    const els = document.querySelectorAll<HTMLElement>('button, [role="button"], input:not([type="hidden"])')
+    const els = document.querySelectorAll<HTMLElement>('button, [role="button"], input:not([type="hidden"]), [data-hitedit-region]')
     const next: HERegion[] = []
     for (const el of els) {
       if (el.closest('#he-overlay')) continue
@@ -502,6 +502,21 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
         const navMatch = challengeConfig.scene.nav.find((n) => n.label === region.label)
         if (navMatch) { navLefts[navMatch.id] = left; navTops[navMatch.id] = top; navWidths[navMatch.id] = width; navHeights[navMatch.id] = height }
       }
+      const playerRegion = regions.find((r) => r.label === 'Player progress')
+      const playerOv = playerRegion ? overrides[playerRegion.id] : null
+      let playerLeft: string | undefined
+      let playerTop: string | undefined
+      if (playerOv && playerRegion) {
+        const { vpLeft: pvL, vpTop: pvT } = playerOv
+        // For position:fixed (landscape, null offsetParent) use viewport as parent; for
+        // position:absolute (portrait) use the actual offsetParent dimensions.
+        const pW = playerRegion.pW ?? window.innerWidth
+        const pH = playerRegion.pH ?? window.innerHeight
+        const pL2 = playerRegion.pL ?? 0
+        const pT2 = playerRegion.pT ?? 0
+        playerLeft = `${((pvL - pL2) / pW * 100).toFixed(1)}%`
+        playerTop = `${((pvT - pT2) / pH * 100).toFixed(1)}%`
+      }
       orientData = {}
       if (Object.keys(orbTops).length) orientData.orbTops = orbTops
       if (Object.keys(orbLefts).length) orientData.orbLefts = orbLefts
@@ -509,6 +524,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
       if (Object.keys(navWidths).length) orientData.navWidths = navWidths
       if (Object.keys(navHeights).length) orientData.navHeights = navHeights
       if (Object.keys(navLefts).length) orientData.navLefts = navLefts
+      if (playerLeft !== undefined) { orientData.playerLeft = playerLeft; orientData.playerTop = playerTop }
     } else {
       const boxes: Record<string, { left: string; top: string; width: string; height: string }> = { ...(existingOrient.boxes ?? {}) }
       for (const region of regions) {
@@ -831,6 +847,7 @@ function FlagColorChallengeGame({
     round.fillPatterns ?? ALL_FILL_PATTERNS,
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   ))
+  const [sceneImageReady, setSceneImageReady] = useState(false)
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -878,6 +895,8 @@ function FlagColorChallengeGame({
   })
   const sceneImage = landscape?.image ?? scene.image
   const flagOverlay = landscape?.flagOverlay ?? scene.flagOverlay
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const playerRowStyle = useMemo<CSSProperties | undefined>(() => or?.playerLeft ? { left: or.playerLeft, top: or.playerTop, bottom: 'auto', transform: 'none' } : undefined, [or?.playerLeft, or?.playerTop])
   const selectedOrbHue = orbItems.find((orb) => orb.id === selectedOrb)?.hue || '#ffffff'
   const allComplete = round.regions.every((region) => filledRegions[region.id])
   const completedRegionCount = round.regions.filter((region) => filledRegions[region.id]).length
@@ -1107,6 +1126,15 @@ function FlagColorChallengeGame({
     restorePencilHome()
   }
 
+  function handleSceneLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    const img = e.currentTarget
+    if ('decode' in img) {
+      img.decode().catch(() => undefined).finally(() => setSceneImageReady(true))
+    } else {
+      setSceneImageReady(true)
+    }
+  }
+
   // Phase 1: one held press (anywhere on the flag) draws the dotted boundary
   // guides into solid lines. Releasing pauses; re-holding resumes. Reuses the
   // rAF hold-progress pattern from the coloring phase below.
@@ -1141,7 +1169,7 @@ function FlagColorChallengeGame({
   }
 
   function startLineHold(event: React.PointerEvent | null) {
-    if (phase !== 'draw' || lineHoldRef.current) return
+    if (phase !== 'draw' || lineHoldRef.current || !sceneImageReady) return
     // Touch pointers implicitly capture; release so sliding off the flag
     // pauses the draw, matching the coloring hold behavior.
     if (event && event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -1218,8 +1246,15 @@ function FlagColorChallengeGame({
               alt={scene.imageAlt}
               className="france-play-image"
               draggable={false}
+              onLoad={handleSceneLoad}
+              data-scene-ready={sceneImageReady ? 'true' : undefined}
             />
-            <div className={`france-player-row ${players.length === 1 ? 'is-solo' : ''}`} aria-label="Player progress">
+            <div
+              className={`france-player-row ${players.length === 1 ? 'is-solo' : ''}`}
+              aria-label="Player progress"
+              data-hitedit-region="player-row"
+              style={playerRowStyle}
+            >
               {players.map((name, index) => (
                 <div className="france-player-pill" key={`${name}-${index}`}>
                   <span className="france-player-avatar" aria-hidden="true">

@@ -59,6 +59,7 @@ async function holdRegion(page: import('@playwright/test').Page, region: import(
 async function drawTheLines(page: import('@playwright/test').Page) {
   const holdTarget = page.getByRole('button', { name: 'Hold to draw the flag lines' });
   await expect(holdTarget).toBeAttached();
+  await page.locator('img.france-play-image[data-scene-ready="true"]').waitFor({ timeout: 10000 });
   const box = await holdTarget.boundingBox();
   if (!box) throw new Error('line hold target is not visible');
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

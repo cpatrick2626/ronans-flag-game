@@ -21,6 +21,7 @@ async function reachFranceGems(page: import('@playwright/test').Page) {
   // Draw-the-lines phase: hold until palette appears
   const holdTarget = page.getByRole('button', { name: 'Hold to draw the flag lines' })
   await expect(holdTarget).toBeAttached()
+  await page.locator('img.france-play-image[data-scene-ready="true"]').waitFor({ timeout: 10000 })
   const box = await holdTarget.boundingBox()
   if (!box) throw new Error('line hold target not visible')
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
