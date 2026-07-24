@@ -219,6 +219,139 @@ test('hitedit round-trip: FR landscape gem positions survive save → reload', a
   expect(Math.abs(parsePct(renderedTop)  - parsePct(KNOWN_TOP))).toBeLessThan(0.5);
 });
 
+// ── Part 2 guard: independent hitbox and visual sizes ────────────────────────
+// These tests prove that orbHitboxWidths/Heights and orbVisualWidths/Heights are
+// stored and applied as separate dimensions — a hitbox larger than its visible icon
+// must survive save → reload with both sizes intact and unequal.
+
+test('hitedit round-trip: gem hitbox and visual sizes are independent and survive reload (portrait)', async ({ page }) => {
+  const HITBOX_W = '20.0%'
+  const HITBOX_H = '20.0%'
+  const VISUAL_W = '8.0%'
+  const VISUAL_H = '8.0%'
+
+  const mockedOverrides = {
+    FR: {
+      portrait: {
+        orbLefts: { blue: '40.0%' },
+        orbTops: { blue: '70.0%' },
+        orbHitboxWidths: { blue: HITBOX_W },
+        orbHitboxHeights: { blue: HITBOX_H },
+        orbVisualWidths: { blue: VISUAL_W },
+        orbVisualHeights: { blue: VISUAL_H },
+      },
+    },
+  }
+
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify(mockedOverrides) }),
+  )
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/?hitedit=1')
+  await navigateToFranceGems(page, 'Blue orb')
+
+  const blueOrb = page.getByRole('button', { name: 'Blue orb' })
+  await expect(blueOrb).toBeAttached()
+
+  // Hitbox size is applied via inline width/height on the button
+  const hitboxW = await blueOrb.evaluate((el) => (el as HTMLElement).style.width)
+  const hitboxH = await blueOrb.evaluate((el) => (el as HTMLElement).style.height)
+  expect(hitboxW, 'hitbox width must be set').toBeTruthy()
+  expect(Math.abs(parsePct(hitboxW) - parsePct(HITBOX_W)), 'hitbox width within 0.5%').toBeLessThan(0.5)
+  expect(Math.abs(parsePct(hitboxH) - parsePct(HITBOX_H)), 'hitbox height within 0.5%').toBeLessThan(0.5)
+
+  // Visual size is applied via CSS custom properties on the button
+  const visualW = await blueOrb.evaluate((el) => (el as HTMLElement).style.getPropertyValue('--gem-visual-w').trim())
+  const visualH = await blueOrb.evaluate((el) => (el as HTMLElement).style.getPropertyValue('--gem-visual-h').trim())
+  expect(visualW, 'visual width CSS var must be set').toBeTruthy()
+  expect(Math.abs(parsePct(visualW) - parsePct(VISUAL_W)), 'visual width within 0.5%').toBeLessThan(0.5)
+  expect(Math.abs(parsePct(visualH) - parsePct(VISUAL_H)), 'visual height within 0.5%').toBeLessThan(0.5)
+
+  // The whole point: hitbox must differ from visual
+  expect(parsePct(hitboxW)).not.toBeCloseTo(parsePct(visualW), 0)
+
+  // Reload and verify both survive
+  await page.reload()
+  await navigateToFranceGems(page, 'Blue orb')
+
+  const blueOrb2 = page.getByRole('button', { name: 'Blue orb' })
+  await expect(blueOrb2).toBeAttached()
+
+  const hitboxW2 = await blueOrb2.evaluate((el) => (el as HTMLElement).style.width)
+  const hitboxH2 = await blueOrb2.evaluate((el) => (el as HTMLElement).style.height)
+  const visualW2 = await blueOrb2.evaluate((el) => (el as HTMLElement).style.getPropertyValue('--gem-visual-w').trim())
+  const visualH2 = await blueOrb2.evaluate((el) => (el as HTMLElement).style.getPropertyValue('--gem-visual-h').trim())
+
+  expect(Math.abs(parsePct(hitboxW2) - parsePct(HITBOX_W)), 'reloaded hitbox width within 0.5%').toBeLessThan(0.5)
+  expect(Math.abs(parsePct(hitboxH2) - parsePct(HITBOX_H)), 'reloaded hitbox height within 0.5%').toBeLessThan(0.5)
+  expect(Math.abs(parsePct(visualW2) - parsePct(VISUAL_W)), 'reloaded visual width within 0.5%').toBeLessThan(0.5)
+  expect(Math.abs(parsePct(visualH2) - parsePct(VISUAL_H)), 'reloaded visual height within 0.5%').toBeLessThan(0.5)
+  expect(parsePct(hitboxW2)).not.toBeCloseTo(parsePct(visualW2), 0)
+})
+
+test('hitedit round-trip: gem hitbox and visual sizes are independent and survive reload (landscape)', async ({ page }) => {
+  const HITBOX_W = '15.0%'
+  const HITBOX_H = '15.0%'
+  const VISUAL_W = '6.0%'
+  const VISUAL_H = '6.0%'
+
+  const mockedOverrides = {
+    FR: {
+      landscape: {
+        orbLefts: { blue: '35.0%' },
+        orbTops: { blue: '55.0%' },
+        orbHitboxWidths: { blue: HITBOX_W },
+        orbHitboxHeights: { blue: HITBOX_H },
+        orbVisualWidths: { blue: VISUAL_W },
+        orbVisualHeights: { blue: VISUAL_H },
+      },
+    },
+  }
+
+  await page.route('/hitedit-overrides.json', (route) =>
+    route.fulfill({ contentType: 'application/json', body: JSON.stringify(mockedOverrides) }),
+  )
+
+  await page.setViewportSize({ width: 844, height: 390 })
+  await page.goto('/?hitedit=1')
+  await navigateToFranceGems(page, 'Blue orb')
+
+  const blueOrb = page.getByRole('button', { name: 'Blue orb' })
+  await expect(blueOrb).toBeAttached()
+
+  const hitboxW = await blueOrb.evaluate((el) => (el as HTMLElement).style.width)
+  const hitboxH = await blueOrb.evaluate((el) => (el as HTMLElement).style.height)
+  expect(hitboxW, 'hitbox width must be set (landscape)').toBeTruthy()
+  expect(Math.abs(parsePct(hitboxW) - parsePct(HITBOX_W))).toBeLessThan(0.5)
+  expect(Math.abs(parsePct(hitboxH) - parsePct(HITBOX_H))).toBeLessThan(0.5)
+
+  const visualW = await blueOrb.evaluate((el) => (el as HTMLElement).style.getPropertyValue('--gem-visual-w').trim())
+  const visualH = await blueOrb.evaluate((el) => (el as HTMLElement).style.getPropertyValue('--gem-visual-h').trim())
+  expect(visualW, 'visual width CSS var must be set (landscape)').toBeTruthy()
+  expect(Math.abs(parsePct(visualW) - parsePct(VISUAL_W))).toBeLessThan(0.5)
+  expect(Math.abs(parsePct(visualH) - parsePct(VISUAL_H))).toBeLessThan(0.5)
+  expect(parsePct(hitboxW)).not.toBeCloseTo(parsePct(visualW), 0)
+
+  // Reload verification
+  await page.reload()
+  await navigateToFranceGems(page, 'Blue orb')
+
+  const blueOrb2 = page.getByRole('button', { name: 'Blue orb' })
+  await expect(blueOrb2).toBeAttached()
+
+  const hitboxW2 = await blueOrb2.evaluate((el) => (el as HTMLElement).style.width)
+  const hitboxH2 = await blueOrb2.evaluate((el) => (el as HTMLElement).style.height)
+  const visualW2 = await blueOrb2.evaluate((el) => (el as HTMLElement).style.getPropertyValue('--gem-visual-w').trim())
+  const visualH2 = await blueOrb2.evaluate((el) => (el as HTMLElement).style.getPropertyValue('--gem-visual-h').trim())
+
+  expect(Math.abs(parsePct(hitboxW2) - parsePct(HITBOX_W))).toBeLessThan(0.5)
+  expect(Math.abs(parsePct(hitboxH2) - parsePct(HITBOX_H))).toBeLessThan(0.5)
+  expect(Math.abs(parsePct(visualW2) - parsePct(VISUAL_W))).toBeLessThan(0.5)
+  expect(Math.abs(parsePct(visualH2) - parsePct(VISUAL_H))).toBeLessThan(0.5)
+  expect(parsePct(hitboxW2)).not.toBeCloseTo(parsePct(visualW2), 0)
+})
+
 // ── Test 3: Boxes branch, loading screen portrait ────────────────────────────
 
 test('hitedit round-trip: loading screen box positions survive save → reload', async ({ page }) => {

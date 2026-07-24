@@ -18,7 +18,7 @@ type FillHold = { regionId: string; pointerId: number | null; scenePoint: { x: n
 type FranceSpark = { key: number; x: number; y: number; hue: string; kind: 'orb' | 'correct' | 'wrong' | 'complete' }
 type RoomState = { id: string; code: string; hostName: string; guestName?: string; mode: Exclude<Mode, 'solo'>; createdAt: string; updatedAt: string; status: RoomStatus; activeCountryCode: string; rounds: string[]; roundIndex: number; scores: Record<string, number>; lastMoveAt?: string }
 type RoomSnapshot = { room: RoomState; note: string }
-type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; orbTops?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string>; navTops?: Record<string, string>; navWidths?: Record<string, string>; navHeights?: Record<string, string>; playerLeft?: string; playerTop?: string; boxes?: Record<string, { left: string; top: string; width: string; height: string }> }
+type HitEditOrientationOverrides = { orbTop?: string; orbLefts?: Record<string, string>; orbTops?: Record<string, string>; orbHitboxWidths?: Record<string, string>; orbHitboxHeights?: Record<string, string>; orbVisualWidths?: Record<string, string>; orbVisualHeights?: Record<string, string>; navTop?: string; navWidth?: string; navHeight?: string; navLefts?: Record<string, string>; navTops?: Record<string, string>; navWidths?: Record<string, string>; navHeights?: Record<string, string>; playerLeft?: string; playerTop?: string; boxes?: Record<string, { left: string; top: string; width: string; height: string }> }
 type HitEditOverrides = Record<string, { portrait?: HitEditOrientationOverrides; landscape?: HitEditOrientationOverrides }>
 
 const PLAYER_NAME_KEY = 'ronan_flag_player_name'
@@ -310,6 +310,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
   const boxIdRef = useRef(0)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [inputVals, setInputVals] = useState<Record<string, { left: string; top: string; width: string; height: string }>>({})
+  const [visualSizeByGemId, setVisualSizeByGemId] = useState<Record<string, { w: string; h: string }>>({})
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function scanDom() {
@@ -393,6 +394,18 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
     }
   }, [])
 
+  // Pre-populate visual size inputs from persisted overrides on mount / orientation change.
+  useEffect(() => {
+    if (!challengeConfig || !allOverrides) return
+    const existing = allOverrides[challengeConfig.iso2]?.[orientation]
+    if (!existing?.orbVisualWidths) return
+    const init: Record<string, { w: string; h: string }> = {}
+    for (const [gemId, w] of Object.entries(existing.orbVisualWidths)) {
+      init[gemId] = { w: w.replace('%', ''), h: (existing.orbVisualHeights?.[gemId] ?? w).replace('%', '') }
+    }
+    if (Object.keys(init).length) setVisualSizeByGemId(init)
+  }, [challengeConfig?.iso2, orientation]) // eslint-disable-line react-hooks/exhaustive-deps
+
   function startDrag(type: HEDrag['type'], id: string, custom: boolean, e: React.PointerEvent, rect: HERect) {
     e.preventDefault(); e.stopPropagation(); e.currentTarget.setPointerCapture(e.pointerId)
     isDraggingRef.current = true
@@ -469,6 +482,10 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
       const orbLefts: Record<string, string> = { ...(existingOrient.orbLefts ?? {}) }
       // Start from existing per-gem tops; migrate shared orbTop → per-gem if no orbTops yet saved
       const orbTops: Record<string, string> = { ...(existingOrient.orbTops ?? {}) }
+      const orbHitboxWidths: Record<string, string> = { ...(existingOrient.orbHitboxWidths ?? {}) }
+      const orbHitboxHeights: Record<string, string> = { ...(existingOrient.orbHitboxHeights ?? {}) }
+      const orbVisualWidths: Record<string, string> = { ...(existingOrient.orbVisualWidths ?? {}) }
+      const orbVisualHeights: Record<string, string> = { ...(existingOrient.orbVisualHeights ?? {}) }
       if (!existingOrient.orbTops && existingOrient.orbTop) {
         for (const region of regions) {
           const gm = region.label.match(/^(.+) orb$/i)
@@ -498,9 +515,23 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
         const width = `${(vW / pW * 100).toFixed(1)}%`
         const height = `${(vH / pH * 100).toFixed(1)}%`
         const gemMatch = region.label.match(/^(.+) orb$/i)
-        if (gemMatch) { orbLefts[gemMatch[1].toLowerCase()] = left; orbTops[gemMatch[1].toLowerCase()] = top }
+        if (gemMatch) {
+          const gemId = gemMatch[1].toLowerCase()
+          orbLefts[gemId] = left
+          orbTops[gemId] = top
+          // Only persist hitbox size when the user explicitly resized (not just moved) the overlay
+          if (Math.abs(vW - region.vpWidth) > 1 || Math.abs(vH - region.vpHeight) > 1) {
+            orbHitboxWidths[gemId] = width
+            orbHitboxHeights[gemId] = height
+          }
+        }
         const navMatch = challengeConfig.scene.nav.find((n) => n.label === region.label)
         if (navMatch) { navLefts[navMatch.id] = left; navTops[navMatch.id] = top; navWidths[navMatch.id] = width; navHeights[navMatch.id] = height }
+      }
+      // Persist visual sizes for gems regardless of whether they were dragged this session
+      for (const [gemId, vis] of Object.entries(visualSizeByGemId)) {
+        if (vis.w) orbVisualWidths[gemId] = `${parseFloat(vis.w).toFixed(1)}%`
+        if (vis.h) orbVisualHeights[gemId] = `${parseFloat(vis.h).toFixed(1)}%`
       }
       const playerRegion = regions.find((r) => r.label === 'Player progress')
       const playerOv = playerRegion ? overrides[playerRegion.id] : null
@@ -520,6 +551,10 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
       orientData = {}
       if (Object.keys(orbTops).length) orientData.orbTops = orbTops
       if (Object.keys(orbLefts).length) orientData.orbLefts = orbLefts
+      if (Object.keys(orbHitboxWidths).length) orientData.orbHitboxWidths = orbHitboxWidths
+      if (Object.keys(orbHitboxHeights).length) orientData.orbHitboxHeights = orbHitboxHeights
+      if (Object.keys(orbVisualWidths).length) orientData.orbVisualWidths = orbVisualWidths
+      if (Object.keys(orbVisualHeights).length) orientData.orbVisualHeights = orbVisualHeights
       if (Object.keys(navTops).length) orientData.navTops = navTops
       if (Object.keys(navWidths).length) orientData.navWidths = navWidths
       if (Object.keys(navHeights).length) orientData.navHeights = navHeights
@@ -582,6 +617,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
         position: 'fixed', left: r.vpLeft, top: r.vpTop, width: r.vpWidth, height: r.vpHeight,
         border: `2px solid ${color}`, boxSizing: 'border-box', background: `${color}1a`,
         pointerEvents: isEdit ? 'auto' : 'none', zIndex: 99998,
+        touchAction: isEdit ? 'none' : undefined,
       }}>
         <div style={{
           position: 'absolute', bottom: '100%', left: 0,
@@ -735,6 +771,36 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
                       ))}
                     </div>
                   ) : null}
+                  {(() => {
+                    const gm = r.label.match(/^(.+) orb$/i)
+                    if (!gm || !challengeConfig) return null
+                    const gemId = gm[1].toLowerCase()
+                    const vis = visualSizeByGemId[gemId] ?? { w: '', h: '' }
+                    return (
+                      <div style={{ marginTop: 4, paddingTop: 4, borderTop: '1px dashed #333' }}>
+                        <div style={{ color: '#ff9a00', fontSize: 9, marginBottom: 3 }}>Visual size (independent of hitbox)</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px 6px' }}>
+                          {(['w', 'h'] as const).map((field) => (
+                            <label key={field} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 9 }}>
+                              <span style={{ color: '#888', minWidth: 24 }}>vis {field}:</span>
+                              <input
+                                type="number"
+                                step="0.1"
+                                aria-label={`visual ${field === 'w' ? 'width' : 'height'} for ${r.label}`}
+                                value={vis[field]}
+                                onChange={(e) => setVisualSizeByGemId((prev) => ({
+                                  ...prev,
+                                  [gemId]: { ...(prev[gemId] ?? { w: '', h: '' }), [field]: e.target.value },
+                                }))}
+                                style={inputStyle}
+                              />
+                              <span style={{ color: '#555' }}>%</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
                   <div style={{ color: '#555', fontSize: 9, marginTop: 3 }}>
                     vp {Math.round(vL)},{Math.round(vT)} {Math.round(vW)}×{Math.round(vH)}px
                   </div>
@@ -891,7 +957,15 @@ function FlagColorChallengeGame({
     const slotIndex = orbSlotIndexes[index]
     const portraitLeft = scene.orbs[slotIndex]?.left ?? '50%'
     const configLeft = landscape ? landscape.orbLefts[slotIndex] ?? portraitLeft : portraitLeft
-    return { ...orb, left: or?.orbLefts?.[orb.id] ?? configLeft, top: or?.orbTops?.[orb.id] ?? defaultOrbTop }
+    return {
+      ...orb,
+      left: or?.orbLefts?.[orb.id] ?? configLeft,
+      top: or?.orbTops?.[orb.id] ?? defaultOrbTop,
+      hitboxWidth: or?.orbHitboxWidths?.[orb.id],
+      hitboxHeight: or?.orbHitboxHeights?.[orb.id],
+      visualWidth: or?.orbVisualWidths?.[orb.id],
+      visualHeight: or?.orbVisualHeights?.[orb.id],
+    }
   })
   const sceneImage = landscape?.image ?? scene.image
   const flagOverlay = landscape?.flagOverlay ?? scene.flagOverlay
@@ -1435,6 +1509,10 @@ function FlagColorChallengeGame({
                     left: orb.left,
                     top: orb.top,
                     '--gem-color': orb.hue,
+                    ...(orb.hitboxWidth ? { width: orb.hitboxWidth } : {}),
+                    ...(orb.hitboxHeight ? { height: orb.hitboxHeight } : {}),
+                    ...(orb.visualWidth ? { '--gem-visual-w': orb.visualWidth } : {}),
+                    ...(orb.visualHeight ? { '--gem-visual-h': orb.visualHeight } : {}),
                   } as CSSProperties}
                   onClick={() => handleOrbSelect(orb.id, Number.parseFloat(orb.left), Number.parseFloat(orb.top), orb.hue)}
                 >

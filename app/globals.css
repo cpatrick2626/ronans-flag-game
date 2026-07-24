@@ -2665,8 +2665,8 @@
 }
 
 [data-orientation='landscape'] .france-palette-gem-visual {
-  width: clamp(54px, 5cqw, 80px);
-  height: clamp(54px, 5cqw, 80px);
+  width: var(--gem-visual-w, clamp(54px, 5cqw, 80px));
+  height: var(--gem-visual-h, clamp(54px, 5cqw, 80px));
 }
 
 [data-orientation='landscape'] .france-nav-item {
@@ -2841,8 +2841,8 @@
 }
 
 .france-palette-gem-visual {
-  width: max(11cqw, 44px);
-  height: max(11cqw, 44px);
+  width: var(--gem-visual-w, max(11cqw, 44px));
+  height: var(--gem-visual-h, max(11cqw, 44px));
   display: block;
   position: relative;
   padding: 0;
