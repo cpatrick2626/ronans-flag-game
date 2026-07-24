@@ -2676,8 +2676,8 @@
 
 
 [data-orientation='landscape'] .france-nav-icon {
-  width: clamp(28px, 5.5cqw, 38px);
-  height: clamp(28px, 5.5cqw, 38px);
+  width: clamp(20px, 3.8cqw, 28px);
+  height: clamp(20px, 3.8cqw, 28px);
 }
 
 [data-orientation='landscape'] .france-nav-label {
