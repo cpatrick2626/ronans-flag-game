@@ -87,6 +87,7 @@ test('France draw-the-lines phase: palette hidden, hold pauses and resumes, reve
   await expect(page.getByRole('button', { name: 'Blue orb' })).toHaveCount(0);
   const holdTarget = page.getByRole('button', { name: 'Hold to draw the flag lines' });
   await expect(holdTarget).toBeAttached();
+  await page.locator('img.france-play-image[data-scene-ready="true"]').waitFor({ timeout: 10000 });
   const box = await holdTarget.boundingBox();
   if (!box) throw new Error('line hold target is not visible');
 

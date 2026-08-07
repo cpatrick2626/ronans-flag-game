@@ -466,6 +466,11 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
     else if (field === 'width') vpWidth = Math.max(4, (num / 100) * r.pW)
     else vpHeight = Math.max(4, (num / 100) * r.pH)
     setOverrides((prev) => ({ ...prev, [r.id]: { vpLeft, vpTop, vpWidth, vpHeight } }))
+    // Live-apply hitbox size to the game element so the change is visible before Save.
+    if ((field === 'width' || field === 'height') && r.label.match(/^(.+) orb$/i)) {
+      const el = document.querySelector<HTMLElement>(`[aria-label="${r.label}"]:not(#he-overlay *)`)
+      if (el) el.style[field === 'width' ? 'width' : 'height'] = `${num}%`
+    }
   }
 
   function syncInputFromRect(r: HERegion) {
@@ -715,13 +720,13 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
       {/* Side panel */}
       <div style={{
         position: 'fixed', right: 0, top: 0, bottom: 0, width: panelOpen ? 320 : 32,
-        background: 'rgba(0,0,0,0.92)', color: '#fff', fontFamily: 'monospace', fontSize: 10,
-        borderLeft: '1px solid #333', pointerEvents: 'auto', zIndex: 99999,
+        background: 'rgba(12,12,28,0.97)', color: '#fff', fontFamily: 'monospace', fontSize: 10,
+        borderLeft: '1px solid #445', pointerEvents: 'auto', zIndex: 99999,
         display: 'flex', flexDirection: 'column',
       }}>
         <button type="button" onClick={() => setPanelOpen((v) => !v)} style={{
-          background: '#111', border: 'none', borderBottom: '1px solid #333',
-          color: '#aaa', padding: '8px', cursor: 'pointer', textAlign: 'left',
+          background: '#1a1a30', border: 'none', borderBottom: '1px solid #445',
+          color: '#ddd', padding: '8px', cursor: 'pointer', textAlign: 'left',
           fontSize: 10, fontFamily: 'monospace', flexShrink: 0,
         }}>
           {panelOpen ? '▶ Panel' : '◀'}
@@ -732,7 +737,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
             <div style={{ color: '#ffd', fontWeight: 'bold', marginBottom: 4, fontSize: 11 }}>
               {regions.length} regions · {screen} · {orientation}
             </div>
-            <div style={{ color: '#666', fontSize: 9, marginBottom: 10 }}>
+            <div style={{ color: '#999', fontSize: 9, marginBottom: 10 }}>
               {typeof window !== 'undefined' ? `Viewport: ${Math.round(window.innerWidth)}×${Math.round(window.innerHeight)}px` : ''}
             </div>
 
@@ -743,12 +748,12 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
               const color = HE_COLORS[i % HE_COLORS.length]
               const hasPct = r.pL !== null && r.pT !== null && r.pW && r.pH
               const inputStyle: React.CSSProperties = {
-                width: 46, background: '#111', color: '#7bf', border: '1px solid #333',
-                borderRadius: 3, padding: '1px 3px', fontSize: 9, fontFamily: 'monospace',
+                width: 46, background: '#1a1a2e', color: '#9dd', border: '1px solid #445',
+                borderRadius: 3, padding: '2px 4px', fontSize: 10, fontFamily: 'monospace',
                 outline: 'none', MozAppearance: 'textfield',
               }
               return (
-                <div key={r.id} style={{ borderTop: '1px solid #222', paddingTop: 5, marginTop: 5 }}>
+                <div key={r.id} style={{ borderTop: '1px solid #3a3a4a', paddingTop: 5, marginTop: 5 }}>
                   <div style={{ color, fontWeight: 'bold', fontSize: 11 }}>
                     {r.label}{ov ? <span style={{ color: '#ff9a00' }}> ✏</span> : null}
                   </div>
@@ -756,7 +761,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px 6px', marginTop: 4 }}>
                       {(['left', 'top', 'width', 'height'] as const).map((field) => (
                         <label key={field} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 9 }}>
-                          <span style={{ color: '#888', minWidth: 14 }}>{field === 'width' ? 'w' : field === 'height' ? 'h' : field[0]}:</span>
+                          <span style={{ color: '#bbb', minWidth: 14 }}>{field === 'width' ? 'w' : field === 'height' ? 'h' : field[0]}:</span>
                           <input
                             type="number"
                             step="0.1"
@@ -766,7 +771,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
                             onBlur={() => syncInputFromRect(r)}
                             style={inputStyle}
                           />
-                          <span style={{ color: '#555' }}>%</span>
+                          <span style={{ color: '#888' }}>%</span>
                         </label>
                       ))}
                     </div>
@@ -777,31 +782,40 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
                     const gemId = gm[1].toLowerCase()
                     const vis = visualSizeByGemId[gemId] ?? { w: '', h: '' }
                     return (
-                      <div style={{ marginTop: 4, paddingTop: 4, borderTop: '1px dashed #333' }}>
-                        <div style={{ color: '#ff9a00', fontSize: 9, marginBottom: 3 }}>Visual size (independent of hitbox)</div>
+                      <div style={{ marginTop: 4, paddingTop: 4, borderTop: '1px dashed #445' }}>
+                        <div style={{ color: '#ffb84d', fontSize: 9, marginBottom: 3 }}>Vis w / Vis h (independent of hitbox)</div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px 6px' }}>
                           {(['w', 'h'] as const).map((field) => (
                             <label key={field} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 9 }}>
-                              <span style={{ color: '#888', minWidth: 24 }}>vis {field}:</span>
+                              <span style={{ color: '#bbb', minWidth: 24 }}>vis {field}:</span>
                               <input
                                 type="number"
                                 step="0.1"
                                 aria-label={`visual ${field === 'w' ? 'width' : 'height'} for ${r.label}`}
                                 value={vis[field]}
-                                onChange={(e) => setVisualSizeByGemId((prev) => ({
-                                  ...prev,
-                                  [gemId]: { ...(prev[gemId] ?? { w: '', h: '' }), [field]: e.target.value },
-                                }))}
+                                placeholder="80"
+                                onChange={(e) => {
+                                  const val = e.target.value
+                                  setVisualSizeByGemId((prev) => ({
+                                    ...prev,
+                                    [gemId]: { ...(prev[gemId] ?? { w: '', h: '' }), [field]: val },
+                                  }))
+                                  const num = parseFloat(val)
+                                  if (Number.isFinite(num)) {
+                                    const el = document.querySelector<HTMLElement>(`[aria-label="${r.label}"]:not(#he-overlay *)`)
+                                    if (el) el.style.setProperty(field === 'w' ? '--gem-visual-w' : '--gem-visual-h', `${num}%`)
+                                  }
+                                }}
                                 style={inputStyle}
                               />
-                              <span style={{ color: '#555' }}>%</span>
+                              <span style={{ color: '#888' }}>%</span>
                             </label>
                           ))}
                         </div>
                       </div>
                     )
                   })()}
-                  <div style={{ color: '#555', fontSize: 9, marginTop: 3 }}>
+                  <div style={{ color: '#888', fontSize: 9, marginTop: 3 }}>
                     vp {Math.round(vL)},{Math.round(vT)} {Math.round(vW)}×{Math.round(vH)}px
                   </div>
                   <button type="button" style={{ ...heBtn(copied === r.id ? '#1a5c1a' : '#1e1e2e'), marginTop: 3 }}
@@ -813,7 +827,7 @@ function HitRegionEditor({ screen, orientation, challengeConfig, allOverrides, o
             })}
 
             {customBoxes.length > 0 && (
-              <div style={{ borderTop: '2px solid #333', paddingTop: 8, marginTop: 8 }}>
+              <div style={{ borderTop: '2px solid #445', paddingTop: 8, marginTop: 8 }}>
                 <div style={{ color: '#ffcc00', fontWeight: 'bold', marginBottom: 4 }}>Custom Boxes</div>
                 {customBoxes.map((b) => {
                   const r = customRects[b.id] ?? { vpLeft: 0, vpTop: 0, vpWidth: 0, vpHeight: 0 }
