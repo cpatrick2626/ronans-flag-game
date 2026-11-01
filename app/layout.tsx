@@ -17,8 +17,23 @@ const cormorantGaramond = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: 'Ronan Flag Game',
+  title: "Ronan's Flag Game",
+  applicationName: "Ronan's Flag Game",
   description: 'A colorful flag coloring game with progress, multiplayer, and country discovery.',
+  icons: {
+    icon: [
+      { url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  // iOS home-screen launch: no Safari chrome; the translucent status bar lets the art run
+  // under it while the app shell's safe-area padding keeps controls clear.
+  appleWebApp: {
+    capable: true,
+    title: "Ronan's Flags",
+    statusBarStyle: 'black-translucent',
+  },
 }
 
 // viewportFit: 'cover' lets the backdrop extend under notches/home indicators;
@@ -27,6 +42,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#030508',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
